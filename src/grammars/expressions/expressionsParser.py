@@ -15,20 +15,19 @@ def serializedATN():
         buf.write(",\4\2\t\2\4\3\t\3\4\4\t\4\3\2\6\2\n\n\2\r\2\16\2\13\3")
         buf.write("\3\3\3\3\3\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\5\4\31\n\4")
         buf.write("\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\3\4\7\4\'")
-        buf.write("\n\4\f\4\16\4*\13\4\3\4\2\3\6\5\2\4\6\2\b\4\2\b\t\23\23")
-        buf.write("\4\2\6\7\r\r\3\2\b\t\4\2\n\13\16\17\4\2\f\f\20\20\3\2")
-        buf.write("\21\22\2\60\2\t\3\2\2\2\4\r\3\2\2\2\6\30\3\2\2\2\b\n\5")
-        buf.write("\4\3\2\t\b\3\2\2\2\n\13\3\2\2\2\13\t\3\2\2\2\13\f\3\2")
-        buf.write("\2\2\f\3\3\2\2\2\r\16\5\6\4\2\16\17\7\3\2\2\17\5\3\2\2")
-        buf.write("\2\20\21\b\4\1\2\21\22\7\4\2\2\22\23\5\6\4\2\23\24\7\5")
-        buf.write("\2\2\24\31\3\2\2\2\25\26\t\2\2\2\26\31\5\6\4\t\27\31\7")
-        buf.write("\26\2\2\30\20\3\2\2\2\30\25\3\2\2\2\30\27\3\2\2\2\31(")
-        buf.write("\3\2\2\2\32\33\f\b\2\2\33\34\t\3\2\2\34\'\5\6\4\t\35\36")
-        buf.write("\f\7\2\2\36\37\t\4\2\2\37\'\5\6\4\b !\f\6\2\2!\'\t\5\2")
-        buf.write("\2\"#\f\5\2\2#\'\t\6\2\2$%\f\4\2\2%\'\t\7\2\2&\32\3\2")
-        buf.write("\2\2&\35\3\2\2\2& \3\2\2\2&\"\3\2\2\2&$\3\2\2\2\'*\3\2")
-        buf.write("\2\2(&\3\2\2\2()\3\2\2\2)\7\3\2\2\2*(\3\2\2\2\6\13\30")
-        buf.write("&(")
+        buf.write("\n\4\f\4\16\4*\13\4\3\4\2\3\6\5\2\4\6\2\b\4\2\5\6\20\20")
+        buf.write("\4\2\3\4\n\n\3\2\5\6\4\2\7\b\13\f\4\2\t\t\r\r\3\2\16\17")
+        buf.write("\2\60\2\t\3\2\2\2\4\r\3\2\2\2\6\30\3\2\2\2\b\n\5\4\3\2")
+        buf.write("\t\b\3\2\2\2\n\13\3\2\2\2\13\t\3\2\2\2\13\f\3\2\2\2\f")
+        buf.write("\3\3\2\2\2\r\16\5\6\4\2\16\17\7\25\2\2\17\5\3\2\2\2\20")
+        buf.write("\21\b\4\1\2\21\22\7\23\2\2\22\23\5\6\4\2\23\24\7\24\2")
+        buf.write("\2\24\31\3\2\2\2\25\26\t\2\2\2\26\31\5\6\4\t\27\31\7\26")
+        buf.write("\2\2\30\20\3\2\2\2\30\25\3\2\2\2\30\27\3\2\2\2\31(\3\2")
+        buf.write("\2\2\32\33\f\b\2\2\33\34\t\3\2\2\34\'\5\6\4\t\35\36\f")
+        buf.write("\7\2\2\36\37\t\4\2\2\37\'\5\6\4\b !\f\6\2\2!\'\t\5\2\2")
+        buf.write("\"#\f\5\2\2#\'\t\6\2\2$%\f\4\2\2%\'\t\7\2\2&\32\3\2\2")
+        buf.write("\2&\35\3\2\2\2& \3\2\2\2&\"\3\2\2\2&$\3\2\2\2\'*\3\2\2")
+        buf.write("\2(&\3\2\2\2()\3\2\2\2)\7\3\2\2\2*(\3\2\2\2\6\13\30&(")
         return buf.getvalue()
 
 
@@ -42,13 +41,13 @@ class expressionsParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "';'", "'('", "')'", "'*'", "'/'", "'+'", 
-                     "'-'", "'<'", "'>'", "'=='", "'%'", "'<='", "'>='", 
-                     "'!='", "'&&'", "'||'", "'!'", "'++'", "'--'" ]
+    literalNames = [ "<INVALID>", "'*'", "'/'", "'+'", "'-'", "'<'", "'>'", 
+                     "'=='", "'%'", "'<='", "'>='", "'!='", "'&&'", "'||'", 
+                     "'!'", "'++'", "'--'", "'('", "')'", "';'" ]
 
-    symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "MUL", "DIV", "ADD", "SUB", "LT", "GT", "EQ", "MOD", 
-                      "LTE", "GTE", "NEQ", "AND", "OR", "NOT", "INCR", "DECR", 
+    symbolicNames = [ "<INVALID>", "MUL", "DIV", "ADD", "SUB", "LT", "GT", 
+                      "EQ", "MOD", "LTE", "GTE", "NEQ", "AND", "OR", "NOT", 
+                      "INCR", "DECR", "LBRACKET", "RBRACKET", "END_INSTR", 
                       "INT", "WS" ]
 
     RULE_prog = 0
@@ -58,25 +57,25 @@ class expressionsParser ( Parser ):
     ruleNames =  [ "prog", "stat", "expr" ]
 
     EOF = Token.EOF
-    T__0=1
-    T__1=2
-    T__2=3
-    MUL=4
-    DIV=5
-    ADD=6
-    SUB=7
-    LT=8
-    GT=9
-    EQ=10
-    MOD=11
-    LTE=12
-    GTE=13
-    NEQ=14
-    AND=15
-    OR=16
-    NOT=17
-    INCR=18
-    DECR=19
+    MUL=1
+    DIV=2
+    ADD=3
+    SUB=4
+    LT=5
+    GT=6
+    EQ=7
+    MOD=8
+    LTE=9
+    GTE=10
+    NEQ=11
+    AND=12
+    OR=13
+    NOT=14
+    INCR=15
+    DECR=16
+    LBRACKET=17
+    RBRACKET=18
+    END_INSTR=19
     INT=20
     WS=21
 
@@ -139,7 +138,7 @@ class expressionsParser ( Parser ):
                 self.state = 9 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << expressionsParser.T__1) | (1 << expressionsParser.ADD) | (1 << expressionsParser.SUB) | (1 << expressionsParser.NOT) | (1 << expressionsParser.INT))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << expressionsParser.ADD) | (1 << expressionsParser.SUB) | (1 << expressionsParser.NOT) | (1 << expressionsParser.LBRACKET) | (1 << expressionsParser.INT))) != 0)):
                     break
 
         except RecognitionException as re:
@@ -161,6 +160,9 @@ class expressionsParser ( Parser ):
         def expr(self):
             return self.getTypedRuleContext(expressionsParser.ExprContext,0)
 
+
+        def END_INSTR(self):
+            return self.getToken(expressionsParser.END_INSTR, 0)
 
         def getRuleIndex(self):
             return expressionsParser.RULE_stat
@@ -191,7 +193,7 @@ class expressionsParser ( Parser ):
             self.state = 11
             self.expr(0)
             self.state = 12
-            self.match(expressionsParser.T__0)
+            self.match(expressionsParser.END_INSTR)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -210,12 +212,18 @@ class expressionsParser ( Parser ):
             self.unary_op = None # Token
             self.binary_op = None # Token
 
+        def LBRACKET(self):
+            return self.getToken(expressionsParser.LBRACKET, 0)
+
         def expr(self, i:int=None):
             if i is None:
                 return self.getTypedRuleContexts(expressionsParser.ExprContext)
             else:
                 return self.getTypedRuleContext(expressionsParser.ExprContext,i)
 
+
+        def RBRACKET(self):
+            return self.getToken(expressionsParser.RBRACKET, 0)
 
         def ADD(self):
             return self.getToken(expressionsParser.ADD, 0)
@@ -294,13 +302,13 @@ class expressionsParser ( Parser ):
             self.state = 22
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [expressionsParser.T__1]:
+            if token in [expressionsParser.LBRACKET]:
                 self.state = 15
-                self.match(expressionsParser.T__1)
+                self.match(expressionsParser.LBRACKET)
                 self.state = 16
                 self.expr(0)
                 self.state = 17
-                self.match(expressionsParser.T__2)
+                self.match(expressionsParser.RBRACKET)
                 pass
             elif token in [expressionsParser.ADD, expressionsParser.SUB, expressionsParser.NOT]:
                 self.state = 19

@@ -15,3 +15,28 @@ class ASTNode:
 
     def to_dot(self, filename):
         pass
+
+
+class LiteralNode(ASTNode):
+    def __init__(self, value):
+        self.parent = None
+        self.children = None
+        self.value = value
+
+
+
+
+class UnaryOperationNode(ASTNode):
+    def __init__(self, operation):
+        self.parent = None
+        self.children = None
+        self.operation = operation
+
+
+
+
+class BinaryOperationNode(ASTNode):
+    def __init__(self, operation):
+        self.parent = None
+        self.children = None
+        self.operation = operation

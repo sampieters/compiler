@@ -2,12 +2,12 @@ grammar expressions;
 
 prog:   stat+ ;
 
-stat:   expr ';'                // Semi-colon separated statements
+stat:   expr END_INSTR                     // Semi-colon separated statements
     ;
 
-expr:   '(' expr ')'                // Parentheses
-    |   unary_op=(ADD|SUB|NOT) expr     // Unary integer operator
-//    |   unary_op=(NOT) expr         // Unary boolean operator
+expr:   LBRACKET expr RBRACKET             // Parentheses
+    |   unary_op=(ADD|SUB|NOT) expr        // Unary integer operator
+//    |   unary_op=(NOT) expr           // Unary boolean operator
     |   expr binary_op=(MUL|DIV|MOD) expr  // Binary multiplicative operator
     |   expr binary_op=(ADD|SUB) expr      // Binary additive operator
     |   expr binary_op=(LT|GT|LTE|GTE)     // Binary relational operator
@@ -33,6 +33,9 @@ OR  :   '||' ;
 NOT :   '!' ;
 INCR:   '++' ;
 DECR:   '--' ;
+LBRACKET: '(' ;
+RBRACKET: ')' ;
+END_INSTR: ';' ;
 
 // ID  :   [a-zA-Z]+ ;      // match identifiers
 INT :   [1-9][0-9]* ;         // match integers

@@ -23,7 +23,8 @@ class LiteralNode(ASTNode):
         self.children = None
         self.value = value
 
-
+    def __str__(self):
+        return self.value
 
 
 class UnaryOperationNode(ASTNode):
@@ -32,7 +33,8 @@ class UnaryOperationNode(ASTNode):
         self.children = None
         self.operation = operation
 
-
+    def __str__(self):
+        return self.operation
 
 
 class BinaryOperationNode(ASTNode):
@@ -40,3 +42,6 @@ class BinaryOperationNode(ASTNode):
         self.parent = None
         self.children = None
         self.operation = operation
+
+    def __str__(self):
+        return self.operation

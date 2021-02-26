@@ -1,21 +1,13 @@
-class Counter:
-    def __init__(self):
-        self.counter = 0
-
-    def incr(self):
-        self.counter += 1
-
-    def __str__(self):
-        return str(self.counter)
-
+from utils import Counter
 
 class ASTNode:
-    def __init__(self):
+    def __init__(self, node_id=0):
+        self.id = node_id
         self.parent = None
         self.children = None
 
     def __str__(self):
-        return "Something went wrong"
+        return "prog"
 
     def set_parent(self, node):
         assert self.parent is None
@@ -27,27 +19,25 @@ class ASTNode:
         else:
             self.children.append(node)
 
-    def to_dot_recursive(self, file, counter):
+    def to_dot_recursive(self, file):
         if self.children is not None:
             for child in self.children:
-                file.write("\tnode" + str(counter) + "[label=\"" + str(child) + "\"]\n")
-                file.write("\tnode" + str(counter) + "->node")
-                counter.incr()
-                file.write(str(counter) + "\n")
-
-            for child in self.children:
-                child.to_dot_recursive(file, counter)
+                file.write("\tnode" + str(child.id) + "[label=\"" + str(child) + "\"]\n")
+                file.write("\tnode" + str(self.id) + "->node" + str(child.id) + "\n")
+            #for child in self.children:
+                child.to_dot_recursive(file)
 
     def to_dot(self, filename):
         file = open(filename + ".dot", "w")
         file.write("digraph AST {\n")
-        self.to_dot_recursive(file, Counter())
+        file.write("node0[label=\"" + str(self) + "\"]\n")
+        self.to_dot_recursive(file)
         file.write("}")
 
 
 class LiteralNode(ASTNode):
-    def __init__(self, value):
-        super().__init__()
+    def __init__(self, value, node_id):
+        super().__init__(node_id)
         self.value = value
 
     def __str__(self):
@@ -55,8 +45,8 @@ class LiteralNode(ASTNode):
 
 
 class UnaryOperationNode(ASTNode):
-    def __init__(self, operation):
-        super().__init__()
+    def __init__(self, operation, node_id):
+        super().__init__(node_id)
         self.operation = operation
 
     def __str__(self):
@@ -64,19 +54,22 @@ class UnaryOperationNode(ASTNode):
 
 
 class BinaryOperationNode(ASTNode):
-    def __init__(self, operation):
-        super().__init__()
+    def __init__(self, operation, node_id):
+        super().__init__(node_id)
         self.operation = operation
 
     def __str__(self):
         return self.operation
 
-
-test = ASTNode()
-mult = BinaryOperationNode("*")
-lit_1 = LiteralNode("3")
+counter = Counter()
+test = ASTNode(counter.curr())
+counter.incr()
+mult = BinaryOperationNode("*", counter.curr())
+counter.incr()
+lit_1 = LiteralNode("3", counter.curr())
 lit_1.set_parent(mult)
-lit_2 = LiteralNode("4")
+counter.incr()
+lit_2 = LiteralNode("4", counter.curr())
 lit_2.set_parent(mult)
 mult.set_parent(ASTNode)
 mult.add_child(lit_1)

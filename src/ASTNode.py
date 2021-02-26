@@ -18,6 +18,10 @@ class ASTNode:
             self.children = [node]
         else:
             self.children.append(node)
+        self.last_child().parent = self
+
+    def last_child(self):
+        return self.children[-1]
 
     def to_dot_recursive(self, file):
         if self.children is not None:
@@ -59,19 +63,3 @@ class BinaryOperationNode(ASTNode):
 
     def __str__(self):
         return self.operation
-
-counter = Counter()
-test = ASTNode(counter.curr())
-counter.incr()
-mult = BinaryOperationNode("*", counter.curr())
-counter.incr()
-lit_1 = LiteralNode("3", counter.curr())
-lit_1.set_parent(mult)
-counter.incr()
-lit_2 = LiteralNode("4", counter.curr())
-lit_2.set_parent(mult)
-mult.set_parent(ASTNode)
-mult.add_child(lit_1)
-mult.add_child(lit_2)
-test.add_child(mult)
-test.to_dot("wow")

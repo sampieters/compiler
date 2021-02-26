@@ -4,6 +4,7 @@ class Counter:
 
     def incr(self):
         self.counter += 1
+        return self.counter - 1
 
     def curr(self):
         return self.counter

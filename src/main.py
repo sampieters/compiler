@@ -3,6 +3,7 @@ from antlr4 import *
 from antlr4.InputStream import InputStream
 from grammars.expressions.expressionsLexer import expressionsLexer
 from grammars.expressions.expressionsParser import expressionsParser
+from ASTListener import ASTListener
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -17,3 +18,9 @@ if __name__ == '__main__':
 
     lisp_tree_str = tree.toStringTree(recog=parser)
     print(lisp_tree_str)
+
+    listener = ASTListener()
+    walker = ParseTreeWalker()
+    walker.walk(listener, tree)
+    AST = listener.curr_node
+    AST.to_dot("wow")

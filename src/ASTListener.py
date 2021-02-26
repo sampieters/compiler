@@ -42,18 +42,9 @@ class ASTListener(expressionsListener):
         self.curr_node.add_child(UnaryOperationNode(ctx.getChild(0).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
-
     # Exit a parse tree produced by expressionsParser#UnaryOp.
     def exitUnaryOp(self, ctx:expressionsParser.UnaryOpContext):
-        self.curr_node = self.parent
-
-    # Enter a parse tree produced by expressionsParser#Brackets.
-    def enterBrackets(self, ctx:expressionsParser.BracketsContext):
-        pass
-
-    # Exit a parse tree produced by expressionsParser#Brackets.
-    def exitBrackets(self, ctx:expressionsParser.BracketsContext):
-        pass
+        self.curr_node = self.curr_node.parent
 
 
     # Enter a parse tree produced by expressionsParser#BinaryOp.
@@ -73,4 +64,4 @@ class ASTListener(expressionsListener):
 
     # Exit a parse tree produced by expressionsParser#BinaryOpBoolean.
     def exitBinaryOpBoolean(self, ctx:expressionsParser.BinaryOpBooleanContext):
-        self.curr_node = self.parent
+        self.curr_node = self.curr_node.parent

@@ -24,13 +24,12 @@ class ASTNode:
             for child in self.children:
                 file.write("\tnode" + str(child.id) + "[label=\"" + str(child) + "\"]\n")
                 file.write("\tnode" + str(self.id) + "->node" + str(child.id) + "\n")
-            #for child in self.children:
                 child.to_dot_recursive(file)
 
     def to_dot(self, filename):
         file = open(filename + ".dot", "w")
         file.write("digraph AST {\n")
-        file.write("node0[label=\"" + str(self) + "\"]\n")
+        file.write("\tnode0[label=\"" + str(self) + "\"]\n")
         self.to_dot_recursive(file)
         file.write("}")
 

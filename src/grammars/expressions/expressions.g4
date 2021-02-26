@@ -1,19 +1,20 @@
 grammar expressions;
 
-prog:   stat+ ;
-
-stat:   expr END_INSTR                     // Semi-colon separated statements
+prog:   stat+                                # Program
     ;
 
-expr:   LBRACKET expr RBRACKET             // Parentheses
-    |   unary_op=(ADD|SUB|NOT) expr        // Unary integer operator
-//    |   unary_op=(NOT) expr           // Unary boolean operator
-    |   expr binary_op=(MUL|DIV|MOD) expr  // Binary multiplicative operator
-    |   expr binary_op=(ADD|SUB) expr      // Binary additive operator
-    |   expr binary_op=(LT|GT|LTE|GTE)     // Binary relational operator
-    |   expr binary_op=(EQ|NEQ)            // Binary equality operator
-    |   expr binary_op=(AND|OR)            // Binary logical operator
-    |   INT                         // Integer
+stat:   expr END_INSTR                       # Expression       // Semi-colon separated statements
+    ;
+
+expr:   LBRACKET expr RBRACKET            # Brackets  // Parentheses
+    |   (ADD|SUB) expr                    # UnaryOp   // Unary integer operator
+    |   (NOT) expr                        # UnaryOpBoolean   // Unary boolean operator
+    |   expr (MUL|DIV|MOD) expr           # BinaryOp  // Binary multiplicative operator
+    |   expr (ADD|SUB) expr               # BinaryOp  // Binary additive operator
+    |   expr (LT|GT|LTE|GTE) expr         # BinaryOpBoolean  // Binary relational operator
+    |   expr (EQ|NEQ) expr                # BinaryOpBoolean  // Binary equality operator
+    |   expr (AND|OR) expr                # BinaryOpBoolean  // Binary logical operator
+    |   INT                               # Integer   // Integer
     ;
 
 

@@ -1,5 +1,6 @@
 from utils import Counter
 
+
 class ASTNode:
     def __init__(self, node_id=0):
         self.id = node_id

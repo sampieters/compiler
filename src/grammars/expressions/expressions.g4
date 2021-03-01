@@ -37,7 +37,25 @@ DECR:   '--' ;
 LBRACKET: '(' ;
 RBRACKET: ')' ;
 END_INSTR: ';' ;
+DOT : '.' ;
+VOID : 'void' ;
+CONST : 'const' ;
+PREFIX : 'signed' | 'unsigned';
 
-// ID  :   [a-zA-Z]+ ;      // match identifiers
-INT :   [1-9][0-9]* ;         // match integers
+TYPE : INT | CHAR | LONG;
+TYPE_WC : LONG | BOOL | FLOAT | DOUBLE | VOID;
+
+CHAR  :   [a-zA-Z]+ ;      // match identifiers
+DIGIT : [0-9]*
+
+INT :   [1-9]DIGIT ;         // match integers
+
+FLOAT : INT.DIGIT ;
+      | .DIGIT ;
+
+
+VARNAME : ID(ID | DIGIT)*
+VAR : CONST ? PREFIX ? TYPE VARNAME
+
+
 WS  :   [ \n\t\r]+ -> skip ; // toss out whitespace

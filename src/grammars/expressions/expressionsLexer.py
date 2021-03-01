@@ -1,4 +1,4 @@
-# Generated from src/grammars/expressions/expressions.g4 by ANTLR 4.9.1
+# Generated from ./src/grammars/expressions/expressions.g4 by ANTLR 4.9.1
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO

@@ -23,4 +23,4 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
     AST = listener.curr_node
-    AST.to_dot("wow")
+    AST.to_dot("AST")

@@ -1,8 +1,8 @@
 import sys
 from antlr4 import *
 from antlr4.InputStream import InputStream
-from grammars.expressions.expressionsLexer import expressionsLexer
-from grammars.expressions.expressionsParser import expressionsParser
+from grammars.variables.variablesLexer import variablesLexer
+from grammars.variables.variablesParser import variablesParser
 from ASTListener import ASTListener
 
 if __name__ == '__main__':
@@ -11,16 +11,16 @@ if __name__ == '__main__':
     else:
         input_stream = InputStream(sys.stdin.readline())
 
-    lexer = expressionsLexer(input_stream)
+    lexer = variablesLexer(input_stream)
     token_stream = CommonTokenStream(lexer)
-    parser = expressionsParser(token_stream)
+    parser = variablesParser(token_stream)
     tree = parser.prog()
 
     lisp_tree_str = tree.toStringTree(recog=parser)
     print(lisp_tree_str)
 
-    listener = ASTListener()
-    walker = ParseTreeWalker()
-    walker.walk(listener, tree)
-    AST = listener.curr_node
-    AST.to_dot("AST")
+    # listener = ASTListener()
+    # walker = ParseTreeWalker()
+    # walker.walk(listener, tree)
+    # AST = listener.curr_node
+    # AST.to_dot("AST")

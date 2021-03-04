@@ -81,7 +81,7 @@ INT : [1-9][0-9]* | '0' ;
 FLOAT_PREF : 'float' ;
 DOUBLE_PREF : 'double' ;
 LONG_DOUBLE_PREF : 'long double' ;
-FLOAT : INT?.[0-9]* ;
+FLOAT : INT? DOT [0-9]+ ;
 
 CHAR_PREF : 'char' ;
 CHAR : SQUOTE ESC? [!-~] SQUOTE ;

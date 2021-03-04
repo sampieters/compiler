@@ -24,7 +24,7 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | ID                                # Identifier
     ;   
 
-type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?   
+type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?
               | CONST? (FLOAT_PREF|DOUBLE_PREF|LONG_DOUBLE_PREF) MUL?
               ;   
 
@@ -75,7 +75,7 @@ UNSIGNED :      'unsigned' ;
 INT_PREF : 'int' ;
 SHORT_PREF : 'short' | 'short int' ;
 LONG_PREF : 'long' | 'long int' ;
-LONG_LONG_PREF: 'long long' | 'long long int' ;        
+LONG_LONG_PREF: 'long long' | 'long long int' ;
 INT : [1-9][0-9]* | '0' ;         
 
 FLOAT_PREF : 'float' ;

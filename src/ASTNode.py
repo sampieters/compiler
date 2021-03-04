@@ -48,6 +48,24 @@ class LiteralNode(ASTNode):
         return str(self.value)
 
 
+class IdentifierNode(ASTNode):
+    def __init__(self, name, type, node_id):
+        super().__init__(node_id)
+        self.name = name
+        self.type = type
+
+    def __str__(self):
+        return self.type + ' ' + self.name
+
+
+class DefinitionNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'def'
+
+
 class UnaryOperationNode(ASTNode):
     def __init__(self, operation, node_id):
         super().__init__(node_id)
@@ -64,3 +82,11 @@ class BinaryOperationNode(ASTNode):
 
     def __str__(self):
         return self.operation
+
+
+class AssignOperation(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'assign'

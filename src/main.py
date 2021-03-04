@@ -19,8 +19,8 @@ if __name__ == '__main__':
     lisp_tree_str = tree.toStringTree(recog=parser)
     print(lisp_tree_str)
 
-    # listener = ASTListener()
-    # walker = ParseTreeWalker()
-    # walker.walk(listener, tree)
-    # AST = listener.curr_node
-    # AST.to_dot("AST")
+    listener = ASTListener()
+    walker = ParseTreeWalker()
+    walker.walk(listener, tree)
+    AST = listener.curr_node
+    AST.to_dot("AST")

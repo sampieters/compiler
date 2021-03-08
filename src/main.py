@@ -28,5 +28,7 @@ if __name__ == '__main__':
     AST = listener.curr_node
     AST.to_dot("AST")
 
-    visitor = ASTVisitor()
+    visitor = OptimisationVisitor()
     visitor.visit(AST)
+
+    AST.to_dot("AST_OPT")

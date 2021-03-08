@@ -1,0 +1,11 @@
+digraph AST {
+	node0[label="prog"]
+	node1[label="define"]
+	node0->node1
+	node2[label="declare"]
+	node1->node2
+	node3[label="i"]
+	node2->node3
+	node4[label="5"]
+	node1->node4
+}

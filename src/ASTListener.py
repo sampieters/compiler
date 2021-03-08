@@ -1,8 +1,8 @@
-from .grammars.variables.variablesListener import variablesListener
-from .grammars.variables.variablesParser import variablesParser
-from .ASTNode import *
-from .SymbolTable import SymbolTable
-from .utils import Counter
+from grammars.variables.variablesListener import variablesListener
+from grammars.variables.variablesParser import variablesParser
+from ASTNode import *
+from SymbolTable import SymbolTable
+from utils import Counter
 
 class ASTListener(variablesListener):
     def __init__(self):

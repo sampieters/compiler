@@ -4,6 +4,7 @@ from antlr4.InputStream import InputStream
 from grammars.variables.variablesLexer import variablesLexer
 from grammars.variables.variablesParser import variablesParser
 from ASTListener import ASTListener
+from ASTVisitor import ASTVisitor
 from OptimisationVisitor import OptimisationVisitor
 from SemanticalErrorVisitor import SemanticalErrorVisitor
 
@@ -27,5 +28,5 @@ if __name__ == '__main__':
     AST = listener.curr_node
     AST.to_dot("AST")
 
-    opt_visitor = OptimisationVisitor()
-    opt_visitor.visit(tree)
+    visitor = ASTVisitor()
+    visitor.visit(AST)

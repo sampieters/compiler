@@ -1,5 +1,5 @@
 from utils import Counter
-from .ASTVisitor import ASTVisitor
+from ASTVisitor import ASTVisitor
 
 
 class ASTNode:
@@ -50,6 +50,11 @@ class ProgNode(ASTNode):
     def __str__(self):
         return 'prog'
 
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitProg(self)
+
 
 class LiteralNode(ASTNode):
     def __init__(self, value, node_id):
@@ -59,6 +64,9 @@ class LiteralNode(ASTNode):
 
     def __str__(self):
         return str(self.value)
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.visitLiteral(self)
 
 
 class IdentifierNode(ASTNode):
@@ -70,6 +78,9 @@ class IdentifierNode(ASTNode):
     def __str__(self):
         return self.name
 
+    def accept(self, visitor:ASTVisitor):
+        visitor.visitIdentifier(self)
+
 
 class DefinitionNode(ASTNode):
     def __init__(self, node_id):
@@ -77,6 +88,11 @@ class DefinitionNode(ASTNode):
 
     def __str__(self):
         return 'define'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitDefinition(self)
 
 
 class UnaryOperationNode(ASTNode):
@@ -87,6 +103,11 @@ class UnaryOperationNode(ASTNode):
     def __str__(self):
         return self.operation
 
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitUnaryOperation(self)
+
 
 class BinaryOperationNode(ASTNode):
     def __init__(self, operation, node_id):
@@ -96,6 +117,11 @@ class BinaryOperationNode(ASTNode):
     def __str__(self):
         return self.operation
 
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitBinaryOperation(self)
+
 
 class AssignmentNode(ASTNode):
     def __init__(self, node_id):
@@ -104,6 +130,10 @@ class AssignmentNode(ASTNode):
     def __str__(self):
         return 'assign'
 
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitAssignment(self)
 
 class DeclarationNode(ASTNode):
     def __init__(self, node_id):
@@ -111,3 +141,8 @@ class DeclarationNode(ASTNode):
 
     def __str__(self):
         return 'declare'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitDeclaration(self)

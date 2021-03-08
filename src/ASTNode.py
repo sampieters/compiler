@@ -1,5 +1,5 @@
 from utils import Counter
-
+from .ASTVisitor import ASTVisitor
 
 class ASTNode:
     def __init__(self, node_id=0):
@@ -9,6 +9,9 @@ class ASTNode:
 
     def __str__(self):
         return "prog"
+
+    def accept(self, visitor:ASTVisitor):
+        print("accept")
 
     def set_parent(self, node):
         assert self.parent is None

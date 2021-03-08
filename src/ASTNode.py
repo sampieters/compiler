@@ -1,6 +1,7 @@
 from utils import Counter
 from .ASTVisitor import ASTVisitor
 
+
 class ASTNode:
     def __init__(self, node_id=0):
         self.id = node_id
@@ -8,10 +9,10 @@ class ASTNode:
         self.children = None
 
     def __str__(self):
-        return "prog"
+        return "error"
 
-    def accept(self, visitor:ASTVisitor):
-        print("accept")
+    def accept(self, visitor:ASTVisitor) -> None:
+        pass
 
     def set_parent(self, node):
         assert self.parent is None
@@ -40,6 +41,14 @@ class ASTNode:
         file.write("\tnode0[label=\"" + str(self) + "\"]\n")
         self.to_dot_recursive(file)
         file.write("}")
+
+
+class ProgNode(ASTNode):
+    def __init__(self, node_id=0):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'prog'
 
 
 class LiteralNode(ASTNode):

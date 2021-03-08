@@ -1,8 +1,8 @@
-from grammars.variables.variablesListener import variablesListener
-from grammars.variables.variablesParser import variablesParser
-from ASTNode import *
-from SymbolTable import SymbolTable
-from utils import Counter
+from .grammars.variables.variablesListener import variablesListener
+from .grammars.variables.variablesParser import variablesParser
+from .ASTNode import *
+from .SymbolTable import SymbolTable
+from .utils import Counter
 
 class ASTListener(variablesListener):
     def __init__(self):
@@ -11,7 +11,7 @@ class ASTListener(variablesListener):
         
     def enterProgram(self, ctx:variablesParser.ProgramContext):
         assert self.curr_node is None
-        self.curr_node = ASTNode(self.counter.incr())
+        self.curr_node = ProgNode(self.counter.incr())
 
     # Exit a parse tree produced by variablesParser#Program.
     def exitProgram(self, ctx:variablesParser.ProgramContext):

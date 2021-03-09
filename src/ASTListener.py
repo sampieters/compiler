@@ -19,7 +19,7 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#Integer.
     def enterInteger(self, ctx:variablesParser.IntegerContext):
-        self.curr_node.add_child(LiteralNode(int(ctx.getText()), self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(int(ctx.getText()), "int", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         
     # Exit a parse tree produced by variablesParser#Integer.
@@ -28,7 +28,7 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#Float.
     def enterFloat(self, ctx:variablesParser.FloatContext):
-        self.curr_node.add_child(LiteralNode(float(ctx.getText()), self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(float(ctx.getText()), "float", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Float.
@@ -37,7 +37,7 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#String.
     def enterString(self, ctx:variablesParser.StringContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText(), self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(ctx.getText(), "string", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#String.
@@ -46,7 +46,7 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#Character.
     def enterCharacter(self, ctx:variablesParser.CharacterContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText()[0], self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(ctx.getText()[0], "char", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Character.

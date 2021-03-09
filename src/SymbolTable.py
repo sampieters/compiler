@@ -3,7 +3,6 @@ class SymbolTable:
         self.parent = parent
         self.symbols = dict()
 
-
     def get_symbol(self, symbol):
         """
         Returns the Node corresponding to a symbol of the smallest scope possible
@@ -17,13 +16,12 @@ class SymbolTable:
             table = table.parent
         return result
 
-
-
     def add_symbol(self, symbol):
         """
         Adds a symbol to the symbol table
         @params: symbol = IdentifierNode
         """
+<<<<<<< HEAD
         self.symbols[symbol.name] = symbol
 
     
@@ -39,3 +37,8 @@ class SymbolTable:
         else:
             self.symbols = None
             self.parent = None
+=======
+        if self.symbols[symbol.name]:
+            print("Warning: shadow declaration")
+        self.symbols[symbol.name] = symbol
+>>>>>>> ab5bc4a0f054e69c21a7b294e589bec0744478b4

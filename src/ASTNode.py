@@ -11,7 +11,7 @@ class ASTNode:
     def __str__(self):
         return "error"
 
-    def accept(self, visitor:ASTVisitor) -> None:
+    def accept(self, visitor:ASTVisitor):
         pass
 
     def set_parent(self, node):
@@ -57,10 +57,10 @@ class ProgNode(ASTNode):
 
 
 class LiteralNode(ASTNode):
-    def __init__(self, value, node_id):
+    def __init__(self, value, _type, node_id):
         super().__init__(node_id)
         self.value = value
-        self.type = None
+        self.type = _type
 
     def __str__(self):
         return str(self.value)
@@ -142,6 +142,7 @@ class AssignmentNode(ASTNode):
         for child in self.children:
             child.accept(visitor)
         visitor.visitAssignment(self)
+
 
 class DeclarationNode(ASTNode):
     def __init__(self, node_id):

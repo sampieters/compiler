@@ -21,7 +21,6 @@ class SymbolTable:
         Adds a symbol to the symbol table
         @params: symbol = IdentifierNode
         """
-<<<<<<< HEAD
         self.symbols[symbol.name] = symbol
 
     
@@ -31,14 +30,9 @@ class SymbolTable:
 
 
     def exit_scope(self):
-        if (self.parent)
+        if self.parent:
             self.symbols = self.parent.symbols
             self.parent = self.parent.parent
         else:
             self.symbols = None
             self.parent = None
-=======
-        if self.symbols[symbol.name]:
-            print("Warning: shadow declaration")
-        self.symbols[symbol.name] = symbol
->>>>>>> ab5bc4a0f054e69c21a7b294e589bec0744478b4

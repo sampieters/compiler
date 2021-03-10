@@ -1,7 +1,7 @@
 from grammars.variables.variablesParser import variablesParser
 from grammars.variables.variablesVisitor import variablesVisitor
-from .SymbolTable import SymbolTable
-from .ASTNode import *
+from SymbolTable import SymbolTable
+from ASTNode import *
 
 class SemanticalErrorVisitor(variablesVisitor):
     def __init__(self):

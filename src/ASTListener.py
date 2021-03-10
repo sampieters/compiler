@@ -109,6 +109,7 @@ class ASTListener(variablesListener):
 
     # Exit a parse tree produced by variablesParser#declaration.
     def exitDeclaration(self, ctx:variablesParser.DeclarationContext):
+        self.curr_node.children[0].type = ctx.getChild(0).getText()
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#Identifier.

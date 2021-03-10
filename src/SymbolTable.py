@@ -16,6 +16,9 @@ class SymbolTable:
             table = table.parent
         return result
 
+    def get_symbol_curr_scope(self, symbol):
+        return self.symbols[symbol]
+
     def add_symbol(self, symbol):
         """
         Adds a symbol to the symbol table

@@ -81,10 +81,21 @@ class IdentifierNode(ASTNode):
     def accept(self, visitor:ASTVisitor):
         visitor.visitIdentifier(self)
 
+    def isBeingDeclared(self):
+        if isinstance(self.parent, DeclarationNode):
+            return self == self.parent.children[0]
+        return False
+
+    def isBeingAssigned(self):
+        if isinstance(self.parent, AssignmentNode):
+            return self == self.parent.children[0]
+        return False
+
 
 class DefinitionNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
+        self.type = None
 
     def __str__(self):
         return 'define'
@@ -149,6 +160,7 @@ class AssignmentNode(ASTNode):
 class DeclarationNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
+        self.type = None
 
     def __str__(self):
         return 'declare'

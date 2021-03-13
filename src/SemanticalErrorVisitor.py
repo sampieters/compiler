@@ -4,6 +4,8 @@ from SymbolTable import SymbolTable
 from ASTNode import *
 from utils import *
 
+#TODO: replace error messages with actual exceptions
+
 class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()

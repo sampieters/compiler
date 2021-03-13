@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 class SymbolTable:
     def __init__(self, parent=None):
         self.parent = parent
-        self.symbols = dict()
+        self.symbols = defaultdict(lambda: None)
 
     def get_symbol(self, symbol):
         """
@@ -29,7 +31,7 @@ class SymbolTable:
     
     def enter_scope(self):
         self.parent = self
-        self.symbols = dict()
+        self.symbols = defaultdict()
 
 
     def exit_scope(self):

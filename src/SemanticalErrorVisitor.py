@@ -20,7 +20,8 @@ class SemanticalErrorVisitor(ASTVisitor):
             def_node = self.table.get_symbol_curr_scope(str(node))
             # If the identifier was already declared before
             if def_node is not None:
-                print(f"Error: Redefinition of '{str(node)}'{"" if def_node.type == node.type else f" with a different type: '{node.type}' vs '{def_node.type}'"}")
+                print(f"Error: Redefinition of '{str(node)}'", end="")
+                print("" if def_node.type == node.type else f" with a different type: '{node.type}' vs '{def_node.type}'")
             else:
                 self.table.add_symbol(node)
         elif node.isBeingAssigned():
@@ -31,7 +32,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             if self.table.get_symbol(node.name) is None:
                 print(f"Error: Use of undeclared variable '{node.name}'")
 
-    def visitUnaryOperation(self, node)
+    def visitUnaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
             self.visitUnaryOpBoolean(node)
         else:
@@ -50,7 +51,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             self.visitBinaryOp(node)
 
     def visitBinaryOp(self, node):
-        node.type = getBinaryType(node.children[0], node.children[1])
+        node.type = getBinaryType(node.children[0].type, node.children[1].type)
 
     def visitBinaryOpBoolean(self, node):
         node.type = "int"

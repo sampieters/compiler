@@ -5,6 +5,7 @@ from grammars.variables.variablesLexer import variablesLexer
 from grammars.variables.variablesParser import variablesParser
 from ASTListener import ASTListener
 from ASTVisitor import ASTVisitor
+from SemanticalErrorVisitor import SemanticalErrorVisitor
 from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
@@ -28,11 +29,14 @@ if __name__ == '__main__':
     AST = listener.curr_node
     AST.to_dot("AST")
 
-    visitor = OptimisationVisitor()
-    visitor.visit(AST)
+    visitor_err = SemanticalErrorVisitor()
+    visitor_err.visit(AST)
 
-    visitor_2 = LLVMVisitor()
-    visitor_2.visit(AST)
-    print(visitor_2.LLVM)
+    visitor_opt = OptimisationVisitor()
+    visitor_opt.visit(AST)
+
+    visitor_llvm = LLVMVisitor()
+    visitor_llvm.visit(AST)
+    print(visitor_llvm.LLVM)
 
     AST.to_dot("AST_OPT")

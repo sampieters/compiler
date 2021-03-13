@@ -6,7 +6,7 @@ from grammars.variables.variablesParser import variablesParser
 from ASTListener import ASTListener
 from ASTVisitor import ASTVisitor
 from OptimisationVisitor import OptimisationVisitor
-from SemanticalErrorVisitor import SemanticalErrorVisitor
+from LLVMVisitor import LLVMVisitor
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -30,5 +30,9 @@ if __name__ == '__main__':
 
     visitor = OptimisationVisitor()
     visitor.visit(AST)
+
+    visitor_2 = LLVMVisitor()
+    visitor_2.visit(AST)
+    print(visitor_2.LLVM)
 
     AST.to_dot("AST_OPT")

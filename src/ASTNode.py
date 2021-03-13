@@ -120,10 +120,10 @@ class UnaryOperationNode(ASTNode):
             child.accept(visitor)
         visitor.visitUnaryOperation(self)
 
-    def fold(self):
-        new_node = LiteralNode(eval(self.operation + str(self.children[0])), self.id)
+    def fold(self, _type):
+        new_node = LiteralNode(eval(self.operation + str(self.children[0])), _type, self.id)
         new_node.parent = self.parent
-        self.parent.children[self.parent.children.index(self)] = LiteralNode(eval(self.operation + str(self.children[0])), self.id)
+        self.parent.children[self.parent.children.index(self)] = new_node
 
 
 class BinaryOperationNode(ASTNode):
@@ -141,8 +141,8 @@ class BinaryOperationNode(ASTNode):
             child.accept(visitor)
         visitor.visitBinaryOperation(self)
 
-    def fold(self):
-        new_node = LiteralNode(eval(str(self.children[0]) + self.operation + str(self.children[1])), self.id)
+    def fold(self, _type):
+        new_node = LiteralNode(eval(str(self.children[0]) + self.operation + str(self.children[1])), _type, self.id)
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
 

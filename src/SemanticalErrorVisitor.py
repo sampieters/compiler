@@ -31,11 +31,23 @@ class SemanticalErrorVisitor(ASTVisitor):
             if self.table.get_symbol(node.name) is None:
                 print(f"Error: Use of undeclared variable '{node.name}'")
 
+    def visitUnaryOperation(self, node)
+        if node.operation in BOOLEAN_OPS:
+            self.visitUnaryOpBoolean(node)
+        else:
+            self.visitUnaryOp(node)
+
     def visitUnaryOp(self, node):
         node.type = node.children[0].type
 
     def visitUnaryOpBoolean(self, node):
         node.type = "int"
+
+    def visitBinaryOperation(self, node):
+        if node.operation in BOOLEAN_OPS:
+            self.visitBinaryOpBoolean(node)
+        else:
+            self.visitBinaryOp(node)
 
     def visitBinaryOp(self, node):
         node.type = getBinaryType(node.children[0], node.children[1])

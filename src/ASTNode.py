@@ -126,12 +126,12 @@ class UnaryOperationNode(ASTNode):
         self.parent.children[self.parent.children.index(self)] = LiteralNode(eval(self.operation + str(self.children[0])), self.id)
 
 
-
 class BinaryOperationNode(ASTNode):
     def __init__(self, operation, node_id):
         super().__init__(node_id)
         self.operation = operation
         self.type = None
+        self.register = None
 
     def __str__(self):
         return self.operation

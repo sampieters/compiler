@@ -42,18 +42,12 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM += node.children[1].type + ' ' + str(node.children[1].value) + ", " + "lookinhash \n"
 
     def visitUnaryOperation(self, node):
-<<<<<<< HEAD
-        # TODO: NOG TESTEN
-        # nogfunctie voor loading maybe
-        print("test")
-=======
-        print("whu")
         if isinstance(node.children[0], IdentifierNode):
             temp_node = self.table.get_symbol(child.name)
             self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_node.type + ", " + \
                          temp_node.type + "* " + temp_node.original_adress + ", align X\n"
 
->>>>>>> 3156dc79189c103c9b3037604fd91771f169f8de
+
         self.LLVM += '%' + self.counter.print_and_incr() + " = "
         temp = unaryOpToLLVM(node.operation)
         self.LLVM += temp[0] + " lookinhash ," + temp[1] + "\n"

@@ -11,8 +11,8 @@ stat: definition END_INSTR              # DefinitionStatement
 
 expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | (MUL|REF) ID                      # UnaryOpPointer  // Unary pointer operation
-    | (INCR|DECR) ID                    # UnaryOpIdentifier // Unary identifier operation
-    | ID (INCR|DECR)                    # UnaryOpIdentifier // Unary identifier operation
+    | (INCR|DECR) ID                    # UnaryOpIdentifierPrefix // Unary identifier operation (prefix)
+    | ID (INCR|DECR)                    # UnaryOpIdentifierSuffix // Unary identifier operation (suffix)
     | (ADD|SUB) expr                    # UnaryOp   // Unary integer operation
     | (NOT) expr                        # UnaryOpBoolean   // Unary boolean operation
     | expr (MUL|DIV|MOD) expr           # BinaryOp  // Binary multiplicative operation
@@ -42,6 +42,9 @@ definition: declaration EQ expr
 
 assignment: ID EQ expr
           ;
+
+function_call: PRINTF LBRACKET expr RBRACKET     # PrintF
+             ;
 
 MUL :           '*' ; // assigns token name to '*' used above in grammar
 DIV :           '/' ;
@@ -86,7 +89,12 @@ FLOAT : INT? DOT [0-9]+ ;
 CHAR_PREF : 'char' ;
 CHAR : SQUOTE ESC? [!-~] SQUOTE ;
 STRING : '"'CHAR*'"' ;
+
+PRINTF : 'printf' ;
       
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS  :   [ \n\t\r]+ -> skip ; // toss out whitespace
+
+SINGLE_COMMENT : '//' .*? '\n' -> skip ; // toss out comments, for now
+MULTI_COMMENT : '/*' .*? '*/' -> skip ;

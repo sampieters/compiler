@@ -118,6 +118,8 @@ class UnaryOperationNode(ASTNode):
         return self.operation
 
     def accept(self, visitor:ASTVisitor):
+        if self.children is None:
+            return
         for child in self.children:
             child.accept(visitor)
         visitor.visitUnaryOperation(self)

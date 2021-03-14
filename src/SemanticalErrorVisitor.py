@@ -12,7 +12,7 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     # Visit a parse tree produced by variablesParser#Program.
     def visitProgram(self, ctx:variablesParser.ProgramContext):
-        print(self.visitChildren(ctx))
+        self.visitChildren(ctx)
 
     def visitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
@@ -20,18 +20,20 @@ class SemanticalErrorVisitor(ASTVisitor):
             def_node = self.table.get_symbol_curr_scope(str(node))
             # If the identifier was already declared before
             if def_node is not None:
-                print(f"Error: Redefinition of '{str(node)}'", end="")
-                print("" if def_node.type == node.type else f" with a different type: '{node.type}' vs '{def_node.type}'")
+                err_msg = f"Error: Redefinition of '{str(node)}'"
+                if def_node.type != node.type:
+                    err_msg += f" with a different type: '{node.type}' vs '{def_node.type}'" 
+                raise Exception(err_msg)
             else:
                 self.table.add_symbol(node)
         elif node.isBeingAssigned():
             def_node = self.table.get_symbol(str(node))
             if def_node.type.startswith("const"):
-                print(f"Error: Cannot assign to variable '{str(node)}' with const-qualified type '{node.type}'")
+                raise Exception(f"Error: Cannot assign to variable '{str(node)}' with const-qualified type '{node.type}'")
         else:
             def_node = self.table.get_symbol(str(node))
             if def_node is None:
-                print(f"Error: Use of undeclared variable '{node.name}'")
+                raise Exception(f"Error: Use of undeclared variable '{node.name}'")
             else:
                 node.type = def_node.type
 

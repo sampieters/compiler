@@ -1,4 +1,4 @@
-CONVERSION_HIERARCHY = {"int": 1, "unsigned int": 2, "long": 3, "unsigned long": 4, "long long": 5, "unsigned long long": 6,
+CONVERSION_HIERARCHY = {"char": 0, "int": 1, "unsigned int": 2, "long": 3, "unsigned long": 4, "long long": 5, "unsigned long long": 6,
                         "float": 7, "double": 8, "long double": 9}
 
 BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}

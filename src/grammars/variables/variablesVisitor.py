@@ -49,6 +49,11 @@ class variablesVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by variablesParser#UnaryOpIdentifierSuffix.
+    def visitUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by variablesParser#UnaryOpPointer.
     def visitUnaryOpPointer(self, ctx:variablesParser.UnaryOpPointerContext):
         return self.visitChildren(ctx)
@@ -59,13 +64,13 @@ class variablesVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by variablesParser#UnaryOpIdentifier.
-    def visitUnaryOpIdentifier(self, ctx:variablesParser.UnaryOpIdentifierContext):
+    # Visit a parse tree produced by variablesParser#UnaryOpBoolean.
+    def visitUnaryOpBoolean(self, ctx:variablesParser.UnaryOpBooleanContext):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by variablesParser#UnaryOpBoolean.
-    def visitUnaryOpBoolean(self, ctx:variablesParser.UnaryOpBooleanContext):
+    # Visit a parse tree produced by variablesParser#UnaryOpIdentifierPrefix.
+    def visitUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
         return self.visitChildren(ctx)
 
 
@@ -116,6 +121,11 @@ class variablesVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by variablesParser#assignment.
     def visitAssignment(self, ctx:variablesParser.AssignmentContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by variablesParser#PrintF.
+    def visitPrintF(self, ctx:variablesParser.PrintFContext):
         return self.visitChildren(ctx)
 
 

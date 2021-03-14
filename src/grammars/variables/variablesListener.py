@@ -80,6 +80,15 @@ class variablesListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by variablesParser#UnaryOpIdentifierSuffix.
+    def enterUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+        pass
+
+    # Exit a parse tree produced by variablesParser#UnaryOpIdentifierSuffix.
+    def exitUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+        pass
+
+
     # Enter a parse tree produced by variablesParser#UnaryOpPointer.
     def enterUnaryOpPointer(self, ctx:variablesParser.UnaryOpPointerContext):
         pass
@@ -98,21 +107,21 @@ class variablesListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by variablesParser#UnaryOpIdentifier.
-    def enterUnaryOpIdentifier(self, ctx:variablesParser.UnaryOpIdentifierContext):
-        pass
-
-    # Exit a parse tree produced by variablesParser#UnaryOpIdentifier.
-    def exitUnaryOpIdentifier(self, ctx:variablesParser.UnaryOpIdentifierContext):
-        pass
-
-
     # Enter a parse tree produced by variablesParser#UnaryOpBoolean.
     def enterUnaryOpBoolean(self, ctx:variablesParser.UnaryOpBooleanContext):
         pass
 
     # Exit a parse tree produced by variablesParser#UnaryOpBoolean.
     def exitUnaryOpBoolean(self, ctx:variablesParser.UnaryOpBooleanContext):
+        pass
+
+
+    # Enter a parse tree produced by variablesParser#UnaryOpIdentifierPrefix.
+    def enterUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
+        pass
+
+    # Exit a parse tree produced by variablesParser#UnaryOpIdentifierPrefix.
+    def exitUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
         pass
 
 
@@ -203,6 +212,15 @@ class variablesListener(ParseTreeListener):
 
     # Exit a parse tree produced by variablesParser#assignment.
     def exitAssignment(self, ctx:variablesParser.AssignmentContext):
+        pass
+
+
+    # Enter a parse tree produced by variablesParser#PrintF.
+    def enterPrintF(self, ctx:variablesParser.PrintFContext):
+        pass
+
+    # Exit a parse tree produced by variablesParser#PrintF.
+    def exitPrintF(self, ctx:variablesParser.PrintFContext):
         pass
 
 

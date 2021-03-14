@@ -62,6 +62,25 @@ class ASTListener(variablesListener):
     def exitUnaryOp(self, ctx:variablesParser.UnaryOpContext):
         self.curr_node = self.curr_node.parent
 
+    # Enter a parse tree produced by variablesParser#UnaryOp.
+    def enterUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
+        print(ctx.getChild(0).getText() + 'x')
+        self.curr_node.add_child(UnaryOperationNode(ctx.getChild(0).getText() + 'x', self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    # Exit a parse tree produced by variablesParser#UnaryOp.
+    def exitUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
+        self.curr_node = self.curr_node.parent
+
+    # Enter a parse tree produced by variablesParser#UnaryOp.
+    def enterUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+        print('x' + ctx.getChild(1).getText())
+        self.curr_node.add_child(UnaryOperationNode('x' + ctx.getChild(1).getText(), self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    # Exit a parse tree produced by variablesParser#UnaryOp.
+    def exitUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+        self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#BinaryOp.
     def enterBinaryOp(self, ctx:variablesParser.BinaryOpContext):
@@ -71,7 +90,6 @@ class ASTListener(variablesListener):
     # Exit a parse tree produced by variablesParser#BinaryOp.
     def exitBinaryOp(self, ctx:variablesParser.BinaryOpContext):
         self.curr_node = self.curr_node.parent
-
 
     # Enter a parse tree produced by variablesParser#BinaryOpBoolean.
     def enterBinaryOpBoolean(self, ctx:variablesParser.BinaryOpBooleanContext):

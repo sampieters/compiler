@@ -29,8 +29,11 @@ class SemanticalErrorVisitor(ASTVisitor):
             if def_node.type.startswith("const"):
                 print(f"Error: Cannot assign to variable '{str(node)}' with const-qualified type '{node.type}'")
         else:
-            if self.table.get_symbol(node.name) is None:
+            def_node = self.table.get_symbol(str(node))
+            if def_node is None:
                 print(f"Error: Use of undeclared variable '{node.name}'")
+            else:
+                node.type = def_node.type
 
     def visitUnaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:

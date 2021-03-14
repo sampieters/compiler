@@ -1,4 +1,4 @@
-CONVERSION_HIERARCHY = {"int": 1,"unsigned int": 2, "long": 3, "unsigned long": 4, "long long": 5, "unsigned long long": 6,
+CONVERSION_HIERARCHY = {"int": 1, "unsigned int": 2, "long": 3, "unsigned long": 4, "long long": 5, "unsigned long long": 6,
                         "float": 7, "double": 8, "long double": 9}
 
 BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
@@ -9,7 +9,7 @@ def unaryOpToLLVM(operation):
         "--": ["add", "-1"],
         "!": ["not", "moeilijk"]
     }
-    return LLVMType.get(operation, "Non valid type: " + operation)
+    return LLVMType.get(operation, "Non valid operation: " + operation)
 
 def BinaryOpToLLVM(operation):
     LLVMType = {
@@ -19,20 +19,20 @@ def BinaryOpToLLVM(operation):
         "/": "mod",
         "%": ""
     }
-    return LLVMType.get(operation, "Non valid type: " + operation)
+    return LLVMType.get(operation, "Non valid operation: " + operation)
 
 def typeToLLVM(type):
     LLVMType = {
-        "int": "i32, align 4",
-        "short int": "i16, align 2",
-        "long int": "i64, align 8",
-        "long long int": "i64, align 8",
-        "float": "float, align 4",
-        "double": "double, align 8",
-        "long double": "alloca x86_fp80, align 16",
-        "char": "alloca i8, align 1"
+        "int": ["i32", "align 4"],
+        "short int": ["i16", "align 2"],
+        "long int": ["i64", "align 8"],
+        "long long int": ["i64", "align 8"],
+        "float": ["float", "align 4"],
+        "double": ["double", "align 8"],
+        "long double": ["alloca x86_fp80", "align 16"],
+        "char": ["alloca i8", "align 1"]
     }
-    return LLVMType.get(type, "Non valid type")
+    return LLVMType.get(type, "Non valid type: " + type)
 
 
 def getBinaryType(type_1, type_2):
@@ -58,6 +58,11 @@ class Counter:
 
     def curr(self):
         return self.counter
+
+    def print_and_incr(self):
+        temp = str(self.counter)
+        self.incr()
+        return temp
 
     def __str__(self):
         return str(self.counter)

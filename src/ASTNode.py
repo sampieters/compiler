@@ -74,6 +74,8 @@ class IdentifierNode(ASTNode):
         super().__init__(node_id)
         self.name = name
         self.type = None
+        self.original_adress = None
+        self.temp_adress = None
 
     def __str__(self):
         return self.name

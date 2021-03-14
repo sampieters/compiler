@@ -14,7 +14,7 @@ class SymbolTable:
         table = self
         result = None
         while result is None and table is not None:
-            result = table[symbol]
+            result = table.symbols[symbol]
             table = table.parent
         return result
 

@@ -8,6 +8,6 @@ digraph AST {
 	node2->node3
 	node4[label="5"]
 	node1->node4
-	node5[label="x++"]
+	node5[label="++x"]
 	node0->node5
 }

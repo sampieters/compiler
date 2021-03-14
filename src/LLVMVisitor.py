@@ -44,6 +44,7 @@ class LLVMVisitor(ASTVisitor):
     def visitUnaryOperation(self, node):
         # TODO: NOG TESTEN
         # nogfunctie voor loading maybe
+        print("test")
         self.LLVM += '%' + self.counter.print_and_incr() + " = "
         temp = unaryOpToLLVM(node.operation)
         self.LLVM += temp[0] + " lookinhash ," + temp[1] + "\n"

@@ -42,13 +42,23 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM += node.children[1].type + ' ' + str(node.children[1].value) + ", " + "lookinhash \n"
 
     def visitUnaryOperation(self, node):
-        # TODO: NOG TESTEN
-        # nogfunctie voor loading maybe
+        print("whu")
+        if isinstance(node.children[0], IdentifierNode):
+            temp_node = self.table.get_symbol(child.name)
+            self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_node.type + ", " + \
+                         temp_node.type + "* " + temp_node.original_adress + ", align X\n"
+
         self.LLVM += '%' + self.counter.print_and_incr() + " = "
         temp = unaryOpToLLVM(node.operation)
         self.LLVM += temp[0] + " lookinhash ," + temp[1] + "\n"
 
     def visitBinaryOperation(self, node):
+        for child in node.children:
+            if isinstance(child, IdentifierNode):
+                temp_node = self.table.get_symbol(child.name)
+                self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_node.type + ", " + \
+                             temp_node.type + "* " + temp_node.original_adress + ", align X\n"
+
         self.LLVM += '%' + self.counter.print_and_incr() + " = " + BinaryOpToLLVM(node.operation) + ' '
         for child in node.children:
             if isinstance(child, LiteralNode):
@@ -59,9 +69,3 @@ class LLVMVisitor(ASTVisitor):
                 self.LLVM += ', '
 
         self.LLVM += "\n"
-
-    def visitIdentifier(self, node):
-        # if identifier is being used in operation, store in the table
-        if isinstance(node.parent, BinaryOperationNode) or isinstance(node.parent, UnaryOperationNode):
-            self.LLVM += '%' + self.counter.print_and_incr() + " = load " + node.type + ", " + node.type + "* %" \
-                         + node.original_adress + ", align X"

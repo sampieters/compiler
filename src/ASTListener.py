@@ -64,7 +64,6 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#UnaryOp.
     def enterUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
-        print(ctx.getChild(0).getText() + 'x')
         self.curr_node.add_child(UnaryOperationNode(ctx.getChild(0).getText() + 'x', self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
@@ -75,7 +74,6 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#UnaryOp.
     def enterUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
-        print('x' + ctx.getChild(1).getText())
         self.curr_node.add_child(UnaryOperationNode('x' + ctx.getChild(1).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(IdentifierNode(ctx.getChild(0).getText(), self.counter.incr()))

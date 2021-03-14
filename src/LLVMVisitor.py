@@ -43,11 +43,10 @@ class LLVMVisitor(ASTVisitor):
 
     def visitUnaryOperation(self, node):
         if isinstance(node.children[0], IdentifierNode):
-            temp_node = self.table.get_symbol(child.name)
-            self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_node.type + ", " + \
-                         temp_node.type + "* " + temp_node.original_adress + ", align X\n"
-
-
+            temp_node = self.table.get_symbol(node.children[0].name)
+            temp_type = typeToLLVM(temp_node.type)
+            self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_type[0] + ", " + \
+                         temp_type[0] + "* " + temp_node.original_adress + ", " + temp_type[1] + "\n"
         self.LLVM += '%' + self.counter.print_and_incr() + " = "
         temp = unaryOpToLLVM(node.operation)
         self.LLVM += temp[0] + " lookinhash ," + temp[1] + "\n"

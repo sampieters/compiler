@@ -10,6 +10,37 @@ class LLVMVisitor(ASTVisitor):
         self.table = SymbolTable()
         self.counter = Counter()
 
+    def loadVariable(self, node, value=None): 
+        """
+        if value is None:
+            Loads a variable from the symbol table into a new address, so it can be reused
+        otherwise:
+            Loads value (node with a type) into a variable from the symbol table
+        """
+        _type = typeToLLVM(node.type)
+        load_addr = self.counter.incr()
+        instruction += '%' + load_addr + " = load " + _type[0] + ", "
+        if value is None:
+            instruction += _type[0] + "* " + self.table.get_symbol(str(node)).original_adress + ", " + _type[1] + "\n"
+        elif isinstance(value, IdentifierNode):
+            self.loadVariable(value)
+            _type2 = typeToLLVM(value.type)
+            instruction += _type2[0] + "* " + value.temp_adress
+        elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
+            _type2 = typeToLLVM(value.type)
+            instruction += _type2[0] + "* " + value.register
+        elif isinstance(value, LiteralNode):
+            _type2 = typeToLLVM(value.type)
+            instruction += _type2[0] + value.value
+
+        if isinstance(node, IdentifierNode):
+            node.temp_adress = load_addr
+        else if isinstance(node, BinaryOperationNode) or isinstance(node, UnaryOperationNode):
+            node.register = load_addr
+
+        self.LLVM += instruction
+
+
     def visitDeclaration(self, node):
         adress = '%' + self.counter.print_and_incr()
         node.children[0].original_adress = adress
@@ -61,9 +92,9 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM += '%' + self.counter.print_and_incr() + " = " + BinaryOpToLLVM(node.operation) + ' '
         for child in node.children:
             if isinstance(child, LiteralNode):
-                self.LLVM += "easy to determine"
+                self.LLVM += str(child.value)
             else:
-                self.LLVM += "lookinhash"
+                self.LLVM += '%' + str(self.table.get_symbol(child.name).temp_adress)
             if child != node.children[-1]:
                 self.LLVM += ', '
 

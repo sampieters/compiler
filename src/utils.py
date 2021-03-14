@@ -21,7 +21,7 @@ def BinaryOpToLLVM(operation):
     }
     return LLVMType.get(operation, "Non valid operation: " + operation)
 
-def typeToLLVM(type):
+def typeToLLVM(_type):
     LLVMType = {
         "int": ["i32", "align 4"],
         "short int": ["i16", "align 2"],
@@ -32,7 +32,7 @@ def typeToLLVM(type):
         "long double": ["alloca x86_fp80", "align 16"],
         "char": ["alloca i8", "align 1"]
     }
-    return LLVMType.get(type, "Non valid type: " + type)
+    return LLVMType.get(_type, "Non valid type: " + _type)
 
 
 def getBinaryType(type_1, type_2):
@@ -54,7 +54,7 @@ class Counter:
 
     def incr(self):
         self.counter += 1
-        return self.counter - 1
+        return str(self.counter - 1)
 
     def curr(self):
         return self.counter

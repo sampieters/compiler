@@ -113,6 +113,7 @@ class UnaryOperationNode(ASTNode):
         super().__init__(node_id)
         self.operation = operation
         self.type = None
+        self.register = None
 
     def __str__(self):
         return self.operation

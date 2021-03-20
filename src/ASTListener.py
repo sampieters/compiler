@@ -130,8 +130,9 @@ class ASTListener(variablesListener):
 
     # Enter a parse tree produced by variablesParser#assignment.
     def enterAssignment(self, ctx:variablesParser.AssignmentContext):
-        self.curr_node.add_child(BinaryOperationNode(self.counter.incr()))
+        self.curr_node.add_child(AssignmentNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
+        self.curr_node.add_child(IdentifierNode(ctx.getChild(0).getText(), self.counter.incr()))
 
     # Exit a parse tree produced by variablesParser#assignment.
     def exitAssignment(self, ctx:variablesParser.AssignmentContext):

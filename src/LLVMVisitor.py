@@ -10,7 +10,25 @@ class LLVMVisitor(ASTVisitor):
         self.table = SymbolTable()
         self.counter = Counter()
 
-    def loadVariable(self, node, value=None): 
+    def storeVariable(self, node, value):
+        _type = typeToLLVM(node.type)
+
+        instruction = "store "
+        if isinstance(value, IdentifierNode):
+            value = self.table.get_symbol(value.name)
+            self.loadVariable(value)
+            _type2 = typeToLLVM(value.type)
+            instruction += _type2[0] + "* %" + value.temp_adress
+        elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
+            _type2 = typeToLLVM(value.type)
+            instruction += _type2[0] + "* %" + value.register
+        elif isinstance(value, LiteralNode):
+            _type2 = typeToLLVM(value.type)
+            instruction += _type2[0] + ' ' + str(value.value)
+        instruction += ", " + _type[0] + "* " + node.original_adress + ", " + _type[1] + "\n"
+        self.LLVM += instruction
+
+    def loadVariable(self, node, value=None):
         """
         if value is None:
             Loads a variable from the symbol table into a new address, so it can be reused
@@ -19,23 +37,11 @@ class LLVMVisitor(ASTVisitor):
         """
         _type = typeToLLVM(node.type)
         load_addr = self.counter.incr()
-        instruction += '%' + load_addr + " = load " + _type[0] + ", "
-        if value is None:
-            instruction += _type[0] + "* " + self.table.get_symbol(str(node)).original_adress + ", " + _type[1] + "\n"
-        elif isinstance(value, IdentifierNode):
-            self.loadVariable(value)
-            _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + "* " + value.temp_adress
-        elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
-            _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + "* " + value.register
-        elif isinstance(value, LiteralNode):
-            _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + value.value
-
+        instruction = '%' + load_addr + " = load " + _type[0] + ", " + _type[0] + "* " + \
+                      self.table.get_symbol(str(node)).original_adress + ", " + _type[1] + "\n"
         if isinstance(node, IdentifierNode):
             node.temp_adress = load_addr
-        else if isinstance(node, BinaryOperationNode) or isinstance(node, UnaryOperationNode):
+        elif isinstance(node, BinaryOperationNode) or isinstance(node, UnaryOperationNode):
             node.register = load_addr
 
         self.LLVM += instruction
@@ -58,44 +64,52 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM += temp[0] + ", " + temp[1] + "\n"
 
     def visitDefinition(self, node):
-        self.LLVM += "store "
-        #Literal Node
-        temp = typeToLLVM(node.children[1].type)
-        temp_node = self.table.get_symbol(node.children[0].children[0].name)
-
-        # Eerste temp[0] moet wss het type zijn van de literal maar die moet zwz gelijk zijn aan het type van de identifier
-        self.LLVM += temp[0] + ' ' + str(node.children[1].value) + ", " + temp[0] + "* " + temp_node.original_adress + \
-                     ", " + temp[1] + "\n"
+        self.storeVariable(node.children[0].children[0], node.children[1])
 
     def visitAssignment(self, node):
-        self.LLVM += "store "
-        # Literal Node
-        self.LLVM += node.children[1].type + ' ' + str(node.children[1].value) + ", " + "lookinhash \n"
+        self.storeVariable(self.table.get_symbol(node.children[0].name), node.children[1])
 
     def visitUnaryOperation(self, node):
         if isinstance(node.children[0], IdentifierNode):
             temp_node = self.table.get_symbol(node.children[0].name)
-            temp_type = typeToLLVM(temp_node.type)
-            self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_type[0] + ", " + \
-                         temp_type[0] + "* " + temp_node.original_adress + ", " + temp_type[1] + "\n"
+            self.loadVariable(temp_node)
+        node.register = str(self.counter)
         self.LLVM += '%' + self.counter.print_and_incr() + " = "
         temp = unaryOpToLLVM(node.operation)
-        self.LLVM += temp[0] + " lookinhash ," + temp[1] + "\n"
+        _type = typeToLLVM(node.children[0].type)
+        if node.operation == '-':
+            if isinstance(node.children[0], IdentifierNode):
+                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + \
+                             str(self.table.get_symbol(node.children[0].name).temp_adress) + "\n"
+            # TODO: Code hieronder wordt nooit bereikt
+            elif isinstance(node.children[0], LiteralNode):
+                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %"
+            # TODO: Nog Unary en Binary Ops toevoegen
+        elif node.operation == "++x" or node.operation == "--x":
+            print("TODO")
+        elif node.operation == "x++" or node.operation == "x--":
+            print("TODO")
+        elif node.operation == "!":
+            # If parent is prognode then expression is "!Literal" which doesn't do anyting and doesn't need to print anything
+            # TODO: Moet mss in de OptimmisationVisitor
+            #if not isinstance(node.parent, ProgNode):
+            node.children[0].value = 0
+
+            print("TODO")
 
     def visitBinaryOperation(self, node):
         for child in node.children:
             if isinstance(child, IdentifierNode):
                 temp_node = self.table.get_symbol(child.name)
-                self.LLVM += '%' + self.counter.print_and_incr() + " = load " + temp_node.type + ", " + \
-                             temp_node.type + "* " + temp_node.original_adress + ", align X\n"
+                self.loadVariable(temp_node)
 
+        node.register = str(self.counter)
         self.LLVM += '%' + self.counter.print_and_incr() + " = " + BinaryOpToLLVM(node.operation) + ' '
         for child in node.children:
             if isinstance(child, LiteralNode):
                 self.LLVM += str(child.value)
             else:
-                self.LLVM += '%' + str(self.table.get_symbol(child.name).temp_adress)
+                self.LLVM += typeToLLVM(child.type)[0] + " %" + str(self.table.get_symbol(child.name).temp_adress)
             if child != node.children[-1]:
                 self.LLVM += ', '
-
         self.LLVM += "\n"

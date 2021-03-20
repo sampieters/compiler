@@ -5,6 +5,8 @@ BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
 
 def unaryOpToLLVM(operation):
     LLVMType = {
+        "+": ["", ""],
+        "-": ["sub", "0"],
         "++": ["add", "1"],
         "--": ["add", "-1"],
         "!": ["not", "moeilijk"]

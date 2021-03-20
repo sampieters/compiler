@@ -22,6 +22,7 @@ worden van de AST van de gegeven input.
 ### 3) geïmplementeerd
 
 Alle mandatories van opdracht 1 & 2. 
+Opdracht 3 nog niet volledig.
 
 Optionals geïmplementeerd van opdracht 1:
 
@@ -33,5 +34,4 @@ Optionals geïmplementeerd van opdracht 1:
 Optionals geïmplementeerd van opdracht 2:
 
 - Identifier Operations.
-- 
 

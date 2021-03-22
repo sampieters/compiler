@@ -32,8 +32,8 @@ if __name__ == '__main__':
     visitor_err = SemanticalErrorVisitor()
     visitor_err.visit(AST)
 
-    visitor_opt = OptimisationVisitor()
-    visitor_opt.visit(AST)
+    #visitor_opt = OptimisationVisitor()
+    #visitor_opt.visit(AST)
 
     visitor_llvm = LLVMVisitor()
     visitor_llvm.visit(AST)

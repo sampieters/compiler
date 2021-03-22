@@ -18,10 +18,10 @@ class LLVMVisitor(ASTVisitor):
             value = self.table.get_symbol(value.name)
             self.loadVariable(value)
             _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + "* %" + value.temp_adress
+            instruction += _type2[0] + " %" + value.temp_adress
         elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
             _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + "* %" + value.register
+            instruction += _type2[0] + " %" + value.register
         elif isinstance(value, LiteralNode):
             _type2 = typeToLLVM(value.type)
             instruction += _type2[0] + ' ' + str(value.value)
@@ -74,28 +74,35 @@ class LLVMVisitor(ASTVisitor):
             temp_node = self.table.get_symbol(node.children[0].name)
             self.loadVariable(temp_node)
         node.register = str(self.counter)
-        self.LLVM += '%' + self.counter.print_and_incr() + " = "
+
         temp = unaryOpToLLVM(node.operation)
         _type = typeToLLVM(node.children[0].type)
         if node.operation == '-':
+            self.LLVM += '%' + self.counter.print_and_incr() + " = "
             if isinstance(node.children[0], IdentifierNode):
                 self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + \
                              str(self.table.get_symbol(node.children[0].name).temp_adress) + "\n"
-            # TODO: Code hieronder wordt nooit bereikt
             elif isinstance(node.children[0], LiteralNode):
-                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %"
-            # TODO: Nog Unary en Binary Ops toevoegen
+                #TODO: CONFUSED (weet niet wat eerste parameter is voor store variable)
+                self.storeVariable(node, node.children[0])
+            elif isinstance(node.children[0], BinaryOperationNode) or isinstance(node.children[0], UnaryOperationNode):
+                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + str(node.children[0].register) + "\n"
         elif node.operation == "++x" or node.operation == "--x":
             print("TODO")
         elif node.operation == "x++" or node.operation == "x--":
             print("TODO")
         elif node.operation == "!":
-            # If parent is prognode then expression is "!Literal" which doesn't do anyting and doesn't need to print anything
-            # TODO: Moet mss in de OptimmisationVisitor
-            #if not isinstance(node.parent, ProgNode):
-            node.children[0].value = 0
+            # Don't need to check Literal Node because is solved in Optimisation Visitor
+            temp_type = typeToLLVM(node.children[0].type)
+            if isinstance(node.children[0], BinaryOperationNode):
+                self.LLVM += '%' + self.counter.print_and_incr() + " = icmp ne " + temp_type[0] + " %" + node.children[0].register + ", 0\n" \
+                             '%' + self.counter.print_and_incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true\n" \
+                             '%' + self.counter.print_and_incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32\n"
+                if temp_type[0] == "i64":
+                    '%' + self.counter.print_and_incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64\n"
+                #TODO: Nog iets doen voor i32 om te zetten naar type
 
-            print("TODO")
+
 
     def visitBinaryOperation(self, node):
         for child in node.children:

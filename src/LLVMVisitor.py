@@ -11,50 +11,57 @@ class LLVMVisitor(ASTVisitor):
         self.counter = Counter()
 
     def storeVariable(self, node, value):
-        node = self.table.get_symbol(str(node))
+        """Stores value (node with a type) into a variable from the symbol table"""
         _type = typeToLLVM(node.type)
 
         instruction = "store "
+        # If we want to store a variable
         if isinstance(value, IdentifierNode):
             value = self.table.get_symbol(value.name)
+            # Load the variable into a new temporary address before storing it
             self.loadVariable(value)
             _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + " %" + value.temp_adress
+            instruction += _type2[0] + " %" + value.temp_address
+        # If we want to store the result of an operation
         elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
             _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + " %" + value.register
+            instruction += _type2[0] + " %" + value.temp_address
+        # If we want to store a literal
         elif isinstance(value, LiteralNode):
             _type2 = typeToLLVM(value.type)
-            instruction += _type2[0] + ' ' + str(value.value)
-        instruction += ", " + _type[0] + "* " + node.original_adress + ", " + _type[1] + "\n"
+            instruction += _type2[0] + ' ' + value.getValue()
+        
+        # If the node is a variable, get the node from the symbol table and store into the original address
+        if isinstance(node, IdentifierNode):
+            node = self.table.get_symbol(str(node))
+            instruction += ", " + _type[0] + "* " + node.original_address + ", " + _type[1] + "\n"
+        # Otherwise, store into the temporary address of the node
+        else:
+            instruction += ", " + _type[0] + "* " + node.temp_address + ", " + _type[1] + "\n"
         self.LLVM += instruction
 
     def loadVariable(self, node):
-        """
-        if value is None:
-            Loads a variable from the symbol table into a new address, so it can be reused
-        otherwise:
-            Loads value (node with a type) into a variable from the symbol table
-        """
+        """Loads a variable into a new temporary address"""
         node = self.table.get_symbol(str(node))
         _type = typeToLLVM(node.type)
-        load_addr = self.counter.incr()
-        instruction = '%' + load_addr + " = load " + _type[0] + ", " + _type[0] + "* " + \
-                      node.original_adress + ", " + _type[1] + "\n"
-        if isinstance(node, IdentifierNode):
-            node.temp_adress = load_addr
-        elif isinstance(node, BinaryOperationNode) or isinstance(node, UnaryOperationNode):
-            node.register = load_addr
 
+        # Change the temporary address of the variable to the new address, load the original address into it
+        load_addr = self.counter.incr()
+        node.temp_address = load_addr
+        instruction = '%' + load_addr + " = load " + _type[0] + ", " + _type[0] + "* " + \
+                      node.original_address + ", " + _type[1] + "\n"
         self.LLVM += instruction
 
 
     def visitDeclaration(self, node):
-        adress = '%' + self.counter.incr()
-        node.children[0].original_adress = adress
-
-        self.LLVM += adress + " = alloca "
+        """Transform declaration node to LLVM"""
+        # Set the original address for the new variable, add it to the symbol table
+        address = '%' + self.counter.incr()
+        node.children[0].original_address = address
         self.table.add_symbol(node.children[0])
+
+        # Convert the declaration to LLVM
+        instruction = address + " = alloca "
         check = node.children[0].type
         if "const" in check:
             print("extra line for const type after the specification of the type (store ...)")
@@ -63,55 +70,73 @@ class LLVMVisitor(ASTVisitor):
         check = check.replace("signed", "")
 
         temp = typeToLLVM(check)
-        self.LLVM += temp[0] + ", " + temp[1] + "\n"
+        instruction += temp[0] + ", " + temp[1] + "\n"
+        self.LLVM += instruction
 
     def visitDefinition(self, node):
+        """Transform definition node to LLVM"""
+        # Simply store the right side of the definition into the variable on the left, the rest is handled by declaration
         self.storeVariable(node.children[0].children[0], node.children[1])
 
     def visitAssignment(self, node):
+        """Transform definition node to LLVM"""
+        # Simply store the right side of the assignment into the variable on the left
         self.storeVariable(self.table.get_symbol(node.children[0].name), node.children[1])
 
     def visitUnaryOperation(self, node):
+        """Transform unary operation node to LLVM"""
+        # If the unary operation is performed on a variable, load it into a new temporary address
         if isinstance(node.children[0], IdentifierNode):
-            temp_node = self.table.get_symbol(node.children[0].name)
-            self.loadVariable(temp_node)
-        node.register = str(self.counter)
-
+            var = self.table.get_symbol(node.children[0].name)
+            self.loadVariable(var)
+        node.temp_address = str(self.counter)
+        # Get the LLVM equivalents of the type and operation
         temp = unaryOpToLLVM(node.operation)
         _type = typeToLLVM(node.children[0].type)
+        # If the unary operation is -
         if node.operation == '-':
             self.LLVM += '%' + self.counter.incr() + " = "
             if isinstance(node.children[0], IdentifierNode):
                 self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + \
-                             str(self.table.get_symbol(node.children[0].name).temp_adress) + "\n"
-            # elif isinstance(node.children[0], LiteralNode):
+                             str(self.table.get_symbol(node.children[0].name).temp_address) + "\n"
+            elif isinstance(node.children[0], LiteralNode):
                 # CONFUSED (weet niet wat eerste parameter is voor store variable)
-                # self.storeVariable(node, node.children[0])
+                self.storeVariable(node, node.children[0])
             elif isinstance(node.children[0], BinaryOperationNode) or isinstance(node.children[0], UnaryOperationNode):
-                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + str(node.children[0].register) + "\n"
+                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + str(node.children[0].temp_address) + "\n"
+        # If the operation is a prefix ++ or --
         elif node.operation == "++x" or node.operation == "--x":
-            node.register = str(self.counter)
+            # This nodes address should be the address the addition is stored in
+            node.temp_address = str(self.counter)
+            # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(node.children[0])
             bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "int", -1))            
             bin_op.type = node.children[0].type
-            bin_op.register = str(self.counter)
+            bin_op.temp_address = str(self.counter)
+            # Perform the binary operation
             self.performBinaryOp(bin_op)
+            # Store the result of the operation to the original variable
             self.storeVariable(node.children[0], bin_op)
         elif node.operation == "x++" or node.operation == "x--":
-            node.register = str(self.counter.counter - 1)
+            # This nodes address should be the address of the node before the addition
+            node.temp_address = str(self.counter.counter - 1)
+            # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(node.children[0])
             bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "int", -1))
             bin_op.type = node.children[0].type
-            bin_op.register = str(self.counter)
+            bin_op.temp_address = str(self.counter)
+            # Perform the binary operation
             self.performBinaryOp(bin_op)
+            # Store the result of the operation to the original variable
             self.storeVariable(node.children[0], bin_op)
+        # If the operation is !
         elif node.operation == "!":
-            # Don't need to check Literal Node because is solved in Optimisation Visitor
+            #TODO: Don't need to check Literal Node because is solved in Optimisation Visitor, but might want to implement this later
             temp_type = typeToLLVM(node.children[0].type)
             if isinstance(node.children[0], BinaryOperationNode):
-                self.LLVM += '%' + self.counter.incr() + " = icmp ne " + temp_type[0] + " %" + node.children[0].register + ", 0\n" \
+                self.LLVM += '%' + self.counter.incr() + " = icmp ne " + temp_type[0] + " %" + node.children[0].temp_address + ", 0\n" \
                              '%' + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true\n" \
                              '%' + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32\n"
                 if temp_type[0] == "i64":
@@ -121,20 +146,26 @@ class LLVMVisitor(ASTVisitor):
 
 
     def visitBinaryOperation(self, node):
+        """Convert binary operation node to LLVM"""
+        # For each child that is a variable, load the variable into a new temporary address
         for child in node.children:
             if isinstance(child, IdentifierNode):
                 temp_node = self.table.get_symbol(child.name)
                 self.loadVariable(temp_node)
+        # Perform the binary operation
         self.performBinaryOp(node)
 
     def performBinaryOp(self, bin_op):
-        bin_op.register = self.counter.incr()
-        self.LLVM += '%' + bin_op.register + " = " + BinaryOpToLLVM(bin_op.operation) + ' '
+        """Perform a binary operation given a binary operation node"""
+        # Store the result of the binary operation in a new address
+        bin_op.temp_address = self.counter.incr()
+        # Convert the children to LLVM, depending on their node types
+        children_LLVM = []
         for child in bin_op.children:
             if isinstance(child, LiteralNode):
-                self.LLVM += child.getValue()
+                children_LLVM.append(child.getValue())
             else:
-                self.LLVM += typeToLLVM(child.type)[0] + " %" + str(self.table.get_symbol(child.name).temp_adress)
-            if child != bin_op.children[-1]:
-                self.LLVM += ', '
-        self.LLVM += "\n"
+                children_LLVM.append(typeToLLVM(child.type)[0] + " %" + str(self.table.get_symbol(child.name).temp_address))
+        # Construct the LLVM instruction
+        self.LLVM += '%' + bin_op.temp_address + " = " + BinaryOpToLLVM(bin_op.operation) + ' '
+        self.LLVM += ", ".join(children_LLVM) + "\n"

@@ -78,8 +78,8 @@ class IdentifierNode(ASTNode):
         super().__init__(node_id)
         self.name = name
         self.type = None
-        self.original_adress = None
-        self.temp_adress = None
+        self.original_address = None
+        self.temp_address = None
 
     def __str__(self):
         return self.name
@@ -117,7 +117,7 @@ class UnaryOperationNode(ASTNode):
         super().__init__(node_id)
         self.operation = operation
         self.type = None
-        self.register = None
+        self.temp_address = None
 
     def __str__(self):
         return self.operation
@@ -130,7 +130,13 @@ class UnaryOperationNode(ASTNode):
         visitor.visitUnaryOperation(self)
 
     def fold(self, _type):
-        new_node = LiteralNode(eval(self.operation + str(self.children[0])), _type, self.id)
+        # Calculate the result of the unary operation in order to fold, handle ! separately as this has different syntax in python
+        if self.operation == '!':
+            result = int(self.children[0] == 0)
+        else:
+            result = eval(self.operation + str(self.children[0]))
+        # Replace this node by the calculated result
+        new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
 
@@ -140,7 +146,7 @@ class BinaryOperationNode(ASTNode):
         super().__init__(node_id)
         self.operation = operation
         self.type = None
-        self.register = None
+        self.temp_address = None
 
     def __str__(self):
         return self.operation
@@ -151,7 +157,10 @@ class BinaryOperationNode(ASTNode):
         visitor.visitBinaryOperation(self)
 
     def fold(self, _type):
-        new_node = LiteralNode(eval(str(self.children[0]) + self.operation + str(self.children[1])), _type, self.id)
+        # Calculate the result of the binary operation in order to fold
+        result = eval(str(self.children[0]) + self.operation + str(self.children[1]))
+        # Replace this node by the calculated result
+        new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
 

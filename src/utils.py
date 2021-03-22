@@ -61,10 +61,5 @@ class Counter:
     def curr(self):
         return self.counter
 
-    def print_and_incr(self):
-        temp = str(self.counter)
-        self.incr()
-        return temp
-
     def __str__(self):
         return str(self.counter)

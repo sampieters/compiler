@@ -68,6 +68,10 @@ class LiteralNode(ASTNode):
     def accept(self, visitor:ASTVisitor):
         visitor.visitLiteral(self)
 
+    def getValue(self):
+        #TODO: handle case for floats etc
+        return str(self.value)
+
 
 class IdentifierNode(ASTNode):
     def __init__(self, name, node_id):

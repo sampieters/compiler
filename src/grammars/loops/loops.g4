@@ -36,7 +36,7 @@ increment: (INCR | DECR) ID
 block_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR increment RBRACKET LCURLY loop_stat* RCURLY
           | WHILE LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY
           | IF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY (ELIF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY)* (ELSE loop_stat*)?
-          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE D_POINT stat)* (DEFAULT D_POINT stat)? (CASE D_POINT stat)* RCURLY
+          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE COLON stat)* (DEFAULT COLON stat)? (CASE COLON stat)* RCURLY
           ;
 
 type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?
@@ -83,7 +83,7 @@ RBRACKET :      ')' ;
 LCURLY :        '{' ;
 RCURLY :        '}' ;
 END_INSTR :     ';' ;
-D_POINT :       ':' ;
+COLON :       ':' ;
 DOT :           '.' ;
 REF :           '&' ;
 SQUOTE :        '\'' ;

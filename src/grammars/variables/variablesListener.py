@@ -1,228 +1,222 @@
 # Generated from src/grammars/variables/variables.g4 by ANTLR 4.9.1
 from antlr4 import *
-if __name__ is not None and "." in __name__:
-    from .variablesParser import variablesParser
-else:
-    from variablesParser import variablesParser
 
 # This class defines a complete listener for a parse tree produced by variablesParser.
 class variablesListener(ParseTreeListener):
 
     # Enter a parse tree produced by variablesParser#Program.
-    def enterProgram(self, ctx:variablesParser.ProgramContext):
+    def enterProgram(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#Program.
-    def exitProgram(self, ctx:variablesParser.ProgramContext):
+    def exitProgram(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#DefinitionStatement.
-    def enterDefinitionStatement(self, ctx:variablesParser.DefinitionStatementContext):
+    def enterDefinitionStatement(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#DefinitionStatement.
-    def exitDefinitionStatement(self, ctx:variablesParser.DefinitionStatementContext):
+    def exitDefinitionStatement(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#DeclarationStatement.
-    def enterDeclarationStatement(self, ctx:variablesParser.DeclarationStatementContext):
+    def enterDeclarationStatement(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#DeclarationStatement.
-    def exitDeclarationStatement(self, ctx:variablesParser.DeclarationStatementContext):
+    def exitDeclarationStatement(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#AssignmentStatement.
-    def enterAssignmentStatement(self, ctx:variablesParser.AssignmentStatementContext):
+    def enterAssignmentStatement(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#AssignmentStatement.
-    def exitAssignmentStatement(self, ctx:variablesParser.AssignmentStatementContext):
+    def exitAssignmentStatement(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#ExpressionStatement.
-    def enterExpressionStatement(self, ctx:variablesParser.ExpressionStatementContext):
+    def enterExpressionStatement(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#ExpressionStatement.
-    def exitExpressionStatement(self, ctx:variablesParser.ExpressionStatementContext):
+    def exitExpressionStatement(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#UnaryOp.
-    def enterUnaryOp(self, ctx:variablesParser.UnaryOpContext):
+    def enterUnaryOp(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#UnaryOp.
-    def exitUnaryOp(self, ctx:variablesParser.UnaryOpContext):
+    def exitUnaryOp(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#Identifier.
-    def enterIdentifier(self, ctx:variablesParser.IdentifierContext):
+    def enterIdentifier(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#Identifier.
-    def exitIdentifier(self, ctx:variablesParser.IdentifierContext):
+    def exitIdentifier(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#Brackets.
-    def enterBrackets(self, ctx:variablesParser.BracketsContext):
+    def enterBrackets(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#Brackets.
-    def exitBrackets(self, ctx:variablesParser.BracketsContext):
+    def exitBrackets(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#UnaryOpIdentifierSuffix.
-    def enterUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+    def enterUnaryOpIdentifierSuffix(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#UnaryOpIdentifierSuffix.
-    def exitUnaryOpIdentifierSuffix(self, ctx:variablesParser.UnaryOpIdentifierSuffixContext):
+    def exitUnaryOpIdentifierSuffix(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#UnaryOpPointer.
-    def enterUnaryOpPointer(self, ctx:variablesParser.UnaryOpPointerContext):
+    def enterUnaryOpPointer(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#UnaryOpPointer.
-    def exitUnaryOpPointer(self, ctx:variablesParser.UnaryOpPointerContext):
+    def exitUnaryOpPointer(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#LiteralExpr.
-    def enterLiteralExpr(self, ctx:variablesParser.LiteralExprContext):
+    def enterLiteralExpr(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#LiteralExpr.
-    def exitLiteralExpr(self, ctx:variablesParser.LiteralExprContext):
+    def exitLiteralExpr(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#UnaryOpBoolean.
-    def enterUnaryOpBoolean(self, ctx:variablesParser.UnaryOpBooleanContext):
+    def enterUnaryOpBoolean(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#UnaryOpBoolean.
-    def exitUnaryOpBoolean(self, ctx:variablesParser.UnaryOpBooleanContext):
+    def exitUnaryOpBoolean(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#UnaryOpIdentifierPrefix.
-    def enterUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
+    def enterUnaryOpIdentifierPrefix(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#UnaryOpIdentifierPrefix.
-    def exitUnaryOpIdentifierPrefix(self, ctx:variablesParser.UnaryOpIdentifierPrefixContext):
+    def exitUnaryOpIdentifierPrefix(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#BinaryOp.
-    def enterBinaryOp(self, ctx:variablesParser.BinaryOpContext):
+    def enterBinaryOp(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#BinaryOp.
-    def exitBinaryOp(self, ctx:variablesParser.BinaryOpContext):
+    def exitBinaryOp(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#BinaryOpBoolean.
-    def enterBinaryOpBoolean(self, ctx:variablesParser.BinaryOpBooleanContext):
+    def enterBinaryOpBoolean(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#BinaryOpBoolean.
-    def exitBinaryOpBoolean(self, ctx:variablesParser.BinaryOpBooleanContext):
+    def exitBinaryOpBoolean(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#type_specifier.
-    def enterType_specifier(self, ctx:variablesParser.Type_specifierContext):
+    def enterType_specifier(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#type_specifier.
-    def exitType_specifier(self, ctx:variablesParser.Type_specifierContext):
+    def exitType_specifier(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#Float.
-    def enterFloat(self, ctx:variablesParser.FloatContext):
+    def enterFloat(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#Float.
-    def exitFloat(self, ctx:variablesParser.FloatContext):
+    def exitFloat(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#Integer.
-    def enterInteger(self, ctx:variablesParser.IntegerContext):
+    def enterInteger(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#Integer.
-    def exitInteger(self, ctx:variablesParser.IntegerContext):
+    def exitInteger(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#String.
-    def enterString(self, ctx:variablesParser.StringContext):
+    def enterString(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#String.
-    def exitString(self, ctx:variablesParser.StringContext):
+    def exitString(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#Character.
-    def enterCharacter(self, ctx:variablesParser.CharacterContext):
+    def enterCharacter(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#Character.
-    def exitCharacter(self, ctx:variablesParser.CharacterContext):
+    def exitCharacter(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#declaration.
-    def enterDeclaration(self, ctx:variablesParser.DeclarationContext):
+    def enterDeclaration(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#declaration.
-    def exitDeclaration(self, ctx:variablesParser.DeclarationContext):
+    def exitDeclaration(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#definition.
-    def enterDefinition(self, ctx:variablesParser.DefinitionContext):
+    def enterDefinition(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#definition.
-    def exitDefinition(self, ctx:variablesParser.DefinitionContext):
+    def exitDefinition(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#assignment.
-    def enterAssignment(self, ctx:variablesParser.AssignmentContext):
+    def enterAssignment(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#assignment.
-    def exitAssignment(self, ctx:variablesParser.AssignmentContext):
+    def exitAssignment(self, ctx):
         pass
 
 
     # Enter a parse tree produced by variablesParser#PrintF.
-    def enterPrintF(self, ctx:variablesParser.PrintFContext):
+    def enterPrintF(self, ctx):
         pass
 
     # Exit a parse tree produced by variablesParser#PrintF.
-    def exitPrintF(self, ctx:variablesParser.PrintFContext):
+    def exitPrintF(self, ctx):
         pass
 
 
-
-del variablesParser

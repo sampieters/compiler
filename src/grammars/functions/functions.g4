@@ -24,15 +24,28 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | ID                                # Identifier
     ;
 
+
+function: declaration LBRACKET (declaration (COMMA declaration)*)? (definition (COMMA definition)*)? RBRACKET LCURLY block_func RCURLY
+        | VOID ID LBRACKET (declaration (COMMA declaration)*)? (definition (COMMA definition)*)? RBRACKET LCURLY block_func RCURLY
+        ;
+
+block_func: stat*
+          | RETURN expr END_INSTR
+          | RETURN END_INSTR
+
 loop_stat: stat
          | BREAK END_INSTR
          | CONTINUE END_INSTR
          ;
 
+switch_stat: stat
+           | BREAK END_INSTR
+           ;
+
 block_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET LCURLY loop_stat* RCURLY
           | WHILE LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY
           | IF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY (ELIF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY)* (ELSE loop_stat*)?
-          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE D_POINT stat)* (DEFAULT D_POINT stat)? (CASE D_POINT stat)* RCURLY
+          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE COLON switch_stat+)* (DEFAULT COLON switch_stat*)? (CASE COLON switch_stat+)* RCURLY
           ;
 
 type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?
@@ -79,8 +92,9 @@ RBRACKET :      ')' ;
 LCURLY :        '{' ;
 RCURLY :        '}' ;
 END_INSTR :     ';' ;
-D_POINT :       ':' ;
+COLON :         ':' ;
 DOT :           '.' ;
+COMMA :         ',' ;
 REF :           '&' ;
 SQUOTE :        '\'' ;
 ESC :           '\\' ;

@@ -1,4 +1,4 @@
-grammar loops;
+grammar C;
 
 prog: stat+                             # Program
     ;
@@ -20,7 +20,7 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | expr (LT|GT|LTE|GTE) expr         # BinaryOpBoolean  // Binary relational operation
     | expr (DEQ|NEQ) expr               # BinaryOpBoolean  // Binary equality operation
     | expr (AND|OR) expr                # BinaryOpBoolean  // Binary logical operation
-    | literal                           # LiteralExpr  
+    | literal                           # LiteralExpr
     | ID                                # Identifier
     ;
 
@@ -29,28 +29,24 @@ loop_stat: stat
          | CONTINUE END_INSTR
          ;
 
-switch_stat: stat
-           | BREAK END_INSTR
-           ;
-
 block_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET LCURLY loop_stat* RCURLY
           | WHILE LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY
           | IF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY (ELIF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY)* (ELSE loop_stat*)?
-          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE COLUMN switch_stat*)* (DEFAULT COLUMN switch_stat*)? (CASE COLUMN switch_stat*)* RCURLY
+          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE D_POINT stat)* (DEFAULT D_POINT stat)? (CASE D_POINT stat)* RCURLY
           ;
 
 type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?
               | CONST? (FLOAT_PREF|DOUBLE_PREF|LONG_DOUBLE_PREF) MUL?
-              ;   
+              ;
 
-literal: FLOAT   # Float 
+literal: FLOAT   # Float
        | INT     # Integer
        | STRING  # String
        | CHAR    # Character
        ;
 
 declaration: type_specifier ID
-           ;   
+           ;
 
 definition: declaration EQ expr
           ;
@@ -83,7 +79,7 @@ RBRACKET :      ')' ;
 LCURLY :        '{' ;
 RCURLY :        '}' ;
 END_INSTR :     ';' ;
-COLUMN :       ':' ;
+D_POINT :       ':' ;
 DOT :           '.' ;
 REF :           '&' ;
 SQUOTE :        '\'' ;
@@ -97,7 +93,7 @@ INT_PREF : 'int' ;
 SHORT_PREF : 'short' | 'short int' ;
 LONG_PREF : 'long' | 'long int' ;
 LONG_LONG_PREF: 'long long' | 'long long int' ;
-INT : [1-9][0-9]* | '0' ;         
+INT : [1-9][0-9]* | '0' ;
 
 FLOAT_PREF : 'float' ;
 DOUBLE_PREF : 'double' ;
@@ -119,7 +115,7 @@ CONTINUE : 'continue' ;
 SWITCH : 'switch' ;
 CASE : 'case' ;
 DEFAULT : 'default' ;
-      
+
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WS  :   [ \n\t\r]+ -> skip ; // toss out whitespace

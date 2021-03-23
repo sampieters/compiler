@@ -9,9 +9,9 @@ def unaryOpToLLVM(operation):
         "-": ["sub", "0"],
         "++": ["add", "1"],
         "--": ["add", "-1"],
-        "!": ["not", "moeilijk"]
+        "!": ["not", ""]
     }
-    return LLVMType.get(operation, "Non valid operation: " + operation)
+    return LLVMType.get(operation, "Invalid operation: " + operation)
 
 def BinaryOpToLLVM(operation):
     LLVMType = {
@@ -21,7 +21,7 @@ def BinaryOpToLLVM(operation):
         "/": "mod",
         "%": ""
     }
-    return LLVMType.get(operation, "Non valid operation: " + operation)
+    return LLVMType.get(operation, "Invalid operation: " + operation)
 
 def typeToLLVM(_type):
     LLVMType = {
@@ -34,7 +34,7 @@ def typeToLLVM(_type):
         "long double": ["alloca x86_fp80", "align 16"],
         "char": ["alloca i8", "align 1"]
     }
-    return LLVMType.get(_type, "Non valid type: " + _type)
+    return LLVMType.get(_type, "Invalid type: " + _type)
 
 
 def getBinaryType(type_1, type_2):

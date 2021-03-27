@@ -497,33 +497,6 @@ class CParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
-    class FunctionDeclarationContext(StatContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a CParser.StatContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def function_declaration(self):
-            return self.getTypedRuleContext(CParser.Function_declarationContext,0)
-
-        def END_INSTR(self):
-            return self.getToken(CParser.END_INSTR, 0)
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterFunctionDeclaration" ):
-                listener.enterFunctionDeclaration(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitFunctionDeclaration" ):
-                listener.exitFunctionDeclaration(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitFunctionDeclaration" ):
-                return visitor.visitFunctionDeclaration(self)
-            else:
-                return visitor.visitChildren(self)
-
-
     class SwitchStatementContext(StatContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a CParser.StatContext
@@ -574,6 +547,31 @@ class CParser ( Parser ):
         def accept(self, visitor:ParseTreeVisitor):
             if hasattr( visitor, "visitDefinitionStatement" ):
                 return visitor.visitDefinitionStatement(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class FunctionDefinitionStatementContext(StatContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a CParser.StatContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def function_definition(self):
+            return self.getTypedRuleContext(CParser.Function_definitionContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterFunctionDefinitionStatement" ):
+                listener.enterFunctionDefinitionStatement(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitFunctionDefinitionStatement" ):
+                listener.exitFunctionDefinitionStatement(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFunctionDefinitionStatement" ):
+                return visitor.visitFunctionDefinitionStatement(self)
             else:
                 return visitor.visitChildren(self)
 
@@ -632,31 +630,6 @@ class CParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
-    class FunctionDefinitionContext(StatContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a CParser.StatContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def function_definition(self):
-            return self.getTypedRuleContext(CParser.Function_definitionContext,0)
-
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterFunctionDefinition" ):
-                listener.enterFunctionDefinition(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitFunctionDefinition" ):
-                listener.exitFunctionDefinition(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitFunctionDefinition" ):
-                return visitor.visitFunctionDefinition(self)
-            else:
-                return visitor.visitChildren(self)
-
-
     class ForStatementContext(StatContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a CParser.StatContext
@@ -680,6 +653,33 @@ class CParser ( Parser ):
         def accept(self, visitor:ParseTreeVisitor):
             if hasattr( visitor, "visitForStatement" ):
                 return visitor.visitForStatement(self)
+            else:
+                return visitor.visitChildren(self)
+
+
+    class FunctionDeclarationStatementContext(StatContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a CParser.StatContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def function_declaration(self):
+            return self.getTypedRuleContext(CParser.Function_declarationContext,0)
+
+        def END_INSTR(self):
+            return self.getToken(CParser.END_INSTR, 0)
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterFunctionDeclarationStatement" ):
+                listener.enterFunctionDeclarationStatement(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitFunctionDeclarationStatement" ):
+                listener.exitFunctionDeclarationStatement(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitFunctionDeclarationStatement" ):
+                return visitor.visitFunctionDeclarationStatement(self)
             else:
                 return visitor.visitChildren(self)
 
@@ -837,7 +837,7 @@ class CParser ( Parser ):
                 pass
 
             elif la_ == 11:
-                localctx = CParser.FunctionDeclarationContext(self, localctx)
+                localctx = CParser.FunctionDeclarationStatementContext(self, localctx)
                 self.enterOuterAlt(localctx, 11)
                 self.state = 77
                 self.function_declaration()
@@ -846,7 +846,7 @@ class CParser ( Parser ):
                 pass
 
             elif la_ == 12:
-                localctx = CParser.FunctionDefinitionContext(self, localctx)
+                localctx = CParser.FunctionDefinitionStatementContext(self, localctx)
                 self.enterOuterAlt(localctx, 12)
                 self.state = 80
                 self.function_definition()

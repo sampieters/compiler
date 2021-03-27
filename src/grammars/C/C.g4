@@ -13,8 +13,8 @@ stat: definition END_INSTR              # DefinitionStatement
     | while_stat END_INSTR              # WhileStatement
     | if_stat END_INSTR                 # IfStatement
     | switch_stat END_INSTR             # SwitchStatement
-    | function_declaration END_INSTR    # FunctionDeclaration
-    | function_definition               # FunctionDefinition
+    | function_declaration END_INSTR    # FunctionDeclarationStatement
+    | function_definition               # FunctionDefinitionStatement
     | END_INSTR                         # EmptyStatement
     ;
 

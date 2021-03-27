@@ -1,5 +1,3 @@
-from grammars.variables.variablesParser import variablesParser
-from grammars.variables.variablesVisitor import variablesVisitor
 from SymbolTable import SymbolTable
 from ASTNode import *
 from utils import *
@@ -9,10 +7,6 @@ from utils import *
 class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
-
-    # Visit a parse tree produced by variablesParser#Program.
-    def visitProgram(self, ctx:variablesParser.ProgramContext):
-        self.visitChildren(ctx)
 
     def visitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
@@ -66,3 +60,5 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def visitDeclaration(self, node):
         pass
+
+    # TODO: make sure break continue are only used in loops, function declarations/definitions are only used in global scope

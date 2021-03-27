@@ -1,5 +1,3 @@
-from grammars.variables.variablesParser import variablesParser
-from grammars.variables.variablesVisitor import variablesVisitor
 from ASTVisitor import ASTVisitor
 from ASTNode import *
 from utils import *

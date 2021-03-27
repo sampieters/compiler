@@ -25,12 +25,12 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     ;
 
 loop_stat: stat
-         | BREAK END_INSTR
-         | CONTINUE END_INSTR
+         | BREAK END_INSTR              # BreakStatement
+         | CONTINUE END_INSTR           # ContinueStatement
          ;
 
 switch_stat: stat
-           | BREAK END_INSTR
+           | BREAK END_INSTR            # BreakStatement
            ;
 
 block_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET LCURLY loop_stat* RCURLY

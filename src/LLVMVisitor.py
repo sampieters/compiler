@@ -6,7 +6,7 @@ from SymbolTable import *
 
 class LLVMVisitor(ASTVisitor):
     def __init__(self):
-        self.LLVM = ""
+        self.LLVM = []
         self.table = SymbolTable()
         self.counter = Counter()
 
@@ -34,11 +34,11 @@ class LLVMVisitor(ASTVisitor):
         # If the node is a variable, get the node from the symbol table and store into the original address
         if isinstance(node, IdentifierNode):
             node = self.table.get_symbol(str(node))
-            instruction += ", " + _type[0] + "* " + node.original_address + ", " + _type[1] + "\n"
+            instruction += ", " + _type[0] + "* " + node.original_address + ", " + _type[1]
         # Otherwise, store into the temporary address of the node
         else:
-            instruction += ", " + _type[0] + "* " + node.temp_address + ", " + _type[1] + "\n"
-        self.LLVM += instruction
+            instruction += ", " + _type[0] + "* " + node.temp_address + ", " + _type[1]
+        self.LLVM.append(instruction)
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
@@ -49,8 +49,8 @@ class LLVMVisitor(ASTVisitor):
         load_addr = self.counter.incr()
         node.temp_address = load_addr
         instruction = '%' + load_addr + " = load " + _type[0] + ", " + _type[0] + "* " + \
-                      node.original_address + ", " + _type[1] + "\n"
-        self.LLVM += instruction
+                      node.original_address + ", " + _type[1]
+        self.LLVM.append(instruction)
 
 
     def visitDeclaration(self, node):
@@ -70,8 +70,8 @@ class LLVMVisitor(ASTVisitor):
         check = check.replace("signed", "")
 
         temp = typeToLLVM(check)
-        instruction += temp[0] + ", " + temp[1] + "\n"
-        self.LLVM += instruction
+        instruction += temp[0] + ", " + temp[1]
+        self.LLVM.append(instruction)
 
     def visitDefinition(self, node):
         """Transform definition node to LLVM"""
@@ -95,15 +95,16 @@ class LLVMVisitor(ASTVisitor):
         _type = typeToLLVM(node.children[0].type)
         # If the unary operation is -
         if node.operation == '-':
-            self.LLVM += '%' + self.counter.incr() + " = "
+            instruction = '%' + self.counter.incr() + " = "
             if isinstance(node.children[0], IdentifierNode):
-                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + \
-                             str(self.table.get_symbol(node.children[0].name).temp_address) + "\n"
+                instruction += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + \
+                             str(self.table.get_symbol(node.children[0].name).temp_address)
             elif isinstance(node.children[0], LiteralNode):
                 # CONFUSED (weet niet wat eerste parameter is voor store variable)
                 self.storeVariable(node, node.children[0])
             elif isinstance(node.children[0], BinaryOperationNode) or isinstance(node.children[0], UnaryOperationNode):
-                self.LLVM += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + str(node.children[0].temp_address) + "\n"
+                instruction += temp[0] + ' ' + _type[0] + " " + temp[1] + ", %" + str(node.children[0].temp_address)
+            self.LLVM.append(instruction)
         # If the operation is a prefix ++ or --
         elif node.operation == "++x" or node.operation == "--x":
             # This nodes address should be the address the addition is stored in
@@ -136,11 +137,12 @@ class LLVMVisitor(ASTVisitor):
             #TODO: Don't need to check Literal Node because is solved in Optimisation Visitor, but might want to implement this later
             temp_type = typeToLLVM(node.children[0].type)
             if isinstance(node.children[0], BinaryOperationNode):
-                self.LLVM += '%' + self.counter.incr() + " = icmp ne " + temp_type[0] + " %" + node.children[0].temp_address + ", 0\n" \
-                             '%' + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true\n" \
-                             '%' + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32\n"
+                # TODO: split up in separate functions?
+                self.LLVM.append('%' + self.counter.incr() + " = icmp ne " + temp_type[0] + " %" + node.children[0].temp_address + ", 0")
+                self.LLVM.append('%' + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
+                self.LLVM.append('%' + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32")
                 if temp_type[0] == "i64":
-                    '%' + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64\n"
+                    self.LLVM.append('%' + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64")
                 #TODO: Nog iets doen voor i32 om te zetten naar type
 
 
@@ -167,5 +169,5 @@ class LLVMVisitor(ASTVisitor):
             else:
                 children_LLVM.append(typeToLLVM(child.type)[0] + " %" + str(self.table.get_symbol(child.name).temp_address))
         # Construct the LLVM instruction
-        self.LLVM += '%' + bin_op.temp_address + " = " + BinaryOpToLLVM(bin_op.operation) + ' '
-        self.LLVM += ", ".join(children_LLVM) + "\n"
+        instruction = '%' + bin_op.temp_address + " = " + BinaryOpToLLVM(bin_op.operation) + ' ' + ", ".join(children_LLVM) + "\n"
+        self.LLVM.append(instruction)

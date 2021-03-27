@@ -1,12 +1,21 @@
 grammar C;
 
-prog: stat+                             # Program
+prog: INCLUDE_IO? (stat | scope)+                 # Program
     ;
 
 stat: definition END_INSTR              # DefinitionStatement
     | declaration END_INSTR             # DeclarationStatement
     | assignment END_INSTR              # AssignmentStatement
     | expr END_INSTR                    # ExpressionStatement       // Semi-colon separated statements
+    | BREAK END_INSTR                   # BreakStatement
+    | CONTINUE END_INSTR                # ContinueStatement
+    | for_stat END_INSTR                # ForStatement
+    | while_stat END_INSTR              # WhileStatement
+    | if_stat END_INSTR                 # IfStatement
+    | switch_stat END_INSTR             # SwitchStatement
+    | function_declaration END_INSTR    # FunctionDeclaration
+    | function_definition               # FunctionDefinition
+    | END_INSTR                         # EmptyStatement
     ;
 
 expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
@@ -22,18 +31,29 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | expr (AND|OR) expr                # BinaryOpBoolean  // Binary logical operation
     | literal                           # LiteralExpr
     | ID                                # Identifier
+    | function_call                     # FunctionCall
     ;
 
-loop_stat: stat
-         | BREAK END_INSTR
-         | CONTINUE END_INSTR
+scope: LCURLY stat* RCURLY
+     ;
+
+for_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET scope
+        ;
+
+while_stat: WHILE LBRACKET expr RBRACKET scope
+          ;
+
+if_stat: IF LBRACKET expr RBRACKET scope elif_stat* else_stat?
+       ;
+
+elif_stat: ELIF LBRACKET expr RBRACKET scope
          ;
 
-block_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET LCURLY loop_stat* RCURLY
-          | WHILE LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY
-          | IF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY (ELIF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY)* (ELSE loop_stat*)?
-          | SWITCH LBRACKET expr RBRACKET LCURLY (CASE D_POINT stat)* (DEFAULT D_POINT stat)? (CASE D_POINT stat)* RCURLY
-          ;
+else_stat: ELSE scope
+         ;
+
+switch_stat: SWITCH LBRACKET expr RBRACKET LCURLY (CASE COLON stat)* (DEFAULT COLON stat)? (CASE COLON stat)* RCURLY
+           ;
 
 type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?
               | CONST? (FLOAT_PREF|DOUBLE_PREF|LONG_DOUBLE_PREF) MUL?
@@ -48,14 +68,27 @@ literal: FLOAT   # Float
 declaration: type_specifier ID
            ;
 
+function_declaration: ID LBRACKET arg_list RBRACKET
+                    ;
+
 definition: declaration EQ expr
           ;
+
+function_definition: function_declaration scope
+                   ; 
 
 assignment: ID EQ expr
           ;
 
-function_call: PRINTF LBRACKET expr RBRACKET     # PrintF
+function_call: ID LBRACKET call_list RBRACKET
+             | PRINTF LBRACKET expr RBRACKET
              ;
+
+arg_list: LBRACKET ((type_specifier ID COMMA)* type_specifier ID)? RBRACKET
+        ;
+
+call_list: LBRACKET ((expr COMMA)* expr)? RBRACKET
+         ;
 
 MUL :           '*' ; // assigns token name to '*' used above in grammar
 DIV :           '/' ;
@@ -79,11 +112,12 @@ RBRACKET :      ')' ;
 LCURLY :        '{' ;
 RCURLY :        '}' ;
 END_INSTR :     ';' ;
-D_POINT :       ':' ;
+COLON :       ':' ;
 DOT :           '.' ;
 REF :           '&' ;
 SQUOTE :        '\'' ;
 ESC :           '\\' ;
+COMMA :         ',' ;
 
 CONST :         'const' ;
 SIGNED :        'signed' ;
@@ -115,6 +149,7 @@ CONTINUE : 'continue' ;
 SWITCH : 'switch' ;
 CASE : 'case' ;
 DEFAULT : 'default' ;
+INCLUDE_IO : '#include <stdio.h>' ;
 
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 

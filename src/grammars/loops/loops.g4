@@ -33,9 +33,9 @@ switch_stat: stat
            | BREAK END_INSTR            # BreakStatement
            ;
 
-block_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET LCURLY loop_stat* RCURLY
+block_stat: FOR LBRACKET (efinition | assignment) END_INSTR expr END_INSTR expr RBRACKET LCURLY loop_stat* RCURLY
           | WHILE LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY
-          | IF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY (ELIF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY)* (ELSE loop_stat*)?
+          | IF LBRACKET expdr RBRACKET LCURLY loop_stat* RCURLY (ELIF LBRACKET expr RBRACKET LCURLY loop_stat* RCURLY)* (ELSE loop_stat*)?
           | SWITCH LBRACKET expr RBRACKET LCURLY (CASE COLON switch_stat+)* (DEFAULT COLON switch_stat*)? (CASE COLON switch_stat+)* RCURLY
           ;
 

@@ -19,6 +19,9 @@ class ASTVisitor:
         # print("Visiting Definition Node")
         pass
 
+    def visitFunctionDefinition(self, node):
+        pass
+
     def visitUnaryOperation(self, node):
         # print("Visiting Unary Operation Node")
         pass
@@ -33,4 +36,34 @@ class ASTVisitor:
 
     def visitDeclaration(self, node):
         # print("Visiting Declaration Node")
+        pass
+
+    def visitFunctionDeclaration(self, node):
+        pass
+
+    def visitScope(self, node):
+        pass
+
+    def visitWhile(self, node):
+        pass
+
+    def visitBranch(self, node):
+        pass
+
+    def visitIf(self, node):
+        pass
+
+    def visitElif(self, node):
+        pass
+
+    def visitElse(self, node):
+        pass
+
+    def visitBreak(self, node):
+        pass
+
+    def visitContinue(self, node):
+        pass
+
+    def visitFunctionCall(self, node):
         pass

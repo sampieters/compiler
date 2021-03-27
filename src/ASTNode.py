@@ -55,6 +55,18 @@ class ProgNode(ASTNode):
             child.accept(visitor)
         visitor.visitProg(self)
 
+class ScopeNode(ASTNode):
+    def __init__(self, node_id=0):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'scope'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitScope(self)
+
 
 class LiteralNode(ASTNode):
     def __init__(self, value, _type, node_id):
@@ -110,6 +122,20 @@ class DefinitionNode(ASTNode):
         for child in self.children:
             child.accept(visitor)
         visitor.visitDefinition(self)
+
+
+class FunctionDefinitionNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+        self.type = None
+
+    def __str__(self):
+        return 'define_func'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitFunctionDefinition(self)
 
 
 class UnaryOperationNode(ASTNode):
@@ -191,3 +217,108 @@ class DeclarationNode(ASTNode):
         for child in self.children:
             child.accept(visitor)
         visitor.visitDeclaration(self)
+
+class FunctionDeclarationNode(ASTNode):
+    def __init__(self, node_id, arg_types, return_type):
+        super().__init__(node_id)
+        self.arg_types = arg_types
+        self.return_type = return_type
+
+    def __str__(self):
+        return 'declare_func'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitFunctionDeclaration(self)
+
+class WhileNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'while'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitWhile(self)
+
+class BranchNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'branch'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitBranch(self)
+
+class IfNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'if'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitIf(self)
+
+class ElifNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'elif'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitElif(self)
+
+class ElseNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'else'
+
+    def accept(self, visitor:ASTVisitor):
+        for child in self.children:
+            child.accept(visitor)
+        visitor.visitElse(self)
+
+class BreakNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'break'
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.visitBreak(self)
+
+class ContinueNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'continue'
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.visitContinue(self)
+
+class FunctionCallNode(ASTNode):
+    def __init__(self, node_id, arg_types):
+        super().__init__(node_id)
+        self.arg_types = arg_types
+
+    def __str__(self):
+        return 'func_call'
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.visitFunctionCall(self)

@@ -24,6 +24,12 @@ def BinaryOpToLLVM(operation):
     return LLVMType.get(operation, "Invalid operation: " + operation)
 
 def typeToLLVM(_type):
+    _type = _type.replace("const", "")
+    _type = _type.replace("unsigned", "")
+    _type = _type.replace("signed", "")
+    extra = _type.count('*')
+    _type = _type.replace("*", "")
+
     LLVMType = {
         "int": ["i32", "align 4"],
         "short int": ["i16", "align 2"],
@@ -34,8 +40,10 @@ def typeToLLVM(_type):
         "long double": ["alloca x86_fp80", "align 16"],
         "char": ["alloca i8", "align 1"]
     }
-    return LLVMType.get(_type, "Invalid type: " + _type)
 
+    to_return = LLVMType.get(_type, "Invalid type: " + _type)
+    to_return[0] += extra * '*'
+    return to_return
 
 def getBinaryType(type_1, type_2):
     temp = max(CONVERSION_HIERARCHY[type_1], CONVERSION_HIERARCHY[type_2])

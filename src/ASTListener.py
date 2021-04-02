@@ -157,3 +157,71 @@ class ASTListener(CListener):
     # Exit a parse tree produced by variablesParser#Identifier.
     def exitIdentifier(self, ctx:CParser.IdentifierContext):
         self.curr_node = self.curr_node.parent
+
+    # Enter a parse tree produced by CParser#scope.
+    def enterScope(self, ctx:CParser.ScopeContext):
+        self.curr_node.add_child(ScopeNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    # Exit a parse tree produced by CParser#scope.
+    def exitScope(self, ctx:CParser.ScopeContext):
+        self.curr_node = self.curr_node.parent
+
+    # Enter a parse tree produced by CParser#IfStatement.
+    def enterIfStatement(self, ctx:CParser.IfStatementContext):
+        self.curr_node.add_child(BranchNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+        self.curr_node.add_child(IfNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    # Exit a parse tree produced by CParser#IfStatement.
+    def exitIfStatement(self, ctx:CParser.IfStatementContext):
+        self.curr_node = self.curr_node.parent.parent    
+
+    def enterElif_stat(self, ctx:CParser.Elif_statContext):
+        self.curr_node.parent.add_child(ElifNode(self.counter.incr()))
+        self.curr_node = self.curr_node.parent.last_child()
+
+    # Exit a parse tree produced by CParser#elif_stat.
+    def exitElif_stat(self, ctx:CParser.Elif_statContext):
+        pass
+
+    # Enter a parse tree produced by CParser#else_stat.
+    def enterElse_stat(self, ctx:CParser.Else_statContext):
+        self.curr_node.parent.add_child(ElseNode(self.counter.incr()))
+        self.curr_node = self.curr_node.parent.last_child()
+
+    # Exit a parse tree produced by CParser#else_stat.
+    def exitElse_stat(self, ctx:CParser.Else_statContext):
+        pass
+
+    # Enter a parse tree produced by CParser#WhileStatement.
+    def enterWhileStatement(self, ctx:CParser.WhileStatementContext):
+        self.curr_node.add_child(WhileNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    # Exit a parse tree produced by CParser#WhileStatement.
+    def exitWhileStatement(self, ctx:CParser.WhileStatementContext):
+        self.curr_node = self.curr_node.parent
+
+    # Enter a parse tree produced by CParser#ForStatement.
+    def enterForStatement(self, ctx:CParser.ForStatementContext):
+        self.curr_node.add_child(WhileNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    # Exit a parse tree produced by CParser#ForStatement.
+    def exitForStatement(self, ctx:CParser.ForStatementContext):
+        node = self.curr_node
+        self.curr_node.parent.children.pop()
+        self.curr_node.parent.add_child(node.children.pop(0))
+        self.curr_node.parent.add_child(node)
+        node.last_child().add_child(node.children.pop(1))
+        self.curr_node = self.curr_node.parent       
+
+    # Enter a parse tree produced by CParser#SwitchStatement.
+    def enterSwitchStatement(self, ctx:CParser.SwitchStatementContext):
+        pass
+
+    # Exit a parse tree produced by CParser#SwitchStatement.
+    def exitSwitchStatement(self, ctx:CParser.SwitchStatementContext):
+        pass

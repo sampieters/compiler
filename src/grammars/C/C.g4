@@ -9,12 +9,14 @@ stat: definition END_INSTR              # DefinitionStatement
     | expr END_INSTR                    # ExpressionStatement       // Semi-colon separated statements
     | BREAK END_INSTR                   # BreakStatement
     | CONTINUE END_INSTR                # ContinueStatement
-    | for_stat END_INSTR                # ForStatement
-    | while_stat END_INSTR              # WhileStatement
-    | if_stat END_INSTR                 # IfStatement
-    | switch_stat END_INSTR             # SwitchStatement
+    | for_stat                          # ForStatement
+    | while_stat                        # WhileStatement
+    | if_stat                           # IfStatement
+    | switch_stat                       # SwitchStatement
     | function_declaration END_INSTR    # FunctionDeclarationStatement
     | function_definition               # FunctionDefinitionStatement
+    | RETURN expr END_INSTR             # ReturnStatement
+    | RETURN END_INSTR                  # EmptyReturnStatement
     | END_INSTR                         # EmptyStatement
     ;
 
@@ -149,6 +151,7 @@ CONTINUE : 'continue' ;
 SWITCH : 'switch' ;
 CASE : 'case' ;
 DEFAULT : 'default' ;
+RETURN : 'return' ;
 INCLUDE_IO : '#include <stdio.h>' ;
 
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;

@@ -52,61 +52,46 @@ class LLVMVisitor(ASTVisitor):
                       node.original_address + ", " + _type[1]
         self.LLVM.append(instruction)
 
-    def typeToRightType(self, node, type1, type2):
-        # TODO: type1 or 2 is inside node so one paramter can go
-        #
-        # How it works:
-        #
+    def typeToRightType(self, node, type2):
         # type1 identifier_1 = something;
         # type2 identifier_2 = identifier_1; <-- This in this function is converted to llvm
-        self.loadVariable(node)
         # node parameter needs to have type 1 in it
+        type1 = node.type
+        instruction = ""
         if type1 == "int":
             if type2 == "float":
-                #      "%4 STOND HIER                                counter of load
-                text = "%" + self.counter.incr + " = sitofp i32 %" + str(self.counter-1) + " to float \
-                        store float %" + str(self.counter) + ", float* %2, align 4"
+                instruction = "%" + self.counter.incr() + " = sitofp i32 %" + str(self.counter.counter-2) + " to float"
             elif type2 == "double":
-                text = "%" + self.counter.incr + " = sitofp i32 %" + str(self.counter-1) + "3 to double \
-                       store double %" + str(self.counter) + ", double* %2, align 8"
+                instruction = "%" + self.counter.incr() + " = sitofp i32 %" + str(self.counter.counter-2) + " to double"
             elif type2 == "char":
-                text = "%" + self.counter.incr + " = trunc i32 %" + str(self.counter-1) + " to i8 \
-                        store i8 %" + str(self.counter) + ", i8* %2, align 1"
+                instruction = "%" + self.counter.incr() + " = trunc i32 %" + str(self.counter.counter-2) + " to i8"
 
         elif type1 == "char":
             if type2 == "int":
-                text = "%" + self.counter.incr + " = sext i8 %" + str(self.counter-1) + " to i32 \
-                        store i32 %" + str(self.counter) + ", i32* %2, align 4"
+                instruction = "%" + self.counter.incr() + " = sext i8 %" + str(self.counter.counter-2) + " to i32"
             elif type2 == "float":
-                text = "%" + self.counter.incr + " = sitofp i8 %" + str(self.counter-1) + " to float \
-                        store float %" + str(self.counter) + ", float* %2, align 4"
+                instruction = "%" + self.counter.incr() + " = sitofp i8 %" + str(self.counter.counter-2) + " to float"
             elif type2 == "double":
-                text = "%" + self.counter.incr + " = sitofp i8 %" + str(self.counter-1) + " to double \
-                        store double %" + str(self.counter) + ", double* %2, align 8"
+                instruction = "%" + self.counter.incr() + " = sitofp i8 %" + str(self.counter.counter-2) + " to double"
 
         elif type1 == "float":
             if type2 == "int":
-                text = "%" + self.counter.incr + " = fptosi float %" + str(self.counter-1) + " to i32 \
-                        store i32 %" + str(self.counter) + ", i32* %2, align 4"
+                instruction = "%" + self.counter.incr() + " = fptosi float %" + str(self.counter.counter-2) + " to i32"
             elif type2 == "char":
-                text = "%" + self.counter.incr + " = fptosi float %" + str(self.counter-1) + " to i8 \
-                        store i8 %" + str(self.counter) + ", i8* %2, align 1"
+                instruction = "%" + self.counter.incr() + " = fptosi float %" + str(self.counter.counter-2) + " to i8"
             elif type2 == "double":
-                text = "%" + self.counter.incr + " = fpext float %" + str(self.counter-1) + " to double \
-                        store double %" + str(self.counter) + ", double* %2, align 8"
+                instruction = "%" + self.counter.incr() + " = fpext float %" + str(self.counter.counter-2) + " to double"
 
         elif type1 == "double":
             if type2 == "int":
-                text = "%" + self.counter.incr + " = fptosi double %" + str(self.counter-1) + " to i32 \
-                        store i32 %" + str(self.counter) + ", i32* %2, align 4"
+                instruction = "%" + self.counter.incr() + " = fptosi double %" + str(self.counter.counter-2) + " to i32"
             elif type2 == "char":
-                text = "%" + self.counter.incr + " = fptosi double %" + str(self.counter-1) + " to i8 \
-                        store i8 %" + str(self.counter) + ", i8* %2, align 1"
+                instruction = "%" + self.counter.incr() + " = fptosi double %" + str(self.counter.counter-2) + " to i8"
             elif type2 == "float":
-                text = "%" + self.counter.incr + " = fptrunc double %" + str(self.counter-1) + " to float \
-                        store float %" + str(self.counter) + ", float* %2, align 4"
-        # TODO: node van identifier nog gelijkstellen aan nieuwe node
-        self.storeVariable()
+                instruction = "%" + self.counter.incr() + " = fptrunc double %" + str(self.counter.counter-2) + " to float"
+        node.temp_address = str(self.counter.counter-1)
+        if instruction:
+            self.LLVM.append(instruction)
 
     def visitDeclaration(self, node):
         """Transform declaration node to LLVM"""
@@ -126,11 +111,13 @@ class LLVMVisitor(ASTVisitor):
     def visitDefinition(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the definition into the variable on the left, the rest is handled by declaration
+        self.typeToRightType(node.children[0].children[0], node.children[1].type)
         self.storeVariable(node.children[0].children[0], node.children[1])
 
     def visitAssignment(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the assignment into the variable on the left
+        self.typeToRightType(self.table.get_symbol(node.children[0].name), node.children[1].type)
         self.storeVariable(self.table.get_symbol(node.children[0].name), node.children[1])
 
     def visitUnaryOperation(self, node):

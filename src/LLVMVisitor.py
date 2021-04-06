@@ -72,6 +72,8 @@ class LLVMVisitor(ASTVisitor):
             elif type2 == "char":
                 text = "%" + self.counter.incr + " = trunc i32 %" + str(self.counter-1) + " to i8 \
                         store i8 %" + str(self.counter) + ", i8* %2, align 1"
+            elif type2 == "long int":
+                instruction = "%" self.counter.incr() + " = sext i32 %" + str(self.counter.counter-1) + " to i64" 
 
         elif type1 == "char":
             if type2 == "int":
@@ -105,6 +107,11 @@ class LLVMVisitor(ASTVisitor):
             elif type2 == "float":
                 text = "%" + self.counter.incr + " = fptrunc double %" + str(self.counter-1) + " to float \
                         store float %" + str(self.counter) + ", float* %2, align 4"
+
+        elif type1.endswith("*"):
+            self.typeToRightType(node, type1, "long int")
+            instruction = "%" + self.counter.incr() + " = inttoptr i64" + str(self.counter.counter-1) + " to " + type1
+        
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
         self.storeVariable()
 

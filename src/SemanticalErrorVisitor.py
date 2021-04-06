@@ -34,6 +34,8 @@ class SemanticalErrorVisitor(ASTVisitor):
     def visitUnaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
             self.visitUnaryOpBoolean(node)
+        elif node.operation in POINTER_OPS:
+            self.visitUnaryOpPointer(node)
         else:
             self.visitUnaryOp(node)
 
@@ -42,6 +44,15 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def visitUnaryOpBoolean(self, node):
         node.type = "int"
+
+    def visitUnaryOpPointer(self, node):
+        if node.operation == "*":
+            if not node.children[0].type.endswith("*"):
+                raise Exception(f"Error: Indirection requires pointer operand ('{node.children[0].type}' invalid)")
+            else:
+                node.type = node.children[0].type[:-1]
+        elif node.operation == "&":
+            node.type = "long int"
 
     def visitBinaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:

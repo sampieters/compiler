@@ -2,6 +2,7 @@ CONVERSION_HIERARCHY = {"char": 0, "int": 1, "unsigned int": 2, "long": 3, "unsi
                         "float": 7, "double": 8, "long double": 9}
 
 BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
+POINTER_OPS = {"*", "&"}
 
 def unaryOpToLLVM(operation):
     LLVMType = {

@@ -27,7 +27,9 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
     AST = listener.curr_node
-    AST.to_dot("AST")
+
+    # visitor = ASTVisitor()
+    # visitor.visit(AST)
 
     visitor_err = SemanticalErrorVisitor()
     visitor_err.visit(AST)
@@ -37,5 +39,7 @@ if __name__ == '__main__':
 
     visitor_llvm = LLVMVisitor()
     visitor_llvm.visit(AST)
+
     print("\n".join(visitor_llvm.LLVM))
-    AST.to_dot("AST_OPT")
+    
+    AST.to_dot("AST")

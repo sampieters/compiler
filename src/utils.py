@@ -1,5 +1,5 @@
-CONVERSION_HIERARCHY = {"char": 0, "int": 1, "unsigned int": 2, "long": 3, "unsigned long": 4, "long long": 5, "unsigned long long": 6,
-                        "float": 7, "double": 8, "long double": 9}
+CONVERSION_HIERARCHY = {"i8": 0, "i16": 1, "i32": 2, "i64": 3, "float": 5, "double": 6, "x86_fp80": 7}
+ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
 
 BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
 POINTER_OPS = {"*", "&"}
@@ -24,27 +24,69 @@ def BinaryOpToLLVM(operation):
     }
     return LLVMType.get(operation, "Invalid operation: " + operation)
 
-def typeToLLVM(_type):
-    _type = _type.replace("const", "")
-    _type = _type.replace("unsigned", "")
-    _type = _type.replace("signed", "")
-    extra = _type.count('*')
+def getTypeLLVM(_type):
+    ret_val = ["", []]
+
+    for keyword in ["const", "unsigned", "signed"]:
+        if keyword in _type:
+            ret_val[1].append(keyword)
+            _type = _type.replace(keyword, "")
+        
+    extra = _type.count('*') * '*'
     _type = _type.replace("*", "")
+    _type = _type.replace(" ", "")
 
     LLVMType = {
-        "int": ["i32", "align 4"],
-        "short int": ["i16", "align 2"],
-        "long int": ["i64", "align 8"],
-        "long long int": ["i64", "align 8"],
-        "float": ["float", "align 4"],
-        "double": ["double", "align 8"],
-        "long double": ["alloca x86_fp80", "align 16"],
-        "char": ["alloca i8", "align 1"]
+        "char": "i8",
+        "short int": "i16",
+        "int": "i32",
+        "long int": "i64",
+        "long long int": "i64",
+        "float": "float",
+        "double": "double",
+        "long double": "x86_fp80"
     }
 
-    to_return = LLVMType.get(_type, "Invalid type: " + _type)
-    to_return[0] += extra * '*'
-    return to_return
+    ret_val[0] = LLVMType.get(_type, "Invalid type: " + _type)
+    ret_val[0] += extra
+    return ret_val
+
+def getAlignment(node):
+    if node.type.endswith("*"):
+        return 8
+    elif node.type.startswith("i"):
+        return int(node.type[1:]) / 8
+    else:
+        return ALIGNMENT[node.type]
+
+def getConversionFunction(node1, node2):
+    ret_val = ""
+    if node1.type == node2.type:
+        return None
+    if node1.type.startswith("i"):
+        if "unsigned" in node1.type_semantics:
+            ret_val += "u"
+        else:
+            ret_val += "s"
+        if node2.type in ["float", "double", "long double"]:
+            ret_val += "itofp"
+        elif getAlignment(node2) > getAlignment(node1):
+            ret_val += "ext"
+        else:
+            ret_val = "trunc"
+    elif node2.type.startswith("i"):
+        ret_val += "fpto"
+        if "unsigned" in node2.type_semantics:
+            ret_val += "ui"
+        else:
+            ret_val += "si"
+    elif getAlignment(node2) > getAlignment(node1):
+        ret_val = "fpext"
+    else:
+        ret_val = "fptrunc"
+
+    return ret_val
+        
 
 def getBinaryType(type_1, type_2):
     temp = max(CONVERSION_HIERARCHY[type_1], CONVERSION_HIERARCHY[type_2])

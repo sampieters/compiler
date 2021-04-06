@@ -2,7 +2,7 @@ from grammars.C.CListener import CListener
 from grammars.C.CParser import CParser
 from ASTNode import *
 from SymbolTable import SymbolTable
-from utils import Counter
+from utils import Counter, getTypeLLVM
 
 class ASTListener(CListener):
     def __init__(self):
@@ -19,7 +19,7 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#Integer.
     def enterInteger(self, ctx:CParser.IntegerContext):
-        self.curr_node.add_child(LiteralNode(int(ctx.getText()), "int", self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(int(ctx.getText()), "i32", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         
     # Exit a parse tree produced by variablesParser#Integer.
@@ -37,7 +37,7 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#String.
     def enterString(self, ctx:CParser.StringContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText(), "string", self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(ctx.getText(), "i8*", self.counter.incr(), ["const"]))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#String.
@@ -46,7 +46,7 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#Character.
     def enterCharacter(self, ctx:CParser.CharacterContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText()[0], "char", self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(ctx.getText()[0], "i8", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Character.
@@ -146,7 +146,9 @@ class ASTListener(CListener):
 
     # Exit a parse tree produced by variablesParser#declaration.
     def exitDeclaration(self, ctx:CParser.DeclarationContext):
-        self.curr_node.children[0].type = ctx.getChild(0).getText()
+        _type, type_semantics = getTypeLLVM(ctx.getChild(0).getText())
+        self.curr_node.children[0].type = _type
+        self.curr_node.children[0].type_semantics = type_semantics
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#Identifier.

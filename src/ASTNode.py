@@ -1,4 +1,4 @@
-from utils import Counter
+from utils import Counter, getAlignment
 from ASTVisitor import ASTVisitor
 
 
@@ -75,7 +75,7 @@ class LiteralNode(ASTNode):
         self.type = _type
 
     def __str__(self):
-        return str(self.value)
+        return str(self.value) + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.visitLiteral(self)
@@ -86,15 +86,16 @@ class LiteralNode(ASTNode):
 
 
 class IdentifierNode(ASTNode):
-    def __init__(self, name, node_id):
+    def __init__(self, name, node_id, _type=None):
         super().__init__(node_id)
         self.name = name
-        self.type = None
+        self.type = _type
+        self.type_semantics = []
         self.original_address = None
         self.temp_address = None
 
     def __str__(self):
-        return self.name
+        return self.name + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.visitIdentifier(self)
@@ -109,6 +110,9 @@ class IdentifierNode(ASTNode):
             return self == self.parent.children[0]
         return False
 
+    def alignment(self):
+        return str(int(getAlignment(self)))
+
 
 class DefinitionNode(ASTNode):
     def __init__(self, node_id):
@@ -116,7 +120,7 @@ class DefinitionNode(ASTNode):
         self.type = None
 
     def __str__(self):
-        return 'define'
+        return 'define' + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         for child in self.children:
@@ -130,7 +134,7 @@ class FunctionDefinitionNode(ASTNode):
         self.type = None
 
     def __str__(self):
-        return 'define_func'
+        return 'define_func' + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         for child in self.children:
@@ -146,7 +150,7 @@ class UnaryOperationNode(ASTNode):
         self.temp_address = None
 
     def __str__(self):
-        return self.operation
+        return self.operation + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         if self.children is None:
@@ -175,7 +179,7 @@ class BinaryOperationNode(ASTNode):
         self.temp_address = None
 
     def __str__(self):
-        return self.operation
+        return self.operation + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         for child in self.children:
@@ -211,7 +215,7 @@ class DeclarationNode(ASTNode):
         self.type = None
 
     def __str__(self):
-        return 'declare'
+        return 'declare' + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         for child in self.children:

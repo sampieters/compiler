@@ -20,6 +20,7 @@ class ASTVisitor:
         pass
 
     def visitFunctionDefinition(self, node):
+        # print("Visiting Function Definition Node")
         pass
 
     def visitUnaryOperation(self, node):
@@ -39,31 +40,41 @@ class ASTVisitor:
         pass
 
     def visitFunctionDeclaration(self, node):
+        # print("Visiting Function Declaration Node")
         pass
 
     def visitScope(self, node):
+        # print("Visiting Scope Node")
         pass
 
     def visitWhile(self, node):
+        # print("Visiting While Node")
         pass
 
     def visitBranch(self, node):
+        # print("Visiting Branch Node")
         pass
 
     def visitIf(self, node):
+        # print("Visiting If Node")
         pass
 
     def visitElif(self, node):
+        # print("Visiting Elif Node")
         pass
 
     def visitElse(self, node):
+        # print("Visiting Else Node")
         pass
 
     def visitBreak(self, node):
+        # print("Visiting Break Node")
         pass
 
     def visitContinue(self, node):
+        # print("Visiting Continue Node")
         pass
 
     def visitFunctionCall(self, node):
+        # print("Visiting Function Call Node")
         pass

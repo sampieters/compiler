@@ -11,21 +11,21 @@ class SemanticalErrorVisitor(ASTVisitor):
     def visitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
         if node.isBeingDeclared():
-            def_node = self.table.get_symbol_curr_scope(str(node))
+            def_node = self.table.get_symbol_curr_scope(node.name)
             # If the identifier was already declared before
             if def_node is not None:
-                err_msg = f"Error: Redefinition of '{str(node)}'"
+                err_msg = f"Error: Redefinition of '{node.name}'"
                 if def_node.type != node.type:
                     err_msg += f" with a different type: '{node.type}' vs '{def_node.type}'" 
                 raise Exception(err_msg)
             else:
                 self.table.add_symbol(node)
         elif node.isBeingAssigned():
-            def_node = self.table.get_symbol(str(node))
+            def_node = self.table.get_symbol(node.name)
             if def_node.type.startswith("const"):
-                raise Exception(f"Error: Cannot assign to variable '{str(node)}' with const-qualified type '{node.type}'")
+                raise Exception(f"Error: Cannot assign to variable '{node.name}' with const-qualified type '{node.type}'")
         else:
-            def_node = self.table.get_symbol(str(node))
+            def_node = self.table.get_symbol(node.name)
             if def_node is None:
                 raise Exception(f"Error: Use of undeclared variable '{node.name}'")
             else:
@@ -43,7 +43,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         node.type = node.children[0].type
 
     def visitUnaryOpBoolean(self, node):
-        node.type = "int"
+        node.type = "i32"
 
     def visitUnaryOpPointer(self, node):
         if node.operation == "*":
@@ -52,7 +52,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             else:
                 node.type = node.children[0].type[:-1]
         elif node.operation == "&":
-            node.type = "long int"
+            node.type = "i64"
 
     def visitBinaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
@@ -64,7 +64,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         node.type = getBinaryType(node.children[0].type, node.children[1].type)
 
     def visitBinaryOpBoolean(self, node):
-        node.type = "int"
+        node.type = "i32"
 
     def visitDefinitionNode(self, node):
         pass

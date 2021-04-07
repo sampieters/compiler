@@ -63,7 +63,7 @@ class LLVMVisitor(ASTVisitor):
         node.temp_address = str(self.counter.counter-1)
         self.LLVM.append(instruction)
 
-    def visitDeclaration(self, node):
+    def exitDeclaration(self, node):
         """Transform declaration node to LLVM"""
         # Set the original address for the new variable, add it to the symbol table
         identifier = node.children[0]
@@ -78,19 +78,19 @@ class LLVMVisitor(ASTVisitor):
         instruction += identifier.type + ", align " + identifier.alignment()
         self.LLVM.append(instruction)
 
-    def visitDefinition(self, node):
+    def exitDefinition(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the definition into the variable on the left, the rest is handled by declaration
         self.convertType(node.children[0].children[0], node.children[1])
         self.storeVariable(node.children[0].children[0], node.children[1])
 
-    def visitAssignment(self, node):
+    def exitAssignment(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the assignment into the variable on the left
         self.convertType(self.table.get_symbol(node.children[0].name), node.children[1])
         self.storeVariable(self.table.get_symbol(node.children[0].name), node.children[1])
 
-    def visitUnaryOperation(self, node):
+    def exitUnaryOperation(self, node):
         """Transform unary operation node to LLVM"""
         child = node.children[0]
         # If the unary operation is performed on a variable, load it into a new temporary address
@@ -151,7 +151,7 @@ class LLVMVisitor(ASTVisitor):
                     self.LLVM.append('%' + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64")
                 #TODO: Nog iets doen voor i32 om te zetten naar type
 
-    def visitBinaryOperation(self, node):
+    def exitBinaryOperation(self, node):
         """Convert binary operation node to LLVM"""
         # For each child that is a variable, load the variable into a new temporary address
         for child in node.children:

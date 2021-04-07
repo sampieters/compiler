@@ -3,30 +3,30 @@ from ASTNode import *
 from utils import *
 
 class OptimisationVisitor(ASTVisitor):
-    def visitUnaryOperation(self, node):
+    def exitUnaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
-            self.visitUnaryOpBoolean(node)
+            self.exitUnaryOpBoolean(node)
         else:
-            self.visitUnaryOp(node)
+            self.exitUnaryOp(node)
 
-    def visitUnaryOp(self, node):
+    def exitUnaryOp(self, node):
         if isinstance(node.children[0], LiteralNode):
             node.fold(node.children[0].type)     
 
-    def visitUnaryOpBoolean(self, node):
+    def exitUnaryOpBoolean(self, node):
         if isinstance(node.children[0], LiteralNode):
             node.fold("int")
 
-    def visitBinaryOperation(self, node):
+    def exitBinaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
-            self.visitBinaryOpBoolean(node)
+            self.exitBinaryOpBoolean(node)
         else:
-            self.visitBinaryOp(node)
+            self.exitBinaryOp(node)
 
-    def visitBinaryOp(self, node):
+    def exitBinaryOp(self, node):
         if isinstance(node.children[0], LiteralNode) and isinstance(node.children[1], LiteralNode):
             node.fold(getBinaryType(node.children[0].type, node.children[1].type))
 
-    def visitBinaryOpBoolean(self, node):
+    def exitBinaryOpBoolean(self, node):
         if isinstance(node.children[0], LiteralNode) and isinstance(node.children[1], LiteralNode):
             node.fold("int")

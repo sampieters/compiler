@@ -42,6 +42,12 @@ class ASTNode:
         self.to_dot_recursive(file)
         file.write("}")
 
+    def visitChildren(self, visitor):
+        if not self.children:
+            return
+        for child in self.children:
+            child.accept(visitor)
+
 
 class ProgNode(ASTNode):
     def __init__(self, node_id=0):
@@ -51,9 +57,9 @@ class ProgNode(ASTNode):
         return 'prog'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitProg(self)
+        visitor.enterProg(self)
+        self.visitChildren(visitor)
+        visitor.exitProg(self)
 
 class ScopeNode(ASTNode):
     def __init__(self, node_id=0):
@@ -63,9 +69,9 @@ class ScopeNode(ASTNode):
         return 'scope'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitScope(self)
+        visitor.enterScope(self)
+        self.visitChildren(visitor)
+        visitor.exitScope(self)
 
 
 class LiteralNode(ASTNode):
@@ -78,7 +84,9 @@ class LiteralNode(ASTNode):
         return str(self.value) + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        visitor.visitLiteral(self)
+        visitor.enterLiteral(self)
+        self.visitChildren(visitor)
+        visitor.exitLiteral(self)
 
     def getValue(self):
         #TODO: handle case for floats etc
@@ -98,7 +106,9 @@ class IdentifierNode(ASTNode):
         return self.name + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        visitor.visitIdentifier(self)
+        visitor.enterIdentifier(self)
+        self.visitChildren(visitor)
+        visitor.exitIdentifier(self)
 
     def isBeingDeclared(self):
         if isinstance(self.parent, DeclarationNode):
@@ -123,9 +133,9 @@ class DefinitionNode(ASTNode):
         return 'define' + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitDefinition(self)
+        visitor.enterDefinition(self)
+        self.visitChildren(visitor)
+        visitor.exitDefinition(self)
 
 
 class FunctionDefinitionNode(ASTNode):
@@ -137,9 +147,9 @@ class FunctionDefinitionNode(ASTNode):
         return 'define_func' + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitFunctionDefinition(self)
+        visitor.enterFunctionDefinition(self)
+        self.visitChildren(visitor)
+        visitor.exitFunctionDefinition(self)
 
 
 class UnaryOperationNode(ASTNode):
@@ -153,11 +163,9 @@ class UnaryOperationNode(ASTNode):
         return self.operation + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        if self.children is None:
-            return
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitUnaryOperation(self)
+        visitor.enterUnaryOperation(self)
+        self.visitChildren(visitor)
+        visitor.exitUnaryOperation(self)
 
     def fold(self, _type):
         # Calculate the result of the unary operation in order to fold, handle ! separately as this has different syntax in python
@@ -182,9 +190,9 @@ class BinaryOperationNode(ASTNode):
         return self.operation + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitBinaryOperation(self)
+        visitor.enterBinaryOperation(self)
+        self.visitChildren(visitor)
+        visitor.exitBinaryOperation(self)
 
     def fold(self, _type):
         # Calculate the result of the binary operation in order to fold
@@ -204,9 +212,9 @@ class AssignmentNode(ASTNode):
         return 'assign'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitAssignment(self)
+        visitor.enterAssignment(self)
+        self.visitChildren(visitor)
+        visitor.exitAssignment(self)
 
 
 class DeclarationNode(ASTNode):
@@ -218,9 +226,9 @@ class DeclarationNode(ASTNode):
         return 'declare' + f"({self.type})"
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitDeclaration(self)
+        visitor.enterDeclaration(self)
+        self.visitChildren(visitor)
+        visitor.exitDeclaration(self)
 
 class FunctionDeclarationNode(ASTNode):
     def __init__(self, node_id, arg_types, return_type):
@@ -232,9 +240,9 @@ class FunctionDeclarationNode(ASTNode):
         return 'declare_func'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitFunctionDeclaration(self)
+        visitor.enterFunctionDeclaration(self)
+        self.visitChildren(visitor)
+        visitor.exitFunctionDeclaration(self)
 
 class WhileNode(ASTNode):
     def __init__(self, node_id):
@@ -244,9 +252,9 @@ class WhileNode(ASTNode):
         return 'while'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitWhile(self)
+        visitor.enterWhile(self)
+        self.visitChildren(visitor)
+        visitor.exitWhile(self)
 
 class BranchNode(ASTNode):
     def __init__(self, node_id):
@@ -256,9 +264,9 @@ class BranchNode(ASTNode):
         return 'branch'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitBranch(self)
+        visitor.enterBranch(self)
+        self.visitChildren(visitor)
+        visitor.exitBranch(self)
 
 class IfNode(ASTNode):
     def __init__(self, node_id):
@@ -268,9 +276,9 @@ class IfNode(ASTNode):
         return 'if'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitIf(self)
+        visitor.enterIf(self)
+        self.visitChildren(visitor)
+        visitor.exitElif(self)
 
 class ElifNode(ASTNode):
     def __init__(self, node_id):
@@ -280,9 +288,9 @@ class ElifNode(ASTNode):
         return 'elif'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitElif(self)
+        visitor.enterElif(self)
+        self.visitChildren(visitor)
+        visitor.exitElif(self)
 
 class ElseNode(ASTNode):
     def __init__(self, node_id):
@@ -292,9 +300,9 @@ class ElseNode(ASTNode):
         return 'else'
 
     def accept(self, visitor:ASTVisitor):
-        for child in self.children:
-            child.accept(visitor)
-        visitor.visitElse(self)
+        visitor.enterElse(self)
+        self.visitChildren(visitor)
+        visitor.exitElse(self)
 
 class BreakNode(ASTNode):
     def __init__(self, node_id):
@@ -304,7 +312,9 @@ class BreakNode(ASTNode):
         return 'break'
 
     def accept(self, visitor:ASTVisitor):
-        visitor.visitBreak(self)
+        visitor.enterBreak(self)
+        self.visitChildren(visitor)
+        visitor.exitBreak(self)
 
 class ContinueNode(ASTNode):
     def __init__(self, node_id):
@@ -314,7 +324,9 @@ class ContinueNode(ASTNode):
         return 'continue'
 
     def accept(self, visitor:ASTVisitor):
-        visitor.visitContinue(self)
+        visitor.enterContinue(self)
+        self.visitChildren(visitor)
+        visitor.exitContinue(self)
 
 class FunctionCallNode(ASTNode):
     def __init__(self, node_id, arg_types):
@@ -325,4 +337,6 @@ class FunctionCallNode(ASTNode):
         return 'func_call'
 
     def accept(self, visitor:ASTVisitor):
-        visitor.visitFunctionCall(self)
+        visitor.enterFunctionCall(self)
+        self.visitChildren(visitor)
+        visitor.exitFunctionCall(self)

@@ -3,78 +3,154 @@ class ASTVisitor:
     def visit(self, tree):
         tree.accept(self)
 
-    def visitProg(self, node):
-        # print("Visiting Prog Node")
+    def enterProg(self, node):
+        # print("Entering Prog Node")
         pass
 
-    def visitLiteral(self, node):
-        # print("Visiting Literal Node")
+    def exitProg(self, node):
+        # print("Exiting Prog Node")
         pass
 
-    def visitIdentifier(self, node):
-        # print("Visiting Identifier Node")
+    def enterLiteral(self, node):
+        # print("Entering Literal Node")
         pass
 
-    def visitDefinition(self, node):
-        # print("Visiting Definition Node")
+    def exitLiteral(self, node):
+        # print("Exiting Literal Node")
         pass
 
-    def visitFunctionDefinition(self, node):
-        # print("Visiting Function Definition Node")
+    def enterIdentifier(self, node):
+        # print("Entering Identifier Node")
         pass
 
-    def visitUnaryOperation(self, node):
-        # print("Visiting Unary Operation Node")
+    def exitIdentifier(self, node):
+        # print("Exiting Identifier Node")
         pass
 
-    def visitBinaryOperation(self, node):
-        # print("Visiting Binary Operation Node")
+    def enterDefinition(self, node):
+        # print("Entering Definition Node")
         pass
 
-    def visitAssignment(self, node):
-        # print("Visiting Assignment Node")
+    def exitDefinition(self, node):
+        # print("Exiting Definition Node")
         pass
 
-    def visitDeclaration(self, node):
-        # print("Visiting Declaration Node")
+    def enterFunctionDefinition(self, node):
+        # print("Entering Function Definition Node")
         pass
 
-    def visitFunctionDeclaration(self, node):
-        # print("Visiting Function Declaration Node")
+    def exitFunctionDefinition(self, node):
+        # print("Exiting Function Definition Node")
         pass
 
-    def visitScope(self, node):
-        # print("Visiting Scope Node")
+    def enterUnaryOperation(self, node):
+        # print("Entering Unary Operation Node")
         pass
 
-    def visitWhile(self, node):
-        # print("Visiting While Node")
+    def exitUnaryOperation(self, node):
+        # print("Exiting Unary Operation Node")
         pass
 
-    def visitBranch(self, node):
-        # print("Visiting Branch Node")
+    def enterBinaryOperation(self, node):
+        # print("Entering Binary Operation Node")
         pass
 
-    def visitIf(self, node):
-        # print("Visiting If Node")
+    def exitBinaryOperation(self, node):
+        # print("Exiting Binary Operation Node")
         pass
 
-    def visitElif(self, node):
-        # print("Visiting Elif Node")
+    def enterAssignment(self, node):
+        # print("Entering Assignment Node")
         pass
 
-    def visitElse(self, node):
-        # print("Visiting Else Node")
+    def exitAssignment(self, node):
+        # print("Exiting Assignment Node")
         pass
 
-    def visitBreak(self, node):
-        # print("Visiting Break Node")
+    def enterDeclaration(self, node):
+        # print("Entering Declaration Node")
         pass
 
-    def visitContinue(self, node):
-        # print("Visiting Continue Node")
+    def exitDeclaration(self, node):
+        # print("Exiting Declaration Node")
         pass
 
-    def visitFunctionCall(self, node):
-        # print("Visiting Function Call Node")
+    def enterFunctionDeclaration(self, node):
+        # print("Entering Function Declaration Node")
+        pass
+
+    def exitFunctionDeclaration(self, node):
+        # print("Exiting Function Declaration Node")
+        pass
+
+    def enterScope(self, node):
+        # print("Entering Scope Node")
+        pass
+
+    def exitScope(self, node):
+        # print("Exiting Scope Node")
+        pass
+
+    def enterWhile(self, node):
+        # print("Entering While Node")
+        pass
+
+    def exitWhile(self, node):
+        # print("Exiting While Node")
+        pass
+
+    def enterBranch(self, node):
+        # print("Entering Branch Node")
+        pass
+
+    def exitBranch(self, node):
+        # print("Exiting Branch Node")
+        pass
+
+    def enterIf(self, node):
+        # print("Entering If Node")
+        pass
+
+    def exitIf(self, node):
+        # print("Exiting If Node")
+        pass
+
+    def enterElif(self, node):
+        # print("Entering Elif Node")
+        pass
+
+    def exitElif(self, node):
+        # print("Exiting Elif Node")
+        pass
+
+    def enterElse(self, node):
+        # print("Entering Else Node")
+        pass
+
+    def exitElse(self, node):
+        # print("Exiting Else Node")
+        pass
+
+    def enterBreak(self, node):
+        # print("Entering Break Node")
+        pass
+
+    def exitBreak(self, node):
+        # print("Exiting Break Node")
+        pass
+
+    def enterContinue(self, node):
+        # print("Entering Continue Node")
+        pass
+
+    def exitContinue(self, node):
+        # print("Exiting Continue Node")
+        pass
+
+    def enterFunctionCall(self, node):
+        # print("Entering Function Call Node")
+        pass
+
+    def exitFunctionCall(self, node):
+        # print("Exiting Function Call Node")
         pass

@@ -8,7 +8,7 @@ class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
 
-    def visitIdentifier(self, node):
+    def exitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
         if node.isBeingDeclared():
             def_node = self.table.get_symbol_curr_scope(node.name)
@@ -31,21 +31,21 @@ class SemanticalErrorVisitor(ASTVisitor):
             else:
                 node.type = def_node.type
 
-    def visitUnaryOperation(self, node):
+    def exitUnaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
-            self.visitUnaryOpBoolean(node)
+            self.exitUnaryOpBoolean(node)
         elif node.operation in POINTER_OPS:
-            self.visitUnaryOpPointer(node)
+            self.exitUnaryOpPointer(node)
         else:
-            self.visitUnaryOp(node)
+            self.exitUnaryOp(node)
 
-    def visitUnaryOp(self, node):
+    def exitUnaryOp(self, node):
         node.type = node.children[0].type
 
-    def visitUnaryOpBoolean(self, node):
+    def exitUnaryOpBoolean(self, node):
         node.type = "i32"
 
-    def visitUnaryOpPointer(self, node):
+    def exitUnaryOpPointer(self, node):
         if node.operation == "*":
             if not node.children[0].type.endswith("*"):
                 raise Exception(f"Error: Indirection requires pointer operand ('{node.children[0].type}' invalid)")
@@ -54,22 +54,22 @@ class SemanticalErrorVisitor(ASTVisitor):
         elif node.operation == "&":
             node.type = "i64"
 
-    def visitBinaryOperation(self, node):
+    def exitBinaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
-            self.visitBinaryOpBoolean(node)
+            self.exitBinaryOpBoolean(node)
         else:
-            self.visitBinaryOp(node)
+            self.exitBinaryOp(node)
 
-    def visitBinaryOp(self, node):
+    def exitBinaryOp(self, node):
         node.type = getBinaryType(node.children[0].type, node.children[1].type)
 
-    def visitBinaryOpBoolean(self, node):
+    def exitBinaryOpBoolean(self, node):
         node.type = "i32"
 
-    def visitDefinitionNode(self, node):
+    def exitDefinitionNode(self, node):
         pass
 
-    def visitDeclaration(self, node):
+    def exitDeclaration(self, node):
         pass
 
     # TODO: make sure break continue are only used in loops, function declarations/definitions are only used in global scope

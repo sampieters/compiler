@@ -227,3 +227,10 @@ class ASTListener(CListener):
     # Exit a parse tree produced by CParser#SwitchStatement.
     def exitSwitchStatement(self, ctx:CParser.SwitchStatementContext):
         pass
+
+    def enterFunctionDeclaration(self, ctx:CParser.FunctionDeclarationStatementContext):
+        pass
+
+    # Exit a parse tree produced by CParser#function_declaration.
+    def exitFunctionDeclaration(self, ctx:CParser.FunctionDeclarationStatementContext):
+        pass

@@ -37,13 +37,13 @@ class LLVMVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
-        node = self.table.get_symbol(str(node))
+        node = self.table.get_symbol(node.name)
 
         # Change the temporary address of the variable to the new address, load the original address into it
         load_addr = self.counter.incr()
         node.temp_address = load_addr
         instruction = '%' + load_addr + " = load " + node.type + ", " + node.type + "* " + \
-                      node.original_address + ", align " + node.alignment
+                      node.original_address + ", align " + node.alignment()
         self.LLVM.append("  " + instruction)
 
     def convertType(self, node1, node2):
@@ -156,10 +156,10 @@ class LLVMVisitor(ASTVisitor):
         # For each child that is a variable, load the variable into a new temporary address
         for child in node.children:
             if isinstance(child, IdentifierNode):
-                temp_node = self.table.get_symbol(child.name)
-                if temp_node is None:
+                var = self.table.get_symbol(child.name)
+                if var is None:
                     print("help")
-                self.loadVariable(temp_node)
+                self.loadVariable(var)
         # Perform the binary operation
         self.performBinaryOp(node)
 
@@ -202,19 +202,25 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("  %" + self.counter.incr() + " call " + "RETUNRTYPE" + " @" + "FUNCTIONNAME" + "()")
 
     def enterScope(self, node):
-        if isinstance(node.parent, WhileNode):
-            # NOG EEN LIJN HIER MAAR DIT IS ALLES IN WHILE (...) -> Zou normaal al moeten werken
+        self.table.enter_scope()
+        if isinstance(node.parent.children[0], IdentifierNode):
+            print(self.table.get_symbol(node.parent.children[0].name).temp_address)
+            self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
+                             self.table.get_symbol(node.parent.children[0].name).type + " %" + self.table.get_symbol(node.parent.children[0].name).temp_address + ", 0")
+        elif isinstance(node.parent.children[0], LiteralNode):
             self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + "PREV_TYPE" + " %" + "PREV" + ", 0")
-            #TODO:: WHUT NOG INVULLEN
-            self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
-            self.LLVM.append("")
-            self.LLVM.append(self.counter.incr() + ':')
+        #TODO:: WHUT NOG INVULLEN + preds ook nog doen!!
+        #9:                                                ; preds = %3
+        self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
+        self.LLVM.append("")
+        self.LLVM.append(self.counter.incr() + ':')
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
             self.LLVM.append(self.counter.incr() + ':')
+        self.table.exit_scope()
 
     def performBinaryOp(self, bin_op):
         """Perform a binary operation given a binary operation node"""

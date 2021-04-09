@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import copy
 
 class SymbolTable:
     def __init__(self, parent=None):
@@ -14,7 +15,8 @@ class SymbolTable:
         table = self
         result = None
         while result is None and table is not None:
-            result = table.symbols[symbol]
+            if symbol in table.symbols:
+                result = table.symbols[symbol]
             table = table.parent
         return result
 
@@ -28,11 +30,9 @@ class SymbolTable:
         """
         self.symbols[symbol.name] = symbol
 
-    
     def enter_scope(self):
-        self.parent = self
+        self.parent = copy(self)
         self.symbols = defaultdict()
-
 
     def exit_scope(self):
         if self.parent:

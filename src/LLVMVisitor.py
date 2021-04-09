@@ -37,7 +37,7 @@ class LLVMVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
-        node = self.table.get_symbol(str(node))
+        node = self.table.get_symbol(node.name)
 
         # Change the temporary address of the variable to the new address, load the original address into it
         load_addr = self.counter.incr()
@@ -96,7 +96,7 @@ class LLVMVisitor(ASTVisitor):
         # If the unary operation is performed on a variable, load it into a new temporary address
         if isinstance(child, IdentifierNode):
             var = self.table.get_symbol(child.name)
-            self.loadVariable(var.name)
+            self.loadVariable(var)
         node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
         temp = unaryOpToLLVM(node.operation)
@@ -159,7 +159,7 @@ class LLVMVisitor(ASTVisitor):
                 var = self.table.get_symbol(child.name)
                 if var is None:
                     print("help")
-                self.loadVariable(var.name)
+                self.loadVariable(var)
         # Perform the binary operation
         self.performBinaryOp(node)
 
@@ -204,8 +204,9 @@ class LLVMVisitor(ASTVisitor):
     def enterScope(self, node):
         self.table.enter_scope()
         if isinstance(node.parent.children[0], IdentifierNode):
-            self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " %" +
-                             node.parent.children[0].temp_address + ", 0")
+            print(self.table.get_symbol(node.parent.children[0].name).temp_address)
+            self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
+                             self.table.get_symbol(node.parent.children[0].name).type + " %" + self.table.get_symbol(node.parent.children[0].name).temp_address + ", 0")
         elif isinstance(node.parent.children[0], LiteralNode):
             self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + "PREV_TYPE" + " %" + "PREV" + ", 0")
         #TODO:: WHUT NOG INVULLEN + preds ook nog doen!!

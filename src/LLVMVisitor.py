@@ -96,7 +96,7 @@ class LLVMVisitor(ASTVisitor):
         # If the unary operation is performed on a variable, load it into a new temporary address
         if isinstance(child, IdentifierNode):
             var = self.table.get_symbol(child.name)
-            self.loadVariable(var)
+            self.loadVariable(var.name)
         node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
         temp = unaryOpToLLVM(node.operation)

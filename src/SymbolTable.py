@@ -1,4 +1,5 @@
 from collections import defaultdict
+from copy import copy
 
 class SymbolTable:
     def __init__(self, parent=None):
@@ -30,7 +31,7 @@ class SymbolTable:
 
     
     def enter_scope(self):
-        self.parent = self
+        self.parent = copy(self)
         self.symbols = defaultdict()
 
 

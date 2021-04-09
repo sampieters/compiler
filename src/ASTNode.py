@@ -230,8 +230,9 @@ class DeclarationNode(ASTNode):
         visitor.exitDeclaration(self)
 
 class FunctionDeclarationNode(ASTNode):
-    def __init__(self, node_id, arg_types, return_type):
+    def __init__(self, node_id, name, arg_types, return_type):
         super().__init__(node_id)
+        self.name = name
         self.arg_types = arg_types
         self.return_type = return_type
 

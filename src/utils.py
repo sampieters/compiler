@@ -108,7 +108,7 @@ def checkInfoLoss(type_1, type_2):
 
 class Counter:
     def __init__(self):
-        self.counter = 0
+        self.counter = 1
 
     def incr(self):
         self.counter += 1

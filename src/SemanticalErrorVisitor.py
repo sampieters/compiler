@@ -3,6 +3,7 @@ from ASTNode import *
 from utils import *
 
 #TODO: replace error messages with actual exceptions
+#TODO: Check if void only in functions
 
 class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):

@@ -168,39 +168,53 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("")
         self.LLVM.append(self.counter.incr() + ':')
 
-    def enterIf(self, node):
-        # TODO: Een load zou hie moeten gebeuren al maar gebeurd niet -> zelfde probleem als de while
-        self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
+    def exitIf(self, node):
+        #TODO: Nog preds zoals bij while
+        self.LLVM.append(
+            "  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
+        self.LLVM.append("")
+        self.LLVM.append(self.counter.incr() + ':')
+        self.LLVM.append("  br label %" + str(self.counter.counter))
+
+    def enterElif(self, node):
         self.LLVM.append("")
         self.LLVM.append(self.counter.incr() + ':')
 
-    def exitIf(self, node):
-        # TODO: Ecit wekrt zelfs niet
-        self.LLVM.append("END IF")
-
     def enterElse(self, node):
-        self.LLVM.append("  br label %" + str(self.counter.counter))
         self.LLVM.append("")
         self.LLVM.append(self.counter.incr() + ':')
 
     def exitElse(self, node):
-        # WERKT WEL -> WAAROM IF NIET??
         self.LLVM.append("  br label %" + str(self.counter.counter))
+
+    def exitBranch(self, node):
         self.LLVM.append("")
         self.LLVM.append(self.counter.incr() + ':')
 
-    def enterFunctionDeclaration(self, node):
+    def enterFunctionDefinition(self, node):
+        self.LLVM.append("")
         # TODO: Kweet ni wa deze lijn doet
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
-        # self.LLVM.append("define " + node.type + " @" + "NAME" + "(" + "ARGUMENTS" + ") #0 {")
+        instruction = "define " + node.children[0].children[0].type + " @" + node.children[0].children[0].name + "("
+        if len(node.children[0].children[0].arg_types) != 0:
+            for arg in node.children[0].children[0].arg_types[:-1]:
+                instruction += arg + " %" + self.counter.incr() + ", "
+            instruction += node.children[0].children[0].arg_types[-1] + " %" + self.counter.incr()
+        instruction += ") #0 {"
+        self.LLVM.append(instruction)
 
-    def exitFunctionDeclaration(self, node):
+    def exitFunctionDefinition(self, node):
         self.LLVM.append("}")
 
     def enterFunctionCall(self, node):
-        self.LLVM.append("  %" + self.counter.incr() + " call " + "RETUNRTYPE" + " @" + "FUNCTIONNAME" + "()")
+        instruction = "  %" + self.counter.incr() + " call " + node.children[0].type + " @" + node.children[0].name + "("
+        # TODO: Nog een FOR LOOP doen
+        instruction += ")"
+        self.LLVM.append(instruction)
 
     def enterScope(self, node):
+        #TODO:: WHUT NOG INVULLEN + preds ook nog doen + 0 moet nog verandert worden door de 0 van het juiste type
+        #9:                                                ; preds = %3
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
             if isinstance(node.parent.children[0], IdentifierNode):
@@ -209,12 +223,10 @@ class LLVMVisitor(ASTVisitor):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
                                 condition.type + " %" + condition.temp_address + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):
-                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + "PREV_TYPE" + " %" + "PREV" + ", 0")
-        #TODO:: WHUT NOG INVULLEN + preds ook nog doen!!
-        #9:                                                ; preds = %3
-        self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
-        self.LLVM.append("")
-        self.LLVM.append(self.counter.incr() + ':')
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " " + str(node.parent.children[0].value) + ", 0")
+            self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
+            self.LLVM.append("")
+            self.LLVM.append(self.counter.incr() + ':')
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):

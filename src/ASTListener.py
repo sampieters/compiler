@@ -239,7 +239,7 @@ class ASTListener(CListener):
         self.curr_node.children[0].type = _type
         self.curr_node.children[0].type_semantics = type_semantics
         childCount = ctx.getChild(2).getChildCount()
-        if childCount > 1:
+        if childCount > 2:
             for i in range(1, childCount, 3):
                 arg_type, arg_type_semantics = getTypeLLVM(ctx.getChild(2).getChild(i).getText())
                 self.curr_node.children[0].arg_types.append(arg_type)

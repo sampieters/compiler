@@ -76,7 +76,7 @@ class ASTVisitor:
         pass
 
     def enterFunctionDeclaration(self, node):
-        print("Entering Function Declaration Node")
+        #print("Entering Function Declaration Node")
         pass
 
     def exitFunctionDeclaration(self, node):

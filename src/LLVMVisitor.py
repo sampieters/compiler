@@ -60,7 +60,7 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
-        node.temp_address = str(self.counter.counter-1)
+        node1.temp_address = str(self.counter.counter-1)
         self.LLVM.append("  " + instruction)
 
     def exitDeclaration(self, node):

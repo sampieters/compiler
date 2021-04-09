@@ -203,7 +203,6 @@ class BinaryOperationNode(ASTNode):
         self.parent.children[self.parent.children.index(self)] = new_node
 
 
-
 class AssignmentNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
@@ -231,8 +230,9 @@ class DeclarationNode(ASTNode):
         visitor.exitDeclaration(self)
 
 class FunctionDeclarationNode(ASTNode):
-    def __init__(self, node_id, arg_types, return_type):
+    def __init__(self, node_id, name, arg_types, return_type):
         super().__init__(node_id)
+        self.name = name
         self.arg_types = arg_types
         self.return_type = return_type
 
@@ -244,9 +244,11 @@ class FunctionDeclarationNode(ASTNode):
         self.visitChildren(visitor)
         visitor.exitFunctionDeclaration(self)
 
+
 class WhileNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
+        self.start_address = None
 
     def __str__(self):
         return 'while'
@@ -255,6 +257,7 @@ class WhileNode(ASTNode):
         visitor.enterWhile(self)
         self.visitChildren(visitor)
         visitor.exitWhile(self)
+
 
 class BranchNode(ASTNode):
     def __init__(self, node_id):

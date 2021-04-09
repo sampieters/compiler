@@ -17,10 +17,15 @@ def unaryOpToLLVM(operation):
 def BinaryOpToLLVM(operation):
     LLVMType = {
         "+": "add",
-        "-": "mul",
-        "*": "sdiv",
-        "/": "mod",
-        "%": ""
+        "-": "sub",
+        "*": "mul",
+        "/": "sdiv",
+        "%": "mod",
+        "==": "icmp eq",
+        "<=": "icmp sle",
+        ">=": "icmp sge",
+        ">": "icmp sgt",
+        "<": "icmp slt"
     }
     return LLVMType.get(operation, "Invalid operation: " + operation)
 

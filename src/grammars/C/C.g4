@@ -70,7 +70,7 @@ literal: FLOAT   # Float
 declaration: type_specifier ID
            ;
 
-function_declaration: ID LBRACKET arg_list RBRACKET
+function_declaration: type_specifier ID arg_list
                     ;
 
 definition: declaration EQ expr
@@ -82,7 +82,7 @@ function_definition: function_declaration scope
 assignment: ID EQ expr
           ;
 
-function_call: ID LBRACKET call_list RBRACKET
+function_call: ID call_list
              | PRINTF LBRACKET expr RBRACKET
              ;
 

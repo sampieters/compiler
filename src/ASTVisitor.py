@@ -154,3 +154,11 @@ class ASTVisitor:
     def exitFunctionCall(self, node):
         # print("Exiting Function Call Node")
         pass
+
+    def enterFunction(self, node):
+        # print("Entering Function Node")
+        pass
+
+    def exitFunction(self, node):
+        # print("Exiting Function Node")
+        pass

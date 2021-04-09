@@ -191,7 +191,6 @@ class LLVMVisitor(ASTVisitor):
 
     def enterFunctionDeclaration(self, node):
         # TODO: Kweet ni wa deze lijn doet
-        print("wooow")
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
         self.LLVM.append("define " + node.return_type + " @" + "NAME" + "(" + "ARGUMENTS" + ") #0 {")
 
@@ -203,12 +202,14 @@ class LLVMVisitor(ASTVisitor):
 
     def enterScope(self, node):
         self.table.enter_scope()
-        if isinstance(node.parent.children[0], IdentifierNode):
-            print(self.table.get_symbol(node.parent.children[0].name).temp_address)
-            self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
-                             self.table.get_symbol(node.parent.children[0].name).type + " %" + self.table.get_symbol(node.parent.children[0].name).temp_address + ", 0")
-        elif isinstance(node.parent.children[0], LiteralNode):
-            self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + "PREV_TYPE" + " %" + "PREV" + ", 0")
+        if isinstance(node.parent, WhileNode):
+            if isinstance(node.parent.children[0], IdentifierNode):
+                condition = self.table.get_symbol(node.parent.children[0].name)
+                self.loadVariable(condition)
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
+                                condition.type + " %" + condition.temp_address + ", 0")
+            elif isinstance(node.parent.children[0], LiteralNode):
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + "PREV_TYPE" + " %" + "PREV" + ", 0")
         #TODO:: WHUT NOG INVULLEN + preds ook nog doen!!
         #9:                                                ; preds = %3
         self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")

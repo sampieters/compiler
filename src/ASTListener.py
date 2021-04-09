@@ -229,8 +229,17 @@ class ASTListener(CListener):
         pass
 
     def enterFunctionDeclaration(self, ctx:CParser.FunctionDeclarationStatementContext):
-        pass
+        self.curr_node.add_child(FunctionDeclarationNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+        self.curr_node.add_child(FunctionNode(ctx.getChild(1).getText(), self.counter.incr()))
 
     # Exit a parse tree produced by CParser#function_declaration.
     def exitFunctionDeclaration(self, ctx:CParser.FunctionDeclarationStatementContext):
-        pass
+        _type, type_semantics = getTypeLLVM(ctx.getChild(0).getText())
+        self.curr_node.children[0].type = _type
+        self.curr_node.children[0].type_semantics = type_semantics
+        for i in range(0, ctx.getChild(2).getChildCount(), 2):
+            arg_type, arg_type_semantics = getTypeLLVM(ctx.getChild(2).getChild(i).getText())
+            self.curr_node.children[0].arg_types.append(arg_type)
+            self.curr_node.children[0].arg_type_semantics.append(arg_type_semantics)
+        self.curr_node = self.curr_node.parent

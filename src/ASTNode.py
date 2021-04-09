@@ -123,6 +123,25 @@ class IdentifierNode(ASTNode):
     def alignment(self):
         return str(int(getAlignment(self)))
 
+class FunctionNode(ASTNode):
+    def __init__(self, name, node_id):
+        super().__init__(node_id)
+        self.name = name
+        self.type = None
+        self.type_semantics = []
+        self.arg_types = []
+        self.arg_types_semantics = []
+        self.original_address = None
+        self.temp_address = None
+
+    def __str__(self):
+        return self.name + f"({self.type})"
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.enterFunction(self)
+        self.visitChildren(visitor)
+        visitor.exitFunction(self)
+
 
 class DefinitionNode(ASTNode):
     def __init__(self, node_id):
@@ -281,7 +300,7 @@ class IfNode(ASTNode):
     def accept(self, visitor:ASTVisitor):
         visitor.enterIf(self)
         self.visitChildren(visitor)
-        visitor.exitElif(self)
+        visitor.exitIf(self)
 
 class ElifNode(ASTNode):
     def __init__(self, node_id):

@@ -162,3 +162,11 @@ class ASTVisitor:
     def exitFunction(self, node):
         # print("Exiting Function Node")
         pass
+
+    def enterArgList(self, node):
+        # print("Entering Arg List Node")
+        pass
+
+    def exitArgList(self, node):
+        # print("Exiting Arg List Node")
+        pass

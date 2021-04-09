@@ -192,7 +192,7 @@ class LLVMVisitor(ASTVisitor):
     def enterFunctionDeclaration(self, node):
         # TODO: Kweet ni wa deze lijn doet
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
-        self.LLVM.append("define " + node.return_type + " @" + "NAME" + "(" + "ARGUMENTS" + ") #0 {")
+        # self.LLVM.append("define " + node.type + " @" + "NAME" + "(" + "ARGUMENTS" + ") #0 {")
 
     def exitFunctionDeclaration(self, node):
         self.LLVM.append("}")

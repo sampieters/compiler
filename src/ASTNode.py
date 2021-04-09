@@ -249,11 +249,8 @@ class DeclarationNode(ASTNode):
         visitor.exitDeclaration(self)
 
 class FunctionDeclarationNode(ASTNode):
-    def __init__(self, node_id, name, arg_types, return_type):
+    def __init__(self, node_id):
         super().__init__(node_id)
-        self.name = name
-        self.arg_types = arg_types
-        self.return_type = return_type
 
     def __str__(self):
         return 'declare_func'
@@ -351,9 +348,8 @@ class ContinueNode(ASTNode):
         visitor.exitContinue(self)
 
 class FunctionCallNode(ASTNode):
-    def __init__(self, node_id, arg_types):
+    def __init__(self, node_id):
         super().__init__(node_id)
-        self.arg_types = arg_types
 
     def __str__(self):
         return 'func_call'
@@ -362,3 +358,15 @@ class FunctionCallNode(ASTNode):
         visitor.enterFunctionCall(self)
         self.visitChildren(visitor)
         visitor.exitFunctionCall(self)
+
+class ArgListNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'arguments'
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.enterArgList(self)
+        self.visitChildren(visitor)
+        visitor.exitArgList(self)

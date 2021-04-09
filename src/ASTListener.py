@@ -46,7 +46,7 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#Character.
     def enterCharacter(self, ctx:CParser.CharacterContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText()[0], "i8", self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(ctx.getText()[1], "i8", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Character.
@@ -228,18 +228,35 @@ class ASTListener(CListener):
     def exitSwitchStatement(self, ctx:CParser.SwitchStatementContext):
         pass
 
-    def enterFunctionDeclaration(self, ctx:CParser.FunctionDeclarationStatementContext):
+    def enterFunctionDeclaration(self, ctx:CParser.FunctionDeclarationContext):
         self.curr_node.add_child(FunctionDeclarationNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(FunctionNode(ctx.getChild(1).getText(), self.counter.incr()))
 
     # Exit a parse tree produced by CParser#function_declaration.
-    def exitFunctionDeclaration(self, ctx:CParser.FunctionDeclarationStatementContext):
+    def exitFunctionDeclaration(self, ctx:CParser.FunctionDeclarationContext):
         _type, type_semantics = getTypeLLVM(ctx.getChild(0).getText())
         self.curr_node.children[0].type = _type
         self.curr_node.children[0].type_semantics = type_semantics
-        for i in range(0, ctx.getChild(2).getChildCount(), 2):
+        for i in range(1, ctx.getChild(2).getChildCount(), 3):
             arg_type, arg_type_semantics = getTypeLLVM(ctx.getChild(2).getChild(i).getText())
             self.curr_node.children[0].arg_types.append(arg_type)
-            self.curr_node.children[0].arg_type_semantics.append(arg_type_semantics)
+            self.curr_node.children[0].arg_types_semantics.append(arg_type_semantics)
         self.curr_node = self.curr_node.parent
+
+    def enterFunctionDefinitionStatement(self, ctx:CParser.FunctionDefinitionStatementContext):
+        self.curr_node.add_child(FunctionDefinitionNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    def exitFunctionDefinitionStatement(self, ctx:CParser.FunctionDefinitionStatementContext):
+        self.curr_node = self.curr_node.parent
+
+    def enterFunctionCall(self, ctx:CParser.FunctionCallContext):
+        self.curr_node.add_child(FunctionCallNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+        self.curr_node.add_child(FunctionNode(ctx.getChild(0).getChild(0).getText(), self.counter.incr()))
+        self.curr_node.add_child(ArgListNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    def exitFunctionCall(self, ctx:CParser.FunctionCallContext):
+        self.curr_node = self.curr_node.parent.parent

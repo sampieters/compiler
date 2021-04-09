@@ -70,7 +70,7 @@ literal: FLOAT   # Float
 declaration: type_specifier ID
            ;
 
-function_declaration: type_specifier ID arg_list
+function_declaration: type_specifier ID arg_list # FunctionDeclaration
                     ;
 
 definition: declaration EQ expr

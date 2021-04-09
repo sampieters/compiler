@@ -86,10 +86,10 @@ function_call: ID LBRACKET call_list RBRACKET
              | PRINTF LBRACKET expr RBRACKET
              ;
 
-arg_list: LBRACKET ((type_specifier ID COMMA)* type_specifier ID)? RBRACKET
+arg_list: ((type_specifier ID COMMA)* type_specifier ID)?
         ;
 
-call_list: LBRACKET ((expr COMMA)* expr)? RBRACKET
+call_list: ((expr COMMA)* expr)?
          ;
 
 MUL :           '*' ; // assigns token name to '*' used above in grammar

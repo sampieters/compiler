@@ -77,9 +77,26 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitBreak(self, node):
         if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, WhileNode)):
-            raise Exception("'break' statement not in loop or switch statement")
+            raise Exception("Error: 'break' statement not in loop or switch statement")
 
     def exitContinue(self, node):
         if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, WhileNode)):
-            raise Exception("'continue' statement not in loop statement")
-    # TODO: make sure break continue are only used in loops, function declarations/definitions are only used in global scope
+            raise Exception("Error: 'continue' statement not in loop statement")
+
+    def exitReturn(self, node):
+        if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, FunctionDefinitionNode)):
+            raise Exception("Error: 'return' statement not in function body")
+        if not node.children:
+            node.type = 'void':
+        else:
+            node.type = node.children[0].type
+        func_name = node.parent.parent.children[0].children[0].name
+        func_type = self.table.get_symbol(func_name).type
+        if func_type == 'void' and node.type != 'void':
+            raise Exception(f"Error: Void function '{func_name}' should not return a value")
+        elif func_type != 'void' and node.type == 'void':
+            raise Exception(f"Error: Non-void function '{func_name}' should return a value")
+
+    def exitFunctionDefinition(self, node):
+        if not isinstance(node.parent, ProgNode):
+            raise Exception("Error: Function definition is not allowed here")

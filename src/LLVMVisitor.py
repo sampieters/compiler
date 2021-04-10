@@ -251,6 +251,9 @@ class LLVMVisitor(ASTVisitor):
         return operation
 
     def binaryOpToLLVM(self, node):
+        child1 = self.getSymbol(node.children[0])
+        child2 = self.getSymbol(node.children[1])
+
         ret_val = ""
         try:
             operation = BINARY_OPS_LLVM[node.operation]
@@ -264,27 +267,31 @@ class LLVMVisitor(ASTVisitor):
                 ret_val += "i"
         else:
             ret_val += "f"
-
-        # STEP 2: The actual operation
-        ret_val += operation[0] + " "
-
-        # STEP 3: Check if signed or unsigned
-        child1 = self.getSymbol(node.children[0])
-        child2 = self.getSymbol(node.children[1])
-
-        if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
-            if not operation[0].startswith("cmp"):
-                ret_val += "nuw"
-            elif operation[1] != "eq" and operation[1] != "ne":
+        if operation[0] == "div" or operation[0] == "rem":
+            if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
                 ret_val += "u"
-        else:
-            if not operation[0].startswith("cmp"):
-                ret_val += "nsw"
-            elif operation[1] != "eq" and operation[1] != "ne":
+            else:
                 ret_val += "s"
 
-        if len(operation) == 2:
-            ret_val += operation[1]
+        # STEP 2: The actual operation
+        ret_val += operation[0]
+
+        # STEP 3: Check if signed or unsigned
+        if operation[0] != "div" or operation[0] != "rem":
+            ret_val += " "
+            if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
+                if not operation[0].startswith("cmp"):
+                    ret_val += "nuw"
+                elif operation[1] != "eq" and operation[1] != "ne":
+                    ret_val += "u"
+            else:
+                if not operation[0].startswith("cmp"):
+                    ret_val += "nsw"
+                elif operation[1] != "eq" and operation[1] != "ne":
+                    ret_val += "s"
+
+            if len(operation) == 2:
+                ret_val += operation[1]
         return ret_val
 
     def getSymbol(self, node):

@@ -21,17 +21,54 @@ worden van de AST van de gegeven input.
 
 ### 3) geïmplementeerd
 
-Alle mandatories van opdracht 1 & 2. 
-Opdracht 3 nog niet volledig.
+geïmplementeerd van opdracht 1:
 
-Optionals geïmplementeerd van opdracht 1:
+- (Mandatory) Binary operations +, -, * and / (voltooid)
+- (Mandatory) Comparison operators >, <, and == (voltooid)
+- (Mandatory) Unary operators + and - (voltooid NOG KIJKEN VOOR unsigned en signed)
+- (Mandatory) Brackets to overwrite the order of operations (voltooid)
+- (Mandatory) Binary operator % (voltooid)
+- (optional) Comparison operators >=, <=, != (voltooid)
+- (optional) Logical operators &&, ||, and ! (niet voltooid)
 
-- Binary operator %
-- Comparison operators >=, <=, and !=
-- Logical operators &&, ||, and !
-- Constant folding
+- (optional) Constant folding (voltooid)
 
-Optionals geïmplementeerd van opdracht 2:
+geïmplementeerd van opdracht 2:
 
-- Identifier Operations.
+- (Mandatory) Types (voltooid)
+- (Mandatory) reserved words (voltooid)
+- (Mandatory) Variables (voltooid)
+- (Mandatory) Pointer Operations (Nog uitgebreid testen / niet voltooid)
+- (Optional) Identifier Operations (Nog uitgebreid testen / niet voltooid)
+- (Optional) Conversions (testen / voltooid)
+
+- (Optional) Constant Propagation (niet voltooid)
+
+geïmplementeerd van opdracht 3:
+
+- (Mandatory) Comments (voltooid)
+    - (Optional) retain comments (niet voltooid)
+    - (Optional) comment every instruction (niet voltooid)
+- (Mandatory) Printf (niet voltooid)
+
+geïmplementeerd van opdracht 4:
+
+- (Mandatory) Reserved words
+    - (Mandatory) for (voltooid)
+    - (Mandatory) break (voltooid maar geen LLVM)
+    - (Mandatory) continue (voltooid maar geen LLVM)
+    - (Optional) switch, case and default (niet voltooid)
+- (Mandatory) Scopes (niet voltooid)
+
+geïmplementeerd van opdracht 5:
+
+- (Mandatory) reserved words
+    - return (voltooid maar geen LLVM)
+    - void (niet voltooid)
+- (Mandatory) Scopes (voltooid maar testen)
+- (Mandatory) Local and global variables (niet voltooid)
+- (Mandatory) Functions (nog niet voltooid)
+
+geïmplementeerd van opdracht 6 (niet voltooid)
+    
 

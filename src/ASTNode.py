@@ -78,6 +78,7 @@ class LiteralNode(ASTNode):
     def __init__(self, value, _type, node_id):
         super().__init__(node_id)
         self.value = value
+        self.type_semantics = []
         self.type = _type
 
     def __str__(self):

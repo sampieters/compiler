@@ -14,20 +14,47 @@ def unaryOpToLLVM(operation):
     }
     return LLVMType.get(operation, "Invalid operation: " + operation)
 
-def BinaryOpToLLVM(operation):
+def BinaryOpToLLVM(node):
     LLVMType = {
-        "+": "add",
-        "-": "sub",
-        "*": "mul",
-        "/": "sdiv",
-        "%": "mod",
-        "==": "icmp eq",
-        "<=": "icmp sle",
-        ">=": "icmp sge",
-        ">": "icmp sgt",
-        "<": "icmp slt"
+        "+": ["add"],
+        "-": ["sub"],
+        "*": ["mul"],
+        "/": ["div"],
+        "%": ["mod"],
+        "!=": ["cmp", "ne"],
+        "==": ["cmp", "eq"],
+        "<=": ["cmp", "le"],
+        ">=": ["cmp", "ge"],
+        ">": ["cmp", "gt"],
+        "<": ["cmp",  "lt"]
     }
-    return LLVMType.get(operation, "Invalid operation: " + operation)
+    ret_val = ""
+    operation = LLVMType.get(node.operation, "Invalid operation: " + node.operation)
+    the_type = getBinaryType(node.children[0].type, node.children[1].type)
+    # STEP 1: check f or i (example: icmp or fcmp || add or fadd
+    if the_type.startswith("i"):
+        if operation[0].startswith("cmp"):
+            ret_val += "i"
+    else:
+        ret_val += "f"
+    # STEP 2: The actual operation
+    ret_val += operation[0] + " "
+    # STEP 3: Check if signed or unsigned
+    if "unsigned" in node.children[0].type_semantics or "unsigned" in node.children[1].type_semantics:
+        if not operation[0].startswith("cmp"):
+            ret_val += "nuw"
+        elif operation[1] != "eq" and operation[1] != "ne":
+            ret_val += "u"
+    else:
+        if not operation[0].startswith("cmp"):
+            ret_val += "nsw"
+        elif operation[1] != "eq" and operation[1] != "ne":
+            ret_val += "s"
+
+    if len(operation) == 2:
+        ret_val += operation[1]
+    return ret_val
+
 
 def getTypeLLVM(_type):
     ret_val = ["", []]

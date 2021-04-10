@@ -54,7 +54,7 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitDefinition(self, node):
         if checkInfoLoss(node.children[0].children[0].type, node.children[1].type):
-            print(f"Warning: implicit conversion from '{node.children[0].type}' to '{node.children[1].type}' can cause a loss of information.")
+            print(f"Warning: implicit conversion from '{node.children[0].children[0].type}' to '{node.children[1].type}' can cause a loss of information.")
 
     def exitAssignment(self, node):
         child1, child2 = node.children

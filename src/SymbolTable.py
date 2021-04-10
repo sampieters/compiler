@@ -41,3 +41,6 @@ class SymbolTable:
         else:
             self.symbols = None
             self.parent = None
+
+    def __str__(self):
+        return "\n".join([f"{symbol}: {self.symbols[symbol]}" for symbol in self.symbols])

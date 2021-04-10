@@ -4,57 +4,27 @@ ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
 BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
 POINTER_OPS = {"*", "&"}
 
-def unaryOpToLLVM(operation):
-    LLVMType = {
-        "+": ["", ""],
-        "-": ["sub", "0"],
-        "++": ["add", "1"],
-        "--": ["add", "-1"],
-        "!": ["not", ""]
-    }
-    return LLVMType.get(operation, "Invalid operation: " + operation)
+UNARY_OPS_LLVM = {
+            "+": ["", ""],
+            "-": ["sub", "0"],
+            "++": ["add", "1"],
+            "--": ["add", "-1"],
+            "!": ["not", ""]
+        }
 
-def BinaryOpToLLVM(node):
-    LLVMType = {
-        "+": ["add"],
-        "-": ["sub"],
-        "*": ["mul"],
-        "/": ["div"],
-        "%": ["mod"],
-        "!=": ["cmp", "ne"],
-        "==": ["cmp", "eq"],
-        "<=": ["cmp", "le"],
-        ">=": ["cmp", "ge"],
-        ">": ["cmp", "gt"],
-        "<": ["cmp",  "lt"]
-    }
-    ret_val = ""
-    operation = LLVMType.get(node.operation, "Invalid operation: " + node.operation)
-    the_type = getBinaryType(node.children[0].type, node.children[1].type)
-    # STEP 1: check f or i (example: icmp or fcmp || add or fadd
-    if the_type.startswith("i"):
-        if operation[0].startswith("cmp"):
-            ret_val += "i"
-    else:
-        ret_val += "f"
-    # STEP 2: The actual operation
-    ret_val += operation[0] + " "
-    # STEP 3: Check if signed or unsigned
-    if "unsigned" in node.children[0].type_semantics or "unsigned" in node.children[1].type_semantics:
-        if not operation[0].startswith("cmp"):
-            ret_val += "nuw"
-        elif operation[1] != "eq" and operation[1] != "ne":
-            ret_val += "u"
-    else:
-        if not operation[0].startswith("cmp"):
-            ret_val += "nsw"
-        elif operation[1] != "eq" and operation[1] != "ne":
-            ret_val += "s"
-
-    if len(operation) == 2:
-        ret_val += operation[1]
-    return ret_val
-
+BINARY_OPS_LLVM = {
+            "+": ["add"],
+            "-": ["sub"],
+            "*": ["mul"],
+            "/": ["div"],
+            "%": ["mod"],
+            "!=": ["cmp", "ne"],
+            "==": ["cmp", "eq"],
+            "<=": ["cmp", "le"],
+            ">=": ["cmp", "ge"],
+            ">": ["cmp", "gt"],
+            "<": ["cmp",  "lt"]
+        }
 
 def getTypeLLVM(_type):
     ret_val = ["", []]
@@ -83,7 +53,6 @@ def getTypeLLVM(_type):
     except KeyError:
         raise Exception(f"Invalid type: '{_type}'")
     ret_val[0] += extra
-    print(ret_val)
     return ret_val
 
 def getAlignment(node):
@@ -96,7 +65,6 @@ def getAlignment(node):
 
 def getConversionFunction(node1, node2):
     ret_val = ""
-    print(node1.type, node2.type)
     if node1.type == node2.type:
         return None
     if node1.type.startswith("i"):
@@ -134,7 +102,6 @@ def getBinaryType(type_1, type_2):
 
 def checkInfoLoss(type_1, type_2):
     # returns true for info loss
-    print(type_1, type_2)
     return CONVERSION_HIERARCHY[type_1] < CONVERSION_HIERARCHY[type_2]
     
 

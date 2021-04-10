@@ -15,7 +15,7 @@ class LLVMVisitor(ASTVisitor):
         instruction = "store "
         # If we want to store a variable
         if isinstance(value, IdentifierNode):
-            value = self.table.get_symbol(value.name)
+            value = self.getSymbol(value)
             # Load the variable into a new temporary address before storing it
             self.loadVariable(value)
             instruction += value.type + " %" + value.temp_address
@@ -28,7 +28,7 @@ class LLVMVisitor(ASTVisitor):
         
         # If the node is a variable, get the node from the symbol table and store into the original address
         if isinstance(node, IdentifierNode):
-            node = self.table.get_symbol(node.name)
+            node = self.getSymbol(node)
             instruction += ", " + node.type + "* " + node.original_address + ", align " + node.alignment()
         # Otherwise, store into the temporary address of the node
         else:
@@ -37,7 +37,7 @@ class LLVMVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
-        node = self.table.get_symbol(node.name)
+        node = self.getSymbol(node)
 
         # Change the temporary address of the variable to the new address, load the original address into it
         load_addr = self.counter.incr()
@@ -87,15 +87,15 @@ class LLVMVisitor(ASTVisitor):
     def exitAssignment(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the assignment into the variable on the left
-        self.convertType(self.table.get_symbol(node.children[0].name), node.children[1])
-        self.storeVariable(self.table.get_symbol(node.children[0].name), node.children[1])
+        self.convertType(self.getSymbol(node.children[0]), node.children[1])
+        self.storeVariable(node.children[0], node.children[1])
 
     def exitUnaryOperation(self, node):
         """Transform unary operation node to LLVM"""
         child = node.children[0]
         # If the unary operation is performed on a variable, load it into a new temporary address
         if isinstance(child, IdentifierNode):
-            var = self.table.get_symbol(child.name)
+            var = self.getSymbol(child)
             self.loadVariable(var.name)
         node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
@@ -105,7 +105,7 @@ class LLVMVisitor(ASTVisitor):
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, IdentifierNode):
                 instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + \
-                             str(self.table.get_symbol(child.name).temp_address)
+                             str(self.getSymbol(child).temp_address)
             elif isinstance(child, LiteralNode):
                 # CONFUSED (weet niet wat eerste parameter is voor store variable)
                 self.storeVariable(node, child)
@@ -156,12 +156,20 @@ class LLVMVisitor(ASTVisitor):
         # For each child that is a variable, load the variable into a new temporary address
         for child in node.children:
             if isinstance(child, IdentifierNode):
-                var = self.table.get_symbol(child.name)
-                if var is None:
-                    print("help")
+                var = self.getSymbol(child)
                 self.loadVariable(var)
-        # Perform the binary operation
-        self.performBinaryOp(node)
+        # Store the result of the binary operation in a new address
+        node.temp_address = self.counter.incr()
+        # Convert the children to LLVM, depending on their node types
+        children_LLVM = []
+        for child in node.children:
+            if isinstance(child, LiteralNode):
+                children_LLVM.append(child.getValue())
+            else:
+                children_LLVM.append(child.type + " %" + str(self.getSymbol(child).temp_address))
+        # Construct the LLVM instruction
+        instruction = '%' + node.temp_address + " = " + self.binaryOpToLLVM(node) + ' ' + ", ".join(children_LLVM)
+        self.LLVM.append("  " + instruction)
 
     def enterWhile(self, node):
         self.LLVM.append("  br label %" + str(self.counter.counter))
@@ -218,7 +226,7 @@ class LLVMVisitor(ASTVisitor):
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
             if isinstance(node.parent.children[0], IdentifierNode):
-                condition = self.table.get_symbol(node.parent.children[0].name)
+                condition = self.getSymbol(node.parent.children[0])
                 self.loadVariable(condition)
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
                                 condition.type + " %" + condition.temp_address + ", 0")
@@ -235,17 +243,52 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM.append(self.counter.incr() + ':')
         self.table.exit_scope()
 
-    def performBinaryOp(self, bin_op):
-        """Perform a binary operation given a binary operation node"""
-        # Store the result of the binary operation in a new address
-        bin_op.temp_address = self.counter.incr()
-        # Convert the children to LLVM, depending on their node types
-        children_LLVM = []
-        for child in bin_op.children:
-            if isinstance(child, LiteralNode):
-                children_LLVM.append(child.getValue())
-            else:
-                children_LLVM.append(child.type + " %" + str(self.table.get_symbol(child.name).temp_address))
-        # Construct the LLVM instruction
-        instruction = '%' + bin_op.temp_address + " = " + BinaryOpToLLVM(bin_op) + ' ' + ", ".join(children_LLVM)
-        self.LLVM.append("  " + instruction)
+    def unaryOpToLLVM(self, node):
+        try:
+            operation = UNARY_OPS_LLVM[node.operation]
+        except KeyError:
+            raise Exception(f"Invalid unary operation '{node.operation}'")
+        return operation
+
+    def binaryOpToLLVM(self, node):
+        ret_val = ""
+        try:
+            operation = BINARY_OPS_LLVM[node.operation]
+        except KeyError:
+            raise Exception(f"Invalid binary operation '{node.operation}'")
+        _type = getBinaryType(node.children[0].type, node.children[1].type)
+
+        # STEP 1: check f or i (example: icmp or fcmp || add or fadd
+        if _type.startswith("i"):
+            if operation[0].startswith("cmp"):
+                ret_val += "i"
+        else:
+            ret_val += "f"
+
+        # STEP 2: The actual operation
+        ret_val += operation[0] + " "
+
+        # STEP 3: Check if signed or unsigned
+        child1 = self.getSymbol(node.children[0])
+        child2 = self.getSymbol(node.children[1])
+
+        if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
+            if not operation[0].startswith("cmp"):
+                ret_val += "nuw"
+            elif operation[1] != "eq" and operation[1] != "ne":
+                ret_val += "u"
+        else:
+            if not operation[0].startswith("cmp"):
+                ret_val += "nsw"
+            elif operation[1] != "eq" and operation[1] != "ne":
+                ret_val += "s"
+
+        if len(operation) == 2:
+            ret_val += operation[1]
+        return ret_val
+
+    def getSymbol(self, node):
+        if isinstance(node, IdentifierNode):
+            return self.table.get_symbol(node.name)
+        else:
+            return node

@@ -1,0 +1,62 @@
+unsigned int int1 = 100;
+int int2 = 5;
+
+int1 + int2;
+int1 - int2;
+int1 * int2;
+int1 / int2;
+
+int1 > int2;
+int1 < int2;
+int1 == int2;
+
++int1;
+-int2;
+
+int1 % int2;
+
+int1 >= int2;
+int1 <= int2;
+int1 != int2;
+
+int int3 = 20;
+unsigned int int4 = 13;
+
+int3 + int4;
+int3 - int4;
+int3 * int4;
+int3 / int4;
+
+int3 > int4;
+int3 < int4;
+int3 == int4;
+
++int3;
+-int4;
+
+int3 % int4;
+
+int3 >= int4;
+int3 <= int4;
+int3 != int4;
+
+unsigned int int5 = 1;
+unsigned int int6 = 0;
+
+int5 + int6;
+int5 - int6;
+int5 * int6;
+int5 / int6;
+
+int5 > int6;
+int5 < int6;
+int5 == int6;
+
++int5;
+-int6;
+
+int5 % int6;
+
+int5 >= int6;
+int5 <= int6;
+int5 != int6;

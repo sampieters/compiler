@@ -45,7 +45,8 @@ def getTypeLLVM(_type):
         "long long int": "i64",
         "float": "float",
         "double": "double",
-        "long double": "x86_fp80"
+        "long double": "x86_fp80",
+        "void": "void"
     }
 
     try:

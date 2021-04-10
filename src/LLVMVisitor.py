@@ -102,13 +102,12 @@ class LLVMVisitor(ASTVisitor):
             self.loadVariable(child)
         node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
-        temp = unaryOpToLLVM(node.operation)
+        temp = self.unaryOpToLLVM(node)
         # If the unary operation is -
         if node.operation == '-':
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, IdentifierNode):
-                instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + \
-                             str(child.temp_address)
+                instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
             elif isinstance(child, LiteralNode):
                 # CONFUSED (weet niet wat eerste parameter is voor store variable)
                 self.storeVariable(node, child)
@@ -247,12 +246,37 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM.append(self.counter.incr() + ':')
         self.table.exit_scope()
 
+    def enterReturn(self, node):
+        #TODO: Wss nog omzetting naar juiste type maken
+        instruction = "  ret "
+        if not node.children:
+            instruction += "void"
+        else:
+            if isinstance(node.children[0], IdentifierNode):
+                instruction += node.children[0].type + " " + node.children[0].temp_adress
+            elif isinstance(node.children[0], LiteralNode):
+                instruction += node.children[0].type + " " + node.children[0].value
+
     def unaryOpToLLVM(self, node):
+        child = self.getSymbol(node.children[0])
+
+        ret_val = ""
         try:
             operation = UNARY_OPS_LLVM[node.operation]
         except KeyError:
             raise Exception(f"Invalid unary operation '{node.operation}'")
-        return operation
+
+        # STEP 1: The actual operation
+        ret_val += operation[0] + " "
+
+        # STEP 2: Check if signed or unsigned
+        if "unsigned" in child.type_semantics:
+            if operation[0] == "sub":
+                ret_val += "nuw"
+        else:
+            if operation[0] == "sub":
+                ret_val += "nsw"
+        return ret_val
 
     def binaryOpToLLVM(self, node):
         child1 = self.getSymbol(node.children[0])
@@ -267,7 +291,7 @@ class LLVMVisitor(ASTVisitor):
 
         # STEP 1: check f or i (example: icmp or fcmp || add or fadd
         if _type.startswith("i"):
-            if operation[0].startswith("cmp"):
+            if operation[0] == "cmp":
                 ret_val += "i"
         else:
             ret_val += "f"
@@ -281,15 +305,15 @@ class LLVMVisitor(ASTVisitor):
         ret_val += operation[0]
 
         # STEP 3: Check if signed or unsigned
-        if operation[0] != "div" or operation[0] != "rem":
+        if operation[0] != "div" and operation[0] != "rem":
             ret_val += " "
             if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
-                if not operation[0].startswith("cmp"):
+                if not operation[0] == "cmp":
                     ret_val += "nuw"
                 elif operation[1] != "eq" and operation[1] != "ne":
                     ret_val += "u"
             else:
-                if not operation[0].startswith("cmp"):
+                if not operation[0] == "cmp":
                     ret_val += "nsw"
                 elif operation[1] != "eq" and operation[1] != "ne":
                     ret_val += "s"

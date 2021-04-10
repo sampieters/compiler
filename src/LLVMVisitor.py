@@ -57,7 +57,7 @@ class LLVMVisitor(ASTVisitor):
             function = getConversionFunction(node1, node2)
             if not function:
                 return
-            instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
+            instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
         node1.temp_address = str(self.counter.counter-1)

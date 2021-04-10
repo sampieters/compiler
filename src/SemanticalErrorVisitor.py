@@ -21,9 +21,10 @@ class SemanticalErrorVisitor(ASTVisitor):
                 raise Exception(err_msg)
             else:
                 self.table.add_symbol(node)
+        # If the identifier is on the left side of an assignment
         elif node.isBeingAssigned():
             def_node = self.table.get_symbol(node.name)
-            if def_node.type.startswith("const"):
+            if "const" in def_node.type_semantics:
                 raise Exception(f"Error: Cannot assign to variable '{node.name}' with const-qualified type '{node.type}'")
         else:
             def_node = self.table.get_symbol(node.name)
@@ -34,41 +35,34 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitUnaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
-            self.exitUnaryOpBoolean(node)
-        elif node.operation in POINTER_OPS:
-            self.exitUnaryOpPointer(node)
-        else:
-            self.exitUnaryOp(node)
-
-    def exitUnaryOp(self, node):
-        node.type = node.children[0].type
-
-    def exitUnaryOpBoolean(self, node):
-        node.type = "i32"
-
-    def exitUnaryOpPointer(self, node):
-        if node.operation == "*":
+            node.type = "i32"
+        elif node.operation == "*":
             if not node.children[0].type.endswith("*"):
                 raise Exception(f"Error: Indirection requires pointer operand ('{node.children[0].type}' invalid)")
             else:
                 node.type = node.children[0].type[:-1]
         elif node.operation == "&":
             node.type = "i64"
+        else:
+            node.type = node.children[0].type
 
     def exitBinaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
-            self.exitBinaryOpBoolean(node)
+            node.type = "i32"
         else:
-            self.exitBinaryOp(node)
+            node.type = getBinaryType(node.children[0].type, node.children[1].type)
 
-    def exitBinaryOp(self, node):
-        node.type = getBinaryType(node.children[0].type, node.children[1].type)
+    def exitDefinition(self, node):
+        if checkInfoLoss(node.children[0].children[0].type, node.children[1].type):
+            print(f"Warning: implicit conversion from '{node.children[0].type}' to '{node.children[1].type}' can cause a loss of information.")
 
-    def exitBinaryOpBoolean(self, node):
-        node.type = "i32"
-
-    def exitDefinitionNode(self, node):
-        pass
+    def exitAssignment(self, node):
+        child1, child2 = node.children
+        for child in [child1, child2]:
+            if isinstance(IdentifierNode, child):
+                child = self.table.get_symbol(child.name)
+        if checkInfoLoss(child1.type, child2.type):
+            print(f"Warning: implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
 
     def exitDeclaration(self, node):
         pass

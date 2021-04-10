@@ -28,7 +28,7 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#Float.
     def enterFloat(self, ctx:CParser.FloatContext):
-        self.curr_node.add_child(LiteralNode(float(ctx.getText()), "float", self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(float(ctx.getText()), "double", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Float.

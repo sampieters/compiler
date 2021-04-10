@@ -1,11 +1,11 @@
 digraph AST {
 	node0[label="prog"]
-	node1[label="define_func(None)"]
-	node0->node1
-	node2[label="declare_func"]
+	node2[label="define(None)"]
 	node1->node2
-	node3[label="main(i32)"]
+	node3[label="declare(None)"]
 	node2->node3
-	node4[label="scope"]
-	node1->node4
+	node4[label="i(i32)"]
+	node3->node4
+	node5[label="3(i32)"]
+	node2->node5
 }

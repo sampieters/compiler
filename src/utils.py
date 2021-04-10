@@ -1,4 +1,4 @@
-CONVERSION_HIERARCHY = {"i8": 0, "i16": 1, "i32": 2, "i64": 3, "float": 5, "double": 6, "x86_fp80": 7}
+CONVERSION_HIERARCHY = {"i8": 0, "i16": 1, "i32": 2, "i64": 3, "float": 4, "double": 5, "x86_fp80": 6}
 ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
 
 BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
@@ -32,14 +32,13 @@ def BinaryOpToLLVM(operation):
 def getTypeLLVM(_type):
     ret_val = ["", []]
 
-    for keyword in ["const", "unsigned", "signed"]:
+    for keyword in ["const", "unsigned"]:
         if keyword in _type:
             ret_val[1].append(keyword)
             _type = _type.replace(keyword, "")
         
     extra = _type.count('*') * '*'
-    _type = _type.replace("*", "")
-    _type = _type.replace(" ", "")
+    _type = _type.replace("*", "").strip()
 
     LLVMType = {
         "char": "i8",
@@ -52,8 +51,12 @@ def getTypeLLVM(_type):
         "long double": "x86_fp80"
     }
 
-    ret_val[0] = LLVMType.get(_type, "Invalid type: " + _type)
+    try:
+        ret_val[0] = LLVMType[_type]
+    except KeyError:
+        raise Exception(f"Invalid type: '{_type}'")
     ret_val[0] += extra
+    print(ret_val)
     return ret_val
 
 def getAlignment(node):
@@ -66,6 +69,7 @@ def getAlignment(node):
 
 def getConversionFunction(node1, node2):
     ret_val = ""
+    print(node1.type, node2.type)
     if node1.type == node2.type:
         return None
     if node1.type.startswith("i"):
@@ -103,8 +107,9 @@ def getBinaryType(type_1, type_2):
 
 def checkInfoLoss(type_1, type_2):
     # returns true for info loss
+    print(type_1, type_2)
     return CONVERSION_HIERARCHY[type_1] < CONVERSION_HIERARCHY[type_2]
-
+    
 
 class Counter:
     def __init__(self):

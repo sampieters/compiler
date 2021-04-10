@@ -247,5 +247,5 @@ class LLVMVisitor(ASTVisitor):
             else:
                 children_LLVM.append(child.type + " %" + str(self.table.get_symbol(child.name).temp_address))
         # Construct the LLVM instruction
-        instruction = '%' + bin_op.temp_address + " = " + BinaryOpToLLVM(bin_op.operation) + ' ' + ", ".join(children_LLVM)
+        instruction = '%' + bin_op.temp_address + " = " + BinaryOpToLLVM(bin_op) + ' ' + ", ".join(children_LLVM)
         self.LLVM.append("  " + instruction)

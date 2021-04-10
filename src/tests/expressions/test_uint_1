@@ -1,0 +1,20 @@
+unsigned int int1 = 100;
+int int2 = 5;
+
+int1 + int2;
+int1 - int2;
+int1 * int2;
+int1 / int2;
+
+int1 > int2;
+int1 < int2;
+int1 == int2;
+
++int1;
+-int2;
+
+int1 % int2;
+
+int1 >= int2;
+int1 <= int2;
+int1 != int2;

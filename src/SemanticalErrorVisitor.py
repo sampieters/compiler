@@ -87,7 +87,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, FunctionDefinitionNode)):
             raise Exception("Error: 'return' statement not in function body")
         if not node.children:
-            node.type = 'void':
+            node.type = 'void'
         else:
             node.type = node.children[0].type
         func_name = node.parent.parent.children[0].children[0].name

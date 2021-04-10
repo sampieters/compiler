@@ -1,0 +1,20 @@
+    unsigned int int5 = 1;
+    unsigned int int6 = 0;
+
+    int5 + int6;
+    int5 - int6;
+    int5 * int6;
+    int5 / int6;
+
+    int5 > int6;
+    int5 < int6;
+    int5 == int6;
+
+    +int5;
+    -int6;
+
+    int5 % int6;
+
+    int5 >= int6;
+    int5 <= int6;
+    int5 != int6;

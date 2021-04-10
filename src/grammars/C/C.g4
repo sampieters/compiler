@@ -15,8 +15,7 @@ stat: definition END_INSTR              # DefinitionStatement
     | switch_stat                       # SwitchStatement
     | function_declaration END_INSTR    # FunctionDeclarationStatement
     | function_definition               # FunctionDefinitionStatement
-    | RETURN expr END_INSTR             # ReturnStatement
-    | RETURN END_INSTR                  # EmptyReturnStatement
+    | RETURN expr? END_INSTR            # ReturnStatement
     | END_INSTR                         # EmptyStatement
     ;
 
@@ -57,8 +56,9 @@ else_stat: ELSE scope
 switch_stat: SWITCH LBRACKET expr RBRACKET LCURLY (CASE COLON stat)* (DEFAULT COLON stat)? (CASE COLON stat)* RCURLY
            ;
 
-type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL?
-              | CONST? (FLOAT_PREF|DOUBLE_PREF|LONG_DOUBLE_PREF) MUL?
+type_specifier: CONST? (SIGNED|UNSIGNED)? (SHORT_PREF|INT_PREF|LONG_PREF|LONG_LONG_PREF|CHAR_PREF) MUL*
+              | CONST? (FLOAT_PREF|DOUBLE_PREF|LONG_DOUBLE_PREF) MUL*
+              | VOID_PREF
               ;
 
 literal: FLOAT   # Float
@@ -126,6 +126,7 @@ SIGNED :        'signed' ;
 UNSIGNED :      'unsigned' ;
 
 INT_PREF : 'int' ;
+VOID_PREF: 'void' ;
 SHORT_PREF : 'short' | 'short int' ;
 LONG_PREF : 'long' | 'long int' ;
 LONG_LONG_PREF: 'long long' | 'long long int' ;

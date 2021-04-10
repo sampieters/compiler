@@ -134,15 +134,6 @@ class CListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by CParser#EmptyReturnStatement.
-    def enterEmptyReturnStatement(self, ctx:CParser.EmptyReturnStatementContext):
-        pass
-
-    # Exit a parse tree produced by CParser#EmptyReturnStatement.
-    def exitEmptyReturnStatement(self, ctx:CParser.EmptyReturnStatementContext):
-        pass
-
-
     # Enter a parse tree produced by CParser#EmptyStatement.
     def enterEmptyStatement(self, ctx:CParser.EmptyStatementContext):
         pass

@@ -262,3 +262,16 @@ class ASTListener(CListener):
 
     def exitFunctionCall(self, ctx:CParser.FunctionCallContext):
         self.curr_node = self.curr_node.parent.parent
+
+    def enterBreakStatement(self, ctx:CParser.BreakStatementContext):
+        self.curr_node.add_child(BreakNode(self.counter.incr()))
+        
+    def enterContinueStatement(self, ctx:CParser.ContinueStatementContext):
+        self.curr_node.add_child(ContinueNode(self.counter.incr()))
+
+    def enterReturnStatement(self, ctx:CParser.ReturnStatementContext):
+        self.curr_node.add_child(ReturnNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    def exitReturnStatement(self, ctx:CParser.ReturnStatementContext):
+        self.curr_node = self.curr_node.parent

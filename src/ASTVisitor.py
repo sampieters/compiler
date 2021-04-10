@@ -147,6 +147,14 @@ class ASTVisitor:
         # print("Exiting Continue Node")
         pass
 
+    def enterReturn(self, node):
+        # print("Entering Return Node")
+        pass
+
+    def exitReturn(self, node):
+        # print("Exiting Return Node")
+        pass
+
     def enterFunctionCall(self, node):
         # print("Entering Function Call Node")
         pass

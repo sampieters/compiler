@@ -3,7 +3,7 @@ from ASTVisitor import ASTVisitor
 
 
 class ASTNode:
-    def __init__(self, node_id=0):
+    def __init__(self, node_id=1):
         self.id = node_id
         self.parent = None
         self.children = None
@@ -38,7 +38,7 @@ class ASTNode:
     def to_dot(self, filename):
         file = open(filename + ".dot", "w")
         file.write("digraph AST {\n")
-        file.write("\tnode0[label=\"" + str(self) + "\"]\n")
+        file.write("\tnode1[label=\"" + str(self) + "\"]\n")
         self.to_dot_recursive(file)
         file.write("}")
 
@@ -347,6 +347,18 @@ class ContinueNode(ASTNode):
         visitor.enterContinue(self)
         self.visitChildren(visitor)
         visitor.exitContinue(self)
+
+class ReturnNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+
+    def __str__(self):
+        return 'return'
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.enterReturn(self)
+        self.visitChildren(visitor)
+        visitor.exitReturn(self)
 
 class FunctionCallNode(ASTNode):
     def __init__(self, node_id):

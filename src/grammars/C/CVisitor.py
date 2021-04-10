@@ -79,11 +79,6 @@ class CVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by CParser#EmptyReturnStatement.
-    def visitEmptyReturnStatement(self, ctx:CParser.EmptyReturnStatementContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by CParser#EmptyStatement.
     def visitEmptyStatement(self, ctx:CParser.EmptyStatementContext):
         return self.visitChildren(ctx)

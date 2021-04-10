@@ -11,6 +11,8 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
+        if node.type == "void":
+            raise Exception("Variable has incomplete type 'void'")
         if node.isBeingDeclared():
             def_node = self.table.get_symbol_curr_scope(node.name)
             # If the identifier was already declared before
@@ -34,6 +36,8 @@ class SemanticalErrorVisitor(ASTVisitor):
                 node.type = def_node.type
 
     def exitUnaryOperation(self, node):
+        if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
+            print("Warning: Expression result unused")
         if node.operation in BOOLEAN_OPS:
             node.type = "i32"
         elif node.operation == "*":
@@ -47,10 +51,14 @@ class SemanticalErrorVisitor(ASTVisitor):
             node.type = node.children[0].type
 
     def exitBinaryOperation(self, node):
+        if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
+            print("Warning: Expression result unused")
         if node.operation in BOOLEAN_OPS:
             node.type = "i32"
         else:
             node.type = getBinaryType(node.children[0].type, node.children[1].type)
+            if node.operation == "%" and node.type in ["float", "double"]:
+                raise Exception(f"Error: Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}'")
 
     def exitDefinition(self, node):
         if checkInfoLoss(node.children[0].children[0].type, node.children[1].type):
@@ -67,4 +75,11 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitDeclaration(self, node):
         pass
 
+    def exitBreak(self, node):
+        if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, WhileNode)):
+            raise Exception("'break' statement not in loop or switch statement")
+
+    def exitContinue(self, node):
+        if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, WhileNode)):
+            raise Exception("'continue' statement not in loop statement")
     # TODO: make sure break continue are only used in loops, function declarations/definitions are only used in global scope

@@ -13,9 +13,11 @@ class LLVMVisitor(ASTVisitor):
     def storeVariable(self, node, value):
         """Stores value (node with a type) into a variable from the symbol table"""
         instruction = "store "
+        node = self.getSymbol(node)
+        value = self.getSymbol(value)
+
         # If we want to store a variable
         if isinstance(value, IdentifierNode):
-            value = self.getSymbol(value)
             # Load the variable into a new temporary address before storing it
             self.loadVariable(value)
             instruction += value.type + " %" + value.temp_address
@@ -28,7 +30,6 @@ class LLVMVisitor(ASTVisitor):
         
         # If the node is a variable, get the node from the symbol table and store into the original address
         if isinstance(node, IdentifierNode):
-            node = self.getSymbol(node)
             instruction += ", " + node.type + "* " + node.original_address + ", align " + node.alignment()
         # Otherwise, store into the temporary address of the node
         else:
@@ -50,6 +51,9 @@ class LLVMVisitor(ASTVisitor):
         # type1 identifier_1 = something;
         # type2 identifier_2 = identifier_1; <-- This in this function is converted to llvm
         # node parameter needs to have type 1 in it
+        node1 = self.getSymbol(node1)
+        node2 = self.getSymbol(node2)
+
         if node1.type.endswith("*"):
             self.typeToRightType(node1, IdentifierNode(None, None, "i64"))
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node1.type
@@ -87,16 +91,15 @@ class LLVMVisitor(ASTVisitor):
     def exitAssignment(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the assignment into the variable on the left
-        self.convertType(self.getSymbol(node.children[0]), node.children[1])
+        self.convertType(node.children[0], node.children[1])
         self.storeVariable(node.children[0], node.children[1])
 
     def exitUnaryOperation(self, node):
         """Transform unary operation node to LLVM"""
-        child = node.children[0]
+        child = self.getSymbol(node.children[0])
         # If the unary operation is performed on a variable, load it into a new temporary address
         if isinstance(child, IdentifierNode):
-            var = self.getSymbol(child)
-            self.loadVariable(var.name)
+            self.loadVariable(child)
         node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
         temp = unaryOpToLLVM(node.operation)
@@ -105,7 +108,7 @@ class LLVMVisitor(ASTVisitor):
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, IdentifierNode):
                 instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + \
-                             str(self.getSymbol(child).temp_address)
+                             str(child.temp_address)
             elif isinstance(child, LiteralNode):
                 # CONFUSED (weet niet wat eerste parameter is voor store variable)
                 self.storeVariable(node, child)
@@ -153,20 +156,21 @@ class LLVMVisitor(ASTVisitor):
 
     def exitBinaryOperation(self, node):
         """Convert binary operation node to LLVM"""
+        child1 = self.getSymbol(node.children[0])
+        child2 = self.getSymbol(node.children[1])
         # For each child that is a variable, load the variable into a new temporary address
-        for child in node.children:
+        for child in [child1, child2]:
             if isinstance(child, IdentifierNode):
-                var = self.getSymbol(child)
-                self.loadVariable(var)
+                self.loadVariable(child)
         # Store the result of the binary operation in a new address
         node.temp_address = self.counter.incr()
         # Convert the children to LLVM, depending on their node types
         children_LLVM = []
-        for child in node.children:
+        for child in [child1, child2]:
             if isinstance(child, LiteralNode):
                 children_LLVM.append(child.getValue())
             else:
-                children_LLVM.append(child.type + " %" + str(self.getSymbol(child).temp_address))
+                children_LLVM.append(child.type + " %" + str(child.temp_address))
         # Construct the LLVM instruction
         instruction = '%' + node.temp_address + " = " + self.binaryOpToLLVM(node) + ' ' + ", ".join(children_LLVM)
         self.LLVM.append("  " + instruction)

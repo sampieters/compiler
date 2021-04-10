@@ -26,7 +26,7 @@ class SymbolTable:
     def add_symbol(self, symbol):
         """
         Adds a symbol to the symbol table
-        @params: symbol = IdentifierNode
+        @params: symbol = IdentifierNode or FunctionNode
         """
         self.symbols[symbol.name] = symbol
 

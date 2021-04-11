@@ -375,7 +375,7 @@ class LLVMVisitor(ASTVisitor):
         return ret_val
 
     def getSymbol(self, node):
-        if isinstance(node, IdentifierNode):
+        if isinstance(node, IdentifierNode) and node.name is not None:
             return self.table.get_symbol(node.name)
         else:
             return node

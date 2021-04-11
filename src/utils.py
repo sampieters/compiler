@@ -108,7 +108,10 @@ def getBinaryType(type_1, type_2):
 
 def checkInfoLoss(type_1, type_2):
     # returns true if an information loss occurs when converting type 1 to type 2
-    return CONVERSION_HIERARCHY[type_1] > CONVERSION_HIERARCHY[type_2]
+    try:
+        return CONVERSION_HIERARCHY[type_1] > CONVERSION_HIERARCHY[type_2]
+    except KeyError:
+        return False
 
 
 def LiteralToLLVM(literal, type):

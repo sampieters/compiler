@@ -61,7 +61,12 @@ class SemanticalErrorVisitor(ASTVisitor):
                 raise Exception(f"Error: Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}'")
 
     def exitDefinition(self, node):
-        if checkInfoLoss(node.children[1].type, node.children[0].children[0].type):
+        if child1.type.endswith("*"):
+            if child2.type in INTEGER_TYPES:
+                print(f"Warning: Incompatible integer to pointer conversion initializing '{child1.type}' with an expression of type '{child2.type}'")
+            else:
+                raise Exception(f"Error: Initializing '{child1.type}' with an expression of incompatible type '{child2.type}'")
+        elif checkInfoLoss(node.children[1].type, node.children[0].children[0].type):
             print(f"Warning: implicit conversion from '{node.children[1].type}' to '{node.children[0].children[0].type}' can cause a loss of information.")
 
     def exitAssignment(self, node):
@@ -69,7 +74,12 @@ class SemanticalErrorVisitor(ASTVisitor):
         for child in [child1, child2]:
             if isinstance(IdentifierNode, child):
                 child = self.table.get_symbol(child.name)
-        if checkInfoLoss(child2.type, child1.type):
+        if child1.type.endswith("*"):
+            if child2.type in INTEGER_TYPES:
+                print(f"Warning: Incompatible integer to pointer conversion assigning to '{child1.type}' from '{child2.type}'")
+            else:
+                raise Exception(f"Error: Assigning to '{child1.type}' from incompatible type '{child2.type}'")
+        elif checkInfoLoss(child2.type, child1.type):
             print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitDeclaration(self, node):

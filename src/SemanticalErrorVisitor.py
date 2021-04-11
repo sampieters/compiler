@@ -61,13 +61,15 @@ class SemanticalErrorVisitor(ASTVisitor):
                 raise Exception(f"Error: Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}'")
 
     def exitDefinition(self, node):
+        child1 = node.children[0].children[0]
+        child2 = node.children[1]
         if child1.type.endswith("*"):
             if child2.type in INTEGER_TYPES:
                 print(f"Warning: Incompatible integer to pointer conversion initializing '{child1.type}' with an expression of type '{child2.type}'")
             else:
                 raise Exception(f"Error: Initializing '{child1.type}' with an expression of incompatible type '{child2.type}'")
-        elif checkInfoLoss(node.children[1].type, node.children[0].children[0].type):
-            print(f"Warning: implicit conversion from '{node.children[1].type}' to '{node.children[0].children[0].type}' can cause a loss of information.")
+        elif checkInfoLoss(child2.type, child1.type):
+            print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitAssignment(self, node):
         child1, child2 = node.children

@@ -13,7 +13,7 @@ from LLVMVisitor import LLVMVisitor
 if __name__ == '__main__':
     var = input("Please enter test file: ")
 
-    f1 = open("tests/" + var)
+    f1 = open("src/tests/" + var)
     line = f1.read()
     f1.close()
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     #AST.to_dot("tests/TEST_AST_OPT")
 
-    with open("tests/" + var + "_RESULT", 'w') as f2:
+    with open("src/tests/" + var + "_RESULT", 'w+') as f2:
         f2.write("\n".join(visitor_llvm.LLVM))
     f2.close()
 

@@ -295,23 +295,19 @@ class LLVMVisitor(ASTVisitor):
     def unaryOpToLLVM(self, node):
         child = self.getSymbol(node.children[0])
 
-        ret_val = ""
         try:
             operation = UNARY_OPS_LLVM[node.operation]
         except KeyError:
             raise Exception(f"Invalid unary operation '{node.operation}'")
 
-        # STEP 1: The actual operation
-        ret_val += operation[0] + " "
-
-        # STEP 2: Check if signed or unsigned
+        # Check if signed or unsigned
         if "unsigned" in child.type_semantics:
             if operation[0] == "sub":
-                ret_val += "nuw"
+                operation[0] += " nuw"
         else:
             if operation[0] == "sub":
-                ret_val += "nsw"
-        return [ret_val, operation[1]]
+                operation[0] += " nsw"
+        return operation
 
     def binaryOpToLLVM(self, node):
         child1 = self.getSymbol(node.children[0])
@@ -322,13 +318,12 @@ class LLVMVisitor(ASTVisitor):
             operation = BINARY_OPS_LLVM[node.operation]
         except KeyError:
             raise Exception(f"Invalid binary operation '{node.operation}'")
-        _type = getBinaryType(node.children[0].type, node.children[1].type)
 
         # STEP 1: check f or i (example: icmp or fcmp || add or fadd
-        if _type.startswith("i"):
+        if node.type.startswith("i"):
             if operation[0] == "cmp":
                 ret_val += "i"
-            if operation[0] == "div" or operation[0] == "rem":
+            elif operation[0] == "div" or operation[0] == "rem":
                 if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
                     ret_val += "u"
                 else:
@@ -341,31 +336,30 @@ class LLVMVisitor(ASTVisitor):
 
         # STEP 3: Check if signed or unsigned
         if operation[0] != "div" and operation[0] != "rem":
-            ret_val += " "
             if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
                 if _type.startswith("i"):
                     if not operation[0] == "cmp":
-                        ret_val += "nuw"
+                        ret_val += " nuw"
                     elif operation[1] != "eq" and operation[1] != "ne":
-                        ret_val += "u"
+                        ret_val += " u"
                 else:
                     if operation[0] == "cmp":
                         if operation[1] != "ne":
-                            ret_val += "o"
+                            ret_val += " o"
                         else:
-                            ret_val += "u"
+                            ret_val += " u"
             else:
-                if _type.startswith("i"):
+                if node.type.startswith("i"):
                     if not operation[0] == "cmp":
-                        ret_val += "nsw"
+                        ret_val += " nsw"
                     elif operation[1] != "eq" and operation[1] != "ne":
-                        ret_val += "s"
+                        ret_val += " s"
                 else:
                     if operation[0] == "cmp":
                         if operation[1] != "ne":
-                            ret_val += "o"
+                            ret_val += " o"
                         else:
-                            ret_val += "u"
+                            ret_val += " u"
 
             if len(operation) == 2:
                 ret_val += operation[1]

@@ -192,7 +192,7 @@ class UnaryOperationNode(ASTNode):
         if self.operation == '!':
             result = int(self.children[0] == 0)
         else:
-            result = eval(self.operation + str(self.children[0]))
+            result = eval(self.operation + str(self.children[0].value))
         # Replace this node by the calculated result
         new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent

@@ -33,7 +33,7 @@ BINARY_OPS_LLVM = {
 def getTypeLLVM(_type):
     ret_val = ["", []]
 
-    for keyword in ["const", "unsigned"]:
+    for keyword in ["const", "unsigned", "signed"]:
         if keyword in _type:
             ret_val[1].append(keyword)
             _type = _type.replace(keyword, "")

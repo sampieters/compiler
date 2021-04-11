@@ -216,7 +216,7 @@ class BinaryOperationNode(ASTNode):
 
     def fold(self, _type):
         # Calculate the result of the binary operation in order to fold
-        result = eval(str(self.children[0]) + self.operation + str(self.children[1]))
+        result = eval(str(self.children[0].value) + self.operation + str(self.children[1].value))
         # Replace this node by the calculated result
         new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent

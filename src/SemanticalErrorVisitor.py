@@ -61,16 +61,16 @@ class SemanticalErrorVisitor(ASTVisitor):
                 raise Exception(f"Error: Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}'")
 
     def exitDefinition(self, node):
-        if checkInfoLoss(node.children[0].children[0].type, node.children[1].type):
-            print(f"Warning: implicit conversion from '{node.children[0].children[0].type}' to '{node.children[1].type}' can cause a loss of information.")
+        if checkInfoLoss(node.children[1].type, node.children[0].children[0].type):
+            print(f"Warning: implicit conversion from '{node.children[1].type}' to '{node.children[0].children[0].type}' can cause a loss of information.")
 
     def exitAssignment(self, node):
         child1, child2 = node.children
         for child in [child1, child2]:
             if isinstance(IdentifierNode, child):
                 child = self.table.get_symbol(child.name)
-        if checkInfoLoss(child1.type, child2.type):
-            print(f"Warning: implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
+        if checkInfoLoss(child2.type, child1.type):
+            print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitDeclaration(self, node):
         pass

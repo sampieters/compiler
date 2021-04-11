@@ -1,8 +1,10 @@
 CONVERSION_HIERARCHY = {"i8": 0, "i16": 1, "i32": 2, "i64": 3, "float": 4, "double": 5, "x86_fp80": 6}
 ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
 
-BOOLEAN_OPS = {"!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"}
-POINTER_OPS = {"*", "&"}
+BOOLEAN_OPS = ["!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"]
+POINTER_OPS = ["*", "&"]
+INTEGER_TYPES = ["i8", "i16", "i32", "i64"]
+DECIMAL_TYPES = ["float", "double", "x86_fp80"]
 
 UNARY_OPS_LLVM = {
             "+": ["", ""],
@@ -67,6 +69,7 @@ def getAlignment(node):
         return ALIGNMENT[node.type]
 
 def getConversionFunction(node1, node2):
+    # Get conversion function when converting node1 type to node2 type
     ret_val = ""
     if node1.type == node2.type:
         return None
@@ -104,8 +107,8 @@ def getBinaryType(type_1, type_2):
 
 
 def checkInfoLoss(type_1, type_2):
-    # returns true for info loss
-    return CONVERSION_HIERARCHY[type_1] < CONVERSION_HIERARCHY[type_2]
+    # returns true if an information loss occurs when converting type 1 to type 2
+    return CONVERSION_HIERARCHY[type_1] > CONVERSION_HIERARCHY[type_2]
 
 
 def LiteralToLLVM(literal, type):

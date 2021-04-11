@@ -51,12 +51,30 @@ class LLVMVisitor(ASTVisitor):
         # type1 identifier_1 = something;
         # type2 identifier_2 = identifier_1; <-- This in this function is converted to llvm
         # node parameter needs to have type 1 in it
+        # Convert node1 type to node2 type
+        #TODO: kommagetallen (literals) kunnen zowel float als double zijn dus conversie niet nodig
         node1 = self.getSymbol(node1)
         node2 = self.getSymbol(node2)
+        # If the node being converted is a literal, modify the literal so no conversion is needed
+        if isinstance(node1, LiteralNode):
+            if node1.type == "i8":
+                node1.value = ord(node1.value)
 
-        if node1.type.endswith("*"):
-            self.typeToRightType(node1, IdentifierNode(None, None, "i64"))
-            instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node1.type
+            # If the literal is an integer that has to be converted to decimal, use scientific notation
+            if node1.type in INTEGER_TYPES and node2.type in DECIMAL_TYPES:
+                node1.value = "{:e}".format(node1.value)
+            # If the literal is a decimal that has to be converted to integer, floor the value
+            elif node1.type in DECIMAL_TYPES and node2.type in INTEGER_TYPES:
+                node1.value = int(node1.value)
+
+            node1.type = node2.type
+
+            return
+
+        if node2.type.endswith("*"):
+            self.convertType(node1, IdentifierNode(None, None, "i64"))
+            instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
+        
         else:
             function = getConversionFunction(node1, node2)
             if not function:
@@ -85,13 +103,13 @@ class LLVMVisitor(ASTVisitor):
     def exitDefinition(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the definition into the variable on the left, the rest is handled by declaration
-        self.convertType(node.children[0].children[0], node.children[1])
+        self.convertType(node.children[1], node.children[0].children[0])
         self.storeVariable(node.children[0].children[0], node.children[1])
 
     def exitAssignment(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the assignment into the variable on the left
-        self.convertType(node.children[0], node.children[1])
+        self.convertType(node.children[1], node.children[0])
         self.storeVariable(node.children[0], node.children[1])
 
     def exitUnaryOperation(self, node):
@@ -153,8 +171,6 @@ class LLVMVisitor(ASTVisitor):
             if isinstance(child, IdentifierNode):
                 self.loadVariable(child)
             node.temp_address = self.counter.counter
-            print(node)
-            print("AAAAAAAAAAAA", node.temp_address)
             #TODO: Don't need to check Literal Node because is solved in Optimisation Visitor, but might want to implement this later
             if isinstance(child, BinaryOperationNode):
                 # TODO: split up in separate functions?
@@ -179,6 +195,8 @@ class LLVMVisitor(ASTVisitor):
         children_LLVM = []
         the_type = getBinaryType(child1.type, child2.type)
         for child in [child1, child2]:
+            # Convert the child to the binary operation type, so that both children have the same type
+            self.convertType(child, IdentifierNode(None, None, the_type))
             if isinstance(child, LiteralNode):
                 children_LLVM.append(child.getValue())
             else:

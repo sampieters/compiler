@@ -4,18 +4,8 @@ digraph AST {
 	node1->node2
 	node3[label="declare(None)"]
 	node2->node3
-	node4[label="i(i32)"]
+	node4[label="a(float)"]
 	node3->node4
-	node5[label="5(i32)"]
+	node5[label="4.6(float)"]
 	node2->node5
-	node6[label="define(None)"]
-	node1->node6
-	node7[label="declare(None)"]
-	node6->node7
-	node8[label="j(i32)"]
-	node7->node8
-	node9[label="!(i32)"]
-	node6->node9
-	node10[label="i(i32)"]
-	node9->node10
 }

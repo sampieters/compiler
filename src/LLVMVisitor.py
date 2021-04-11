@@ -87,6 +87,7 @@ class LLVMVisitor(ASTVisitor):
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
         node1.temp_address = self.counter.counter - 1
+        node1.type = node2.type
         self.LLVM.append("  " + instruction)
 
     def exitDeclaration(self, node):
@@ -178,10 +179,7 @@ class LLVMVisitor(ASTVisitor):
             if not isinstance(child, LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " %" + str(child.temp_address) + ", 0")
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
-                # self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32")
-                # if child.type == "i64":
-                #     self.LLVM.append("  %" + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64")
-                #TODO: Nog iets doen voor i32 om te zetten naar type
+                self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
 
 
@@ -208,9 +206,8 @@ class LLVMVisitor(ASTVisitor):
         # Construct the LLVM instruction
         instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ",".join(children_LLVM)
         self.LLVM.append("  " + instruction)
-        #if node.operation in ["<", ">", "==", "!=", "<=", ">="]:
-        #    #TODO: JOSHHIII HIER GEHARDCODE
-        #    self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter-2) + " to i32")
+        if node.operation in BOOLEAN_OPS:
+            self.convertType(node, IdentifierNode(None, None, "i32"))
 
     def enterWhile(self, node):
         self.LLVM.append("  br label %" + str(self.counter.counter))

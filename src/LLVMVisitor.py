@@ -171,15 +171,15 @@ class LLVMVisitor(ASTVisitor):
             if isinstance(child, IdentifierNode):
                 self.loadVariable(child)
             node.temp_address = self.counter.counter
-            #TODO: Don't need to check Literal Node because is solved in Optimisation Visitor, but might want to implement this later
-            if isinstance(child, BinaryOperationNode):
-                # TODO: split up in separate functions?
-                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " %" + child.temp_address + ", 0")
+            if not isinstance(child, LiteralNode):
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " %" + str(child.temp_address) + ", 0")
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
                 self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32")
                 if child.type == "i64":
                     self.LLVM.append("  %" + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64")
                 #TODO: Nog iets doen voor i32 om te zetten naar type
+                node.temp_address = self.counter.counter-1
+
 
     def exitBinaryOperation(self, node):
         """Convert binary operation node to LLVM"""
@@ -202,7 +202,7 @@ class LLVMVisitor(ASTVisitor):
             else:
                 children_LLVM.append(" %" + str(child.temp_address))
         # Construct the LLVM instruction
-        instruction = '%' + node.temp_address + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ",".join(children_LLVM)
+        instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ",".join(children_LLVM)
         self.LLVM.append("  " + instruction)
         if node.operation in ["<", ">", "==", "!=", "<=", ">="]:
             #TODO: JOSHHIII HIER GEHARDCODE
@@ -266,7 +266,7 @@ class LLVMVisitor(ASTVisitor):
                 condition = self.getSymbol(node.parent.children[0])
                 self.loadVariable(condition)
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
-                                condition.type + " %" + condition.temp_address + ", 0")
+                                condition.type + " %" + str(condition.temp_address) + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " " + str(node.parent.children[0].value) + ", 0")
             self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")

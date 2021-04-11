@@ -177,6 +177,7 @@ class UnaryOperationNode(ASTNode):
         super().__init__(node_id)
         self.operation = operation
         self.type = None
+        self.type_semantics = []
         self.temp_address = None
 
     def __str__(self):
@@ -190,7 +191,7 @@ class UnaryOperationNode(ASTNode):
     def fold(self, _type):
         # Calculate the result of the unary operation in order to fold, handle ! separately as this has different syntax in python
         if self.operation == '!':
-            result = int(self.children[0] == 0)
+            result = int(self.children[0].value == 0)
         else:
             result = eval(self.operation + str(self.children[0].value))
         # Replace this node by the calculated result
@@ -204,6 +205,7 @@ class BinaryOperationNode(ASTNode):
         super().__init__(node_id)
         self.operation = operation
         self.type = None
+        self.type_semantics = []
         self.temp_address = None
 
     def __str__(self):

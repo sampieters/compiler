@@ -25,7 +25,7 @@ geïmplementeerd van opdracht 1:
 
 - (Mandatory) Binary operations +, -, * and / (voltooid)
 - (Mandatory) Comparison operators >, <, and == (voltooid)
-- (Mandatory) Unary operators + and - (voltooid NOG KIJKEN VOOR unsigned en signed)
+- (Mandatory) Unary operators + and - (voltooid)
 - (Mandatory) Brackets to overwrite the order of operations (voltooid)
 - (Mandatory) Binary operator % (voltooid)
 - (optional) Comparison operators >=, <=, != (voltooid)
@@ -72,7 +72,6 @@ geïmplementeerd van opdracht 5:
 geïmplementeerd van opdracht 6 (niet voltooid)
 
 #TODO:
-1) opdracht 1 --> fout bij folding wanneer int i = -17;
 1) opdracht 1 --> fadd, fsub, fmul hebben een spatie te veel in LLVM waarom???
 2) opdracht 2 --> functie om omzettingen te maken van 5.0 naar 5.00000e+10 (ofzoiets) en een char a naar zijn integer value
     

@@ -1,9 +1,9 @@
-CONVERSION_HIERARCHY = {"i8": 0, "i16": 1, "i32": 2, "i64": 3, "float": 4, "double": 5, "x86_fp80": 6}
+CONVERSION_HIERARCHY = {"i1": 0, "i8": 1, "i16": 2, "i32": 3, "i64": 4, "float": 5, "double": 6, "x86_fp80": 7}
 ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
 
 BOOLEAN_OPS = ["!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"]
 POINTER_OPS = ["*", "&"]
-INTEGER_TYPES = ["i8", "i16", "i32", "i64"]
+INTEGER_TYPES = ["i1", "i8", "i16", "i32", "i64"]
 DECIMAL_TYPES = ["float", "double", "x86_fp80"]
 
 UNARY_OPS_LLVM = {

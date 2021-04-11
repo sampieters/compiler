@@ -39,7 +39,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             print("Warning: Expression result unused")
         if node.operation in BOOLEAN_OPS:
-            node.type = "i32"
+            node.type = "i1"
         elif node.operation == "*":
             if not node.children[0].type.endswith("*"):
                 raise Exception(f"Error: Indirection requires pointer operand ('{node.children[0].type}' invalid)")
@@ -54,7 +54,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             print("Warning: Expression result unused")
         if node.operation in BOOLEAN_OPS:
-            node.type = "i32"
+            node.type = "i1"
         else:
             node.type = getBinaryType(node.children[0].type, node.children[1].type)
             if node.operation == "%" and node.type in ["float", "double"]:

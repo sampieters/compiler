@@ -71,10 +71,14 @@ class LLVMVisitor(ASTVisitor):
 
             return
 
+        # If converting a boolean, start by converting to i32
+        if node1.type == "i1":
+            self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter-2) + " to i32")
+            node1.type = "i32"
+        # If converting to a pointer, start by converting to i64, then use inttoptr
         if node2.type.endswith("*"):
             self.convertType(node1, IdentifierNode(None, None, "i64"))
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
-        
         else:
             function = getConversionFunction(node1, node2)
             if not function:
@@ -174,9 +178,9 @@ class LLVMVisitor(ASTVisitor):
             if not isinstance(child, LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " %" + str(child.temp_address) + ", 0")
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
-                self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32")
-                if child.type == "i64":
-                    self.LLVM.append("  %" + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64")
+                # self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter - 2) + " to i32")
+                # if child.type == "i64":
+                #     self.LLVM.append("  %" + self.counter.incr() + " = sext i32 %" + str(self.counter.counter - 2) + " to i64")
                 #TODO: Nog iets doen voor i32 om te zetten naar type
                 node.temp_address = self.counter.counter-1
 
@@ -204,9 +208,9 @@ class LLVMVisitor(ASTVisitor):
         # Construct the LLVM instruction
         instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ",".join(children_LLVM)
         self.LLVM.append("  " + instruction)
-        if node.operation in ["<", ">", "==", "!=", "<=", ">="]:
-            #TODO: JOSHHIII HIER GEHARDCODE
-            self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter-2) + " to i32")
+        #if node.operation in ["<", ">", "==", "!=", "<=", ">="]:
+        #    #TODO: JOSHHIII HIER GEHARDCODE
+        #    self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter-2) + " to i32")
 
     def enterWhile(self, node):
         self.LLVM.append("  br label %" + str(self.counter.counter))

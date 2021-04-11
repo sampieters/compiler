@@ -1,0 +1,20 @@
+    int int3 = 20;
+    unsigned int int4 = 13;
+
+    int3 + int4;
+    int3 - int4;
+    int3 * int4;
+    int3 / int4;
+
+    int3 > int4;
+    int3 < int4;
+    int3 == int4;
+
+    +int3;
+    -int4;
+
+    int3 % int4;
+
+    int3 >= int4;
+    int3 <= int4;
+    int3 != int4;

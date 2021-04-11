@@ -97,14 +97,14 @@ class LLVMVisitor(ASTVisitor):
     def exitUnaryOperation(self, node):
         """Transform unary operation node to LLVM"""
         child = self.getSymbol(node.children[0])
-        # If the unary operation is performed on a variable, load it into a new temporary address
-        if isinstance(child, IdentifierNode):
-            self.loadVariable(child)
-        node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
         temp = self.unaryOpToLLVM(node)
         # If the unary operation is -
         if node.operation == '-':
+            # If the unary operation is performed on a variable, load it into a new temporary address
+            if isinstance(child, IdentifierNode):
+                self.loadVariable(child)
+            node.temp_address = str(self.counter)
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, IdentifierNode):
                 instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
@@ -121,11 +121,12 @@ class LLVMVisitor(ASTVisitor):
             # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(child)
-            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "int", -1))            
+            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "i32", -1))
             bin_op.type = child.type
             bin_op.temp_address = str(self.counter)
             # Perform the binary operation
-            self.performBinaryOp(bin_op)
+            #self.binaryOpToLLVM(bin_op)
+            self.exitBinaryOperation(bin_op)
             # Store the result of the operation to the original variable
             self.storeVariable(child, bin_op)
         elif node.operation == "x++" or node.operation == "x--":
@@ -134,11 +135,13 @@ class LLVMVisitor(ASTVisitor):
             # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(child)
-            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "int", -1))
+            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "i32", -1))
             bin_op.type = child.type
             bin_op.temp_address = str(self.counter)
             # Perform the binary operation
-            self.performBinaryOp(bin_op)
+            #self.binaryOpToLLVM(bin_op)
+            self.exitBinaryOperation(bin_op)
+
             # Store the result of the operation to the original variable
             self.storeVariable(child, bin_op)
         # If the operation is !
@@ -165,14 +168,18 @@ class LLVMVisitor(ASTVisitor):
         node.temp_address = self.counter.incr()
         # Convert the children to LLVM, depending on their node types
         children_LLVM = []
+        the_type = getBinaryType(child1.type, child2.type)
         for child in [child1, child2]:
             if isinstance(child, LiteralNode):
                 children_LLVM.append(child.getValue())
             else:
-                children_LLVM.append(child.type + " %" + str(child.temp_address))
+                children_LLVM.append(" %" + str(child.temp_address))
         # Construct the LLVM instruction
-        instruction = '%' + node.temp_address + " = " + self.binaryOpToLLVM(node) + ' ' + ", ".join(children_LLVM)
+        instruction = '%' + node.temp_address + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ",".join(children_LLVM)
         self.LLVM.append("  " + instruction)
+        if node.operation in ["<", ">", "==", "!=", "<=", ">="]:
+            #TODO: JOSHHIII HIER GEHARDCODE
+            self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter-2) + " to i32")
 
     def enterWhile(self, node):
         self.LLVM.append("  br label %" + str(self.counter.counter))
@@ -276,7 +283,7 @@ class LLVMVisitor(ASTVisitor):
         else:
             if operation[0] == "sub":
                 ret_val += "nsw"
-        return ret_val
+        return [ret_val, operation[1]]
 
     def binaryOpToLLVM(self, node):
         child1 = self.getSymbol(node.children[0])
@@ -293,13 +300,13 @@ class LLVMVisitor(ASTVisitor):
         if _type.startswith("i"):
             if operation[0] == "cmp":
                 ret_val += "i"
+            if operation[0] == "div" or operation[0] == "rem":
+                if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
+                    ret_val += "u"
+                else:
+                    ret_val += "s"
         else:
             ret_val += "f"
-        if operation[0] == "div" or operation[0] == "rem":
-            if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
-                ret_val += "u"
-            else:
-                ret_val += "s"
 
         # STEP 2: The actual operation
         ret_val += operation[0]
@@ -308,15 +315,29 @@ class LLVMVisitor(ASTVisitor):
         if operation[0] != "div" and operation[0] != "rem":
             ret_val += " "
             if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
-                if not operation[0] == "cmp":
-                    ret_val += "nuw"
-                elif operation[1] != "eq" and operation[1] != "ne":
-                    ret_val += "u"
+                if _type.startswith("i"):
+                    if not operation[0] == "cmp":
+                        ret_val += "nuw"
+                    elif operation[1] != "eq" and operation[1] != "ne":
+                        ret_val += "u"
+                else:
+                    if operation[0] == "cmp":
+                        if operation[1] != "ne":
+                            ret_val += "o"
+                        else:
+                            ret_val += "u"
             else:
-                if not operation[0] == "cmp":
-                    ret_val += "nsw"
-                elif operation[1] != "eq" and operation[1] != "ne":
-                    ret_val += "s"
+                if _type.startswith("i"):
+                    if not operation[0] == "cmp":
+                        ret_val += "nsw"
+                    elif operation[1] != "eq" and operation[1] != "ne":
+                        ret_val += "s"
+                else:
+                    if operation[0] == "cmp":
+                        if operation[1] != "ne":
+                            ret_val += "o"
+                        else:
+                            ret_val += "u"
 
             if len(operation) == 2:
                 ret_val += operation[1]

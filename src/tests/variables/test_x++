@@ -1,0 +1,9 @@
+    int integer = 5;
+    char character = 'a';
+    float dubbelepunt = 5.0002;
+    double dubble = 4.43434343434;
+
+    integer++;
+    character++;
+    dubbelepunt++;
+    dubble++;

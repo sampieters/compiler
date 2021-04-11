@@ -70,5 +70,11 @@ geïmplementeerd van opdracht 5:
 - (Mandatory) Functions (nog niet voltooid)
 
 geïmplementeerd van opdracht 6 (niet voltooid)
+
+#TODO:
+1) opdracht 1 --> Error wanneer float % float nog doen (denk ik)
+2) opdracht 1 --> test van float -float is fneg i.p.v. sub (laten we het zo of toch veranderen)
+3) opdracht 1 --> fadd, fsub, fmul hebben een spatie te veel in LLVM waarom???
+4) opdracht 2 --> functie om omzettingen te maken van 5.0 naar 5.00000e+10 (ofzoiets) en een char a naar zijn integer value
     
 

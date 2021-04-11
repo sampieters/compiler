@@ -1,0 +1,24 @@
+  %1 = alloca i32, align 4
+  %2 = alloca i8, align 1
+  %3 = alloca float, align 4
+  %4 = alloca double, align 8
+  %5 = alloca i32, align 4
+  %6 = alloca i8, align 1
+  %7 = alloca float, align 4
+  %8 = alloca double, align 8
+  %9 = alloca i32, align 4
+  %10 = alloca i8, align 1
+  %11 = alloca float, align 4
+  %12 = alloca double, align 8
+  store i32 1, i32* %1, align 4
+  store i8 2, i8* %2, align 1
+  store float 3.000000e+00, float* %3, align 4
+  store double 4.000000e+00, double* %4, align 8
+  store i32 1, i32* %5, align 4
+  store i8 2, i8* %6, align 1
+  store float 3.000000e+00, float* %7, align 4
+  store double 4.000000e+00, double* %8, align 8
+  store i32 1, i32* %9, align 4
+  store i8 2, i8* %10, align 1
+  store float 0x40082FEC60000000, float* %11, align 4
+  store double 4.023400e+00, double* %12, align 8

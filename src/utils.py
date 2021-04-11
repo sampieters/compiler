@@ -106,7 +106,16 @@ def getBinaryType(type_1, type_2):
 def checkInfoLoss(type_1, type_2):
     # returns true for info loss
     return CONVERSION_HIERARCHY[type_1] < CONVERSION_HIERARCHY[type_2]
-    
+
+
+def LiteralToLLVM(literal, type):
+    new_literal = ""
+    if type == "i8":
+        new_literal = ord(literal)
+    elif type == "float" or type == "double":
+        pass
+    return new_literal
+
 
 class Counter:
     def __init__(self):

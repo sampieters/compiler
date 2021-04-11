@@ -64,7 +64,7 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
-        node1.temp_address = str(self.counter.counter-1)
+        node1.temp_address = self.counter.counter - 1
         self.LLVM.append("  " + instruction)
 
     def exitDeclaration(self, node):
@@ -104,41 +104,45 @@ class LLVMVisitor(ASTVisitor):
             # If the unary operation is performed on a variable, load it into a new temporary address
             if isinstance(child, IdentifierNode):
                 self.loadVariable(child)
-            node.temp_address = str(self.counter)
+            node.temp_address = self.counter.counter
             instruction = '%' + self.counter.incr() + " = "
-            if isinstance(child, IdentifierNode):
-                instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
-            elif isinstance(child, LiteralNode):
+            if isinstance(child, LiteralNode):
+                # TODO: Ik denk niet dat dit moet
                 # CONFUSED (weet niet wat eerste parameter is voor store variable)
                 self.storeVariable(node, child)
-            elif isinstance(child, BinaryOperationNode) or isinstance(child, UnaryOperationNode):
-                instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
+            elif isinstance(child, BinaryOperationNode) or isinstance(child, UnaryOperationNode) or isinstance(child, IdentifierNode):
+                if child.type.startswith("i"):
+                    instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
+                else:
+                    instruction += "fneg " + child.type + " %" + str(child.temp_address)
             self.LLVM.append("  " + instruction)
         # If the operation is a prefix ++ or --
         elif node.operation == "++x" or node.operation == "--x":
             # This nodes address should be the address the addition is stored in
-            node.temp_address = str(self.counter)
+            node.temp_address = self.counter.counter
             # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(child)
             bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "i32", -1))
             bin_op.type = child.type
-            bin_op.temp_address = str(self.counter)
+            bin_op.temp_address = self.counter.counter
             # Perform the binary operation
+            #TODO: Wass eerst uitgecommente maar deed een paar dingen te veel/niet dus nieuwe lijn exitBinaryOp
             #self.binaryOpToLLVM(bin_op)
             self.exitBinaryOperation(bin_op)
             # Store the result of the operation to the original variable
             self.storeVariable(child, bin_op)
         elif node.operation == "x++" or node.operation == "x--":
             # This nodes address should be the address of the node before the addition
-            node.temp_address = str(self.counter.counter - 1)
+            node.temp_address = self.counter.counter - 1
             # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(child)
             bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "i32", -1))
             bin_op.type = child.type
-            bin_op.temp_address = str(self.counter)
+            bin_op.temp_address = self.counter.counter
             # Perform the binary operation
+            #TODO: Wass eerst uitgecommente maar deed een paar dingen te veel/niet dus nieuwe lijn exitBinaryOp
             #self.binaryOpToLLVM(bin_op)
             self.exitBinaryOperation(bin_op)
 
@@ -146,6 +150,9 @@ class LLVMVisitor(ASTVisitor):
             self.storeVariable(child, bin_op)
         # If the operation is !
         elif node.operation == "!":
+            if isinstance(child, IdentifierNode):
+                self.loadVariable(child)
+            node.temp_address = self.counter.counter
             #TODO: Don't need to check Literal Node because is solved in Optimisation Visitor, but might want to implement this later
             if isinstance(child, BinaryOperationNode):
                 # TODO: split up in separate functions?
@@ -165,7 +172,7 @@ class LLVMVisitor(ASTVisitor):
             if isinstance(child, IdentifierNode):
                 self.loadVariable(child)
         # Store the result of the binary operation in a new address
-        node.temp_address = self.counter.incr()
+        node.temp_address = int(self.counter.incr())
         # Convert the children to LLVM, depending on their node types
         children_LLVM = []
         the_type = getBinaryType(child1.type, child2.type)

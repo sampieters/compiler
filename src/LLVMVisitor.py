@@ -20,20 +20,20 @@ class LLVMVisitor(ASTVisitor):
         if isinstance(value, IdentifierNode):
             # Load the variable into a new temporary address before storing it
             self.loadVariable(value)
-            instruction += value.type + " %" + value.temp_address
+            instruction += value.type + " %" + str(value.temp_address)
         # If we want to store the result of an operation
         elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
-            instruction += value.type + " %" + value.temp_address
+            instruction += value.type + " %" + str(value.temp_address)
         # If we want to store a literal
         elif isinstance(value, LiteralNode):
             instruction += value.type + ' ' + value.getValue()
         
         # If the node is a variable, get the node from the symbol table and store into the original address
         if isinstance(node, IdentifierNode):
-            instruction += ", " + node.type + "* " + node.original_address + ", align " + node.alignment()
+            instruction += ", " + node.type + "* " + str(node.original_address) + ", align " + node.alignment()
         # Otherwise, store into the temporary address of the node
         else:
-            instruction += ", " + node.type + "* " + node.temp_address + ", align " + node.alignment()
+            instruction += ", " + node.type + "* " + str(node.temp_address) + ", align " + node.alignment()
         self.LLVM.append("  " + instruction)
 
     def loadVariable(self, node):
@@ -153,6 +153,8 @@ class LLVMVisitor(ASTVisitor):
             if isinstance(child, IdentifierNode):
                 self.loadVariable(child)
             node.temp_address = self.counter.counter
+            print(node)
+            print("AAAAAAAAAAAA", node.temp_address)
             #TODO: Don't need to check Literal Node because is solved in Optimisation Visitor, but might want to implement this later
             if isinstance(child, BinaryOperationNode):
                 # TODO: split up in separate functions?

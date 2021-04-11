@@ -15,7 +15,7 @@ class OptimisationVisitor(ASTVisitor):
 
     def exitUnaryOpBoolean(self, node):
         if isinstance(node.children[0], LiteralNode):
-            node.fold("int")
+            node.fold("i32")
 
     def exitBinaryOperation(self, node):
         if node.operation in BOOLEAN_OPS:
@@ -29,4 +29,4 @@ class OptimisationVisitor(ASTVisitor):
 
     def exitBinaryOpBoolean(self, node):
         if isinstance(node.children[0], LiteralNode) and isinstance(node.children[1], LiteralNode):
-            node.fold("int")
+            node.fold("i32")

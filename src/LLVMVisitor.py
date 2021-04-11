@@ -97,14 +97,14 @@ class LLVMVisitor(ASTVisitor):
     def exitUnaryOperation(self, node):
         """Transform unary operation node to LLVM"""
         child = self.getSymbol(node.children[0])
-        # If the unary operation is performed on a variable, load it into a new temporary address
-        if isinstance(child, IdentifierNode):
-            self.loadVariable(child)
-        node.temp_address = str(self.counter)
         # Get the LLVM equivalents of the type and operation
         temp = self.unaryOpToLLVM(node)
         # If the unary operation is -
         if node.operation == '-':
+            # If the unary operation is performed on a variable, load it into a new temporary address
+            if isinstance(child, IdentifierNode):
+                self.loadVariable(child)
+            node.temp_address = str(self.counter)
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, IdentifierNode):
                 instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
@@ -121,11 +121,12 @@ class LLVMVisitor(ASTVisitor):
             # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(child)
-            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "int", -1))            
+            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "i32", -1))
             bin_op.type = child.type
             bin_op.temp_address = str(self.counter)
             # Perform the binary operation
-            self.performBinaryOp(bin_op)
+            #self.binaryOpToLLVM(bin_op)
+            self.exitBinaryOperation(bin_op)
             # Store the result of the operation to the original variable
             self.storeVariable(child, bin_op)
         elif node.operation == "x++" or node.operation == "x--":
@@ -134,11 +135,13 @@ class LLVMVisitor(ASTVisitor):
             # Convert this operation to a binary operation node
             bin_op = BinaryOperationNode("+", -1)
             bin_op.add_child(child)
-            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "int", -1))
+            bin_op.add_child(LiteralNode(eval(node.operation[1] + "1"), "i32", -1))
             bin_op.type = child.type
             bin_op.temp_address = str(self.counter)
             # Perform the binary operation
-            self.performBinaryOp(bin_op)
+            #self.binaryOpToLLVM(bin_op)
+            self.exitBinaryOperation(bin_op)
+
             # Store the result of the operation to the original variable
             self.storeVariable(child, bin_op)
         # If the operation is !

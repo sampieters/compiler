@@ -1,0 +1,14 @@
+    int integer1 = 1;
+    char character1 = 2;
+    float dubbelepunt1 = 3;
+    double dubble1 = 4;
+
+    int integer1 = 1.0;
+    char character1 = 2.0;
+    float dubbelepunt1 = 3.0;
+    double dubble1 = 4.0;
+
+    int integer1 = 1.0234;
+    char character1 = 2.0234;
+    float dubbelepunt1 = 3.0234;
+    double dubble1 = 4.0234;

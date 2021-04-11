@@ -72,8 +72,10 @@ geïmplementeerd van opdracht 5:
 geïmplementeerd van opdracht 6 (niet voltooid)
 
 #TODO:
-1) opdracht 1 --> fadd, fsub, fmul hebben een spatie te veel in LLVM waarom???
-2) opdracht 2 --> functie om omzettingen te maken van 5.0 naar 5.00000e+10 (ofzoiets) en een char a naar zijn integer value
-    
+1) zext aub weg bij while loops
+2) icmp slt bij while loop heeft een spatie te weinig, maar kvind ni war die da doet
+3) for loop doet nog iets anders (extra branch)
 # VRAGEN
 1) fneg of sub voor float
+2) beste manier om toekomstige labels te voorspellen/maken in loops
+3) nuw of geen nuw thats the question

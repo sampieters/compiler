@@ -7,6 +7,7 @@ from SymbolTable import *
 class LLVMVisitor(ASTVisitor):
     def __init__(self):
         self.LLVM = []
+        self.future_LLVM = []
         self.table = SymbolTable()
         self.counter = Counter()
 
@@ -212,7 +213,8 @@ class LLVMVisitor(ASTVisitor):
     def enterWhile(self, node):
         self.LLVM.append("  br label %" + str(self.counter.counter))
         self.LLVM.append("")
-        self.LLVM.append(self.counter.incr() + ':')
+        node.start_address = self.counter.counter
+        self.LLVM.append(self.counter.incr() + ':' + predsspaces(node.start_address) + "%IETS, %IETS")
 
     def exitIf(self, node):
         #TODO: Nog preds zoals bij while
@@ -260,25 +262,26 @@ class LLVMVisitor(ASTVisitor):
 
     def enterScope(self, node):
         #TODO:: WHUT NOG INVULLEN + preds ook nog doen + 0 moet nog verandert worden door de 0 van het juiste type
-        #9:                                                ; preds = %3
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
             if isinstance(node.parent.children[0], IdentifierNode):
                 condition = self.getSymbol(node.parent.children[0])
                 self.loadVariable(condition)
-                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
-                                condition.type + " %" + str(condition.temp_address) + ", 0")
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + condition.type + " %" + str(condition.temp_address) + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " " + str(node.parent.children[0].value) + ", 0")
-            self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
+            self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
+            self.future_LLVM.append(len(self.LLVM)-1)
             self.LLVM.append("")
-            self.LLVM.append(self.counter.incr() + ':')
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%IETS, %IETS")
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):
-            self.LLVM.append("  br label %" + str(self.counter.counter))
+            self.LLVM.append("  br label %" + str(node.parent.start_address))
             self.LLVM.append("")
-            self.LLVM.append(self.counter.incr() + ':')
+            index = self.future_LLVM.pop()
+            self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%IETS, %IETS")
         self.table.exit_scope()
 
     def enterReturn(self, node):

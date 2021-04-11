@@ -122,6 +122,13 @@ def LiteralToLLVM(literal, type):
         pass
     return new_literal
 
+def predsspaces(address):
+    lenght = len(str(address))
+    ret_val = "                                                 "
+    ret_val = ret_val[lenght:]
+    ret_val += "; preds = "
+    return ret_val
+
 
 class Counter:
     def __init__(self):

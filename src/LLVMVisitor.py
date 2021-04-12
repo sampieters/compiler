@@ -181,7 +181,7 @@ class LLVMVisitor(ASTVisitor):
             if not isinstance(child, LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " %" + str(child.temp_address) + ", 0")
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
-                self.convertType(node, IdentifierNode(None, None, "i32"))
+                # self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
 
     def enterContinue(self, node):
@@ -214,8 +214,8 @@ class LLVMVisitor(ASTVisitor):
         # Construct the LLVM instruction
         instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ", ".join(children_LLVM)
         self.LLVM.append("  " + instruction)
-        if node.operation in BOOLEAN_OPS:
-            self.convertType(node, IdentifierNode(None, None, "i32"))
+        # if node.operation in BOOLEAN_OPS:
+        #     self.convertType(node, IdentifierNode(None, None, "i32"))
 
     def enterWhile(self, node):
         self.LLVM.append("  br label %" + str(self.counter.counter))
@@ -259,7 +259,8 @@ class LLVMVisitor(ASTVisitor):
             if isinstance(node.parent.children[0], IdentifierNode):
                 condition = self.getSymbol(node.parent.children[0])
                 self.loadVariable(condition)
-                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + condition.type + " %" + str(condition.temp_address) + ", 0")
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
+                                condition.type + " %" + str(condition.temp_address) + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " " + str(node.parent.children[0].value) + ", 0")
             self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")

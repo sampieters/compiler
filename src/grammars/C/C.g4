@@ -38,7 +38,7 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
 scope: LCURLY stat* RCURLY
      ;
 
-for_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR expr RBRACKET scope
+for_stat: FOR LBRACKET (definition | assignment) END_INSTR expr END_INSTR (expr | assignment) RBRACKET scope
         ;
 
 while_stat: WHILE LBRACKET expr RBRACKET scope

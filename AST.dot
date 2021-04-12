@@ -1,19 +1,31 @@
 digraph AST {
 	node1[label="prog"]
-	node2[label="while"]
+	node2[label="define(None)"]
 	node1->node2
-	node3[label="1(i32)"]
+	node3[label="declare(None)"]
 	node2->node3
-	node4[label="scope"]
-	node2->node4
-	node5[label="define(None)"]
-	node4->node5
-	node6[label="declare(None)"]
-	node5->node6
-	node7[label="j(i32)"]
+	node4[label="i(i32)"]
+	node3->node4
+	node5[label="5(i32)"]
+	node2->node5
+	node6[label="while"]
+	node1->node6
+	node7[label="<(i32)"]
 	node6->node7
-	node8[label="3(i32)"]
-	node5->node8
-	node9[label="break"]
-	node4->node9
+	node8[label="i(i32)"]
+	node7->node8
+	node9[label="5(i32)"]
+	node7->node9
+	node10[label="scope"]
+	node6->node10
+	node11[label="++x(i32)"]
+	node10->node11
+	node12[label="i(i32)"]
+	node11->node12
+	node13[label="continue"]
+	node10->node13
+	node14[label="--x(i32)"]
+	node10->node14
+	node15[label="i(i32)"]
+	node14->node15
 }

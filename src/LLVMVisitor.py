@@ -7,7 +7,8 @@ from SymbolTable import *
 class LLVMVisitor(ASTVisitor):
     def __init__(self):
         self.LLVM = []
-        self.future_LLVM = []
+        self.loop_stack = []
+        self.stat_stack = []
         self.table = SymbolTable()
         self.counter = Counter()
 
@@ -183,6 +184,12 @@ class LLVMVisitor(ASTVisitor):
                 self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
 
+    def enterContinue(self, node):
+        self.LLVM.append("  br label " + str(getParent(node, WhileNode).start_address))
+
+    def enterBreak(self, node):
+        self.LLVM.append("  br label {BREAK}")
+        self.loop_stack.append(len(self.LLVM) - 1)
 
     def exitBinaryOperation(self, node):
         """Convert binary operation node to LLVM"""
@@ -205,7 +212,7 @@ class LLVMVisitor(ASTVisitor):
             else:
                 children_LLVM.append(" %" + str(child.temp_address))
         # Construct the LLVM instruction
-        instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ",".join(children_LLVM)
+        instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ", ".join(children_LLVM)
         self.LLVM.append("  " + instruction)
         if node.operation in BOOLEAN_OPS:
             self.convertType(node, IdentifierNode(None, None, "i32"))
@@ -214,30 +221,15 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("  br label %" + str(self.counter.counter))
         self.LLVM.append("")
         node.start_address = self.counter.counter
-        self.LLVM.append(self.counter.incr() + ':' + predsspaces(node.start_address) + "%IETS, %IETS")
-
-    def exitIf(self, node):
-        #TODO: Nog preds zoals bij while
-        self.LLVM.append(
-            "  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %WHUT")
-        self.LLVM.append("")
-        self.LLVM.append(self.counter.incr() + ':')
-        self.LLVM.append("  br label %" + str(self.counter.counter))
+        self.LLVM.append(self.counter.incr() + ':' + predsspaces(node.start_address) + "%{LABEL}, %SCOPE VAN WHILE")
+        self.loop_stack.append(len(self.LLVM) - 1)
 
     def enterElif(self, node):
         self.LLVM.append("")
         self.LLVM.append(self.counter.incr() + ':')
 
     def enterElse(self, node):
-        self.LLVM.append("")
-        self.LLVM.append(self.counter.incr() + ':')
-
-    def exitElse(self, node):
-        self.LLVM.append("  br label %" + str(self.counter.counter))
-
-    def exitBranch(self, node):
-        self.LLVM.append("")
-        self.LLVM.append(self.counter.incr() + ':')
+        node.start_address = self.counter.counter-1
 
     def enterFunctionDefinition(self, node):
         self.LLVM.append("")
@@ -256,12 +248,12 @@ class LLVMVisitor(ASTVisitor):
 
     def enterFunctionCall(self, node):
         instruction = "  %" + self.counter.incr() + " call " + node.children[0].type + " @" + node.children[0].name + "("
-        # TODO: Nog een FOR LOOP doen
+        # TODO: Nog een FOR LOOP doen in python om over de argumenten te gaan
         instruction += ")"
         self.LLVM.append(instruction)
 
     def enterScope(self, node):
-        #TODO:: WHUT NOG INVULLEN + preds ook nog doen + 0 moet nog verandert worden door de 0 van het juiste type
+        #TODO:: 0 moet nog verandert worden door de 0 van het juiste type
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
             if isinstance(node.parent.children[0], IdentifierNode):
@@ -271,17 +263,40 @@ class LLVMVisitor(ASTVisitor):
             elif isinstance(node.parent.children[0], LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " " + str(node.parent.children[0].value) + ", 0")
             self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
-            self.future_LLVM.append(len(self.LLVM)-1)
+            instruction_index = self.loop_stack.pop()
+            self.LLVM[instruction_index] = self.LLVM[instruction_index].replace("{LABEL}", str(self.counter.counter))
+            self.loop_stack.append(len(self.LLVM)-1)
             self.LLVM.append("")
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%IETS, %IETS")
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%" + str(node.parent.start_address))
+        elif isinstance(node.parent, IfNode):
+            self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
+            self.stat_stack.append(len(self.LLVM) - 1)
+            self.LLVM.append("")
+            node.parent.start_address = self.counter.counter
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%SCOPE VAN IF")
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):
             self.LLVM.append("  br label %" + str(node.parent.start_address))
             self.LLVM.append("")
-            index = self.future_LLVM.pop()
+            #TODO: De break echt nog nakijken
+            index = self.loop_stack.pop()
+            while "{BREAK}" in self.LLVM[index]:
+                self.LLVM[index] = self.LLVM[index].replace("{BREAK}", str(self.counter.counter))
+                index = self.loop_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%IETS, %IETS")
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%" + str(node.parent.start_address))
+        elif isinstance(node.parent, IfNode):
+            # TODO: Als er een else of elif nog is dan is dit adress anders
+            self.LLVM.append("  br label %" + str(self.counter.counter))
+            self.LLVM.append("")
+            index = self.stat_stack.pop()
+            self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter - 1) + "%" + str(node.parent.start_address) + " ,%SCOPE VAN IF")
+        elif isinstance(node.parent, ElseNode):
+            self.LLVM.append("  br label %" + str(self.counter.counter))
+            self.LLVM.append("")
+            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter - 1) + "%" + str(node.parent.start_address) + " ,%IF START")
         self.table.exit_scope()
 
     def enterReturn(self, node):

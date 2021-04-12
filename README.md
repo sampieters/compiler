@@ -75,7 +75,5 @@ geïmplementeerd van opdracht 6 (niet voltooid)
 1) zext aub weg bij while loops
 2) icmp slt bij while loop heeft een spatie te weinig, maar kvind ni war die da doet
 3) for loop doet nog iets anders (extra branch)
+4) if else doet een branch instructie anders -> nog aanpassen maar zorgen dat de adrres blijft wanneer enkel if
 # VRAGEN
-1) fneg of sub voor float
-2) beste manier om toekomstige labels te voorspellen/maken in loops
-3) nuw of geen nuw thats the question

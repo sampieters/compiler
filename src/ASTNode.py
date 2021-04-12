@@ -293,6 +293,7 @@ class BranchNode(ASTNode):
 class IfNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
+        self.start_address = None
 
     def __str__(self):
         return 'if'

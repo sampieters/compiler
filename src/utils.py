@@ -30,6 +30,13 @@ BINARY_OPS_LLVM = {
             "<": ["cmp",  "lt"]
         }
 
+def getParent(node, parentClass):
+    "Get the closest parent of a certain class, returns None if no such parent is found"
+    parent = node.parent
+    while parent and not isinstance(parent, parentClass):
+        parent = parent.parent
+    return parent
+
 def getTypeLLVM(_type):
     ret_val = ["", []]
 

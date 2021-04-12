@@ -88,15 +88,15 @@ class SemanticalErrorVisitor(ASTVisitor):
         pass
 
     def exitBreak(self, node):
-        if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, WhileNode)):
+        if not (isinstance(node.parent, ScopeNode) and getParent(node, WhileNode)):
             raise Exception("Error: 'break' statement not in loop or switch statement")
 
     def exitContinue(self, node):
-        if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, WhileNode)):
+        if not (isinstance(node.parent, ScopeNode) and getParent(node, WhileNode)):
             raise Exception("Error: 'continue' statement not in loop statement")
 
     def exitReturn(self, node):
-        if not (isinstance(node.parent, ScopeNode) and isinstance(node.parent.parent, FunctionDefinitionNode)):
+        if not (isinstance(node.parent, ScopeNode) and getParent(node, FunctionDefinitionNode)):
             raise Exception("Error: 'return' statement not in function body")
         if not node.children:
             node.type = 'void'

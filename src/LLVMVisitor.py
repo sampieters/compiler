@@ -19,24 +19,18 @@ class LLVMVisitor(ASTVisitor):
         value = self.getSymbol(value)
 
         # If we want to store a variable
-        if isinstance(value, IdentifierNode):
+        if isinstance(value, IdentifierNode) and not getParent(value, ArgListNode):
             # Load the variable into a new temporary address before storing it, unless it is an argument of a function
-            if not getParent(value, ArgListNode):
-                self.loadVariable(value)
-            instruction += value.type + " %" + str(value.temp_address)
-        # If we want to store the result of an operation
-        elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
-            instruction += value.type + " %" + str(value.temp_address)
-        # If we want to store a literal
-        elif isinstance(value, LiteralNode):
-            instruction += value.type + ' ' + value.getValue()
+            self.loadVariable(value)
+        
+        instruction += value.type + " " + value.getValue()
         
         # If the node is a variable, get the node from the symbol table and store into the original address
         if isinstance(node, IdentifierNode):
-            instruction += ", " + node.type + "* %" + str(node.original_address) + ", align " + node.alignment()
+            instruction += ", " + node.type + "* " + node.getValue(original=True) + ", align " + node.alignment()
         # Otherwise, store into the temporary address of the node
         else:
-            instruction += ", " + node.type + "* " + str(node.temp_address) + ", align " + node.alignment()
+            instruction += ", " + node.type + "* " + node.getValue() + ", align " + node.alignment()
         self.LLVM.append("  " + instruction)
 
     def loadVariable(self, node):
@@ -46,8 +40,8 @@ class LLVMVisitor(ASTVisitor):
         # Change the temporary address of the variable to the new address, load the original address into it
         load_addr = self.counter.incr()
         node.temp_address = load_addr
-        instruction = '%' + load_addr + " = load " + node.type + ", " + node.type + "* %" + \
-                      node.original_address + ", align " + node.alignment()
+        instruction = '%' + load_addr + " = load " + node.type + ", " + node.type + "* " + \
+                      node.getValue(original=True) + ", align " + node.alignment()
         self.LLVM.append("  " + instruction)
 
     def convertType(self, node1, node2):
@@ -142,9 +136,9 @@ class LLVMVisitor(ASTVisitor):
                 self.storeVariable(node, child)
             elif isinstance(child, BinaryOperationNode) or isinstance(child, UnaryOperationNode) or isinstance(child, IdentifierNode):
                 if child.type.startswith("i"):
-                    instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", %" + str(child.temp_address)
+                    instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", " + child.getValue()
                 else:
-                    instruction += "fneg " + child.type + " %" + str(child.temp_address)
+                    instruction += "fneg " + child.type + " " + child.getValue()
             self.LLVM.append("  " + instruction)
         # If the operation is a prefix ++ or --
         elif node.operation == "++x" or node.operation == "--x":
@@ -184,7 +178,7 @@ class LLVMVisitor(ASTVisitor):
                 self.loadVariable(child)
             node.temp_address = self.counter.counter
             if not isinstance(child, LiteralNode):
-                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " %" + str(child.temp_address) + ", 0")
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " " + child.getValue() + ", 0")
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
                 # self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
@@ -243,7 +237,7 @@ class LLVMVisitor(ASTVisitor):
         for child in function.children[0].children:
             child = child.children[0]
             child.original_address = self.counter.incr()
-            children_LLVM.append(child.type + " %" + child.original_address)
+            children_LLVM.append(child.type + " " + child.getValue(original=True))
         instruction += ", ".join(children_LLVM)
         instruction += ") #0 {"
         self.LLVM.append(instruction)
@@ -279,7 +273,7 @@ class LLVMVisitor(ASTVisitor):
                 condition = self.getSymbol(node.parent.children[0])
                 self.loadVariable(condition)
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
-                                condition.type + " %" + str(condition.temp_address) + ", 0")
+                                condition.type + " " + condition.getValue() + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + node.parent.children[0].type + " " + str(node.parent.children[0].value) + ", 0")
             self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
@@ -325,10 +319,7 @@ class LLVMVisitor(ASTVisitor):
         if not node.children:
             instruction += "void"
         else:
-            if isinstance(node.children[0], IdentifierNode):
-                instruction += node.children[0].type + " " + node.children[0].temp_adress
-            elif isinstance(node.children[0], LiteralNode):
-                instruction += node.children[0].type + " " + node.children[0].value
+            instruction += node.children[0].type + " " + node.children[0].getValue()
 
     def unaryOpToLLVM(self, node):
         child = self.getSymbol(node.children[0])

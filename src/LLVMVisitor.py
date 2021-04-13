@@ -178,7 +178,9 @@ class LLVMVisitor(ASTVisitor):
                 self.loadVariable(child)
             node.temp_address = self.counter.counter
             if not isinstance(child, LiteralNode):
-                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " " + child.getValue() + ", 0")
+                literal = LiteralNode(0, child.type, None)
+                self.convertType(literal, literal)
+                self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " + child.type + " " + child.getValue() + ", " + literal.getValue())
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
                 # self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
@@ -342,14 +344,16 @@ class LLVMVisitor(ASTVisitor):
         child1 = self.getSymbol(node.children[0])
         child2 = self.getSymbol(node.children[1])
 
+        the_type = getBinaryType(child1.type, child2.type)
+
         ret_val = ""
         try:
             operation = BINARY_OPS_LLVM[node.operation]
         except KeyError:
             raise Exception(f"Invalid binary operation '{node.operation}'")
 
-        # STEP 1: check f or i (example: icmp or fcmp || add or fadd
-        if node.type.startswith("i"):
+        # STEP 1: check f or i (example: icmp or fcmp || add or fadd)
+        if the_type.startswith("i"):
             if operation[0] == "cmp":
                 ret_val += "i"
             elif operation[0] == "div" or operation[0] == "rem":
@@ -366,7 +370,7 @@ class LLVMVisitor(ASTVisitor):
         # STEP 3: Check if signed or unsigned
         if operation[0] != "div" and operation[0] != "rem":
             if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
-                if _type.startswith("i"):
+                if the_type.startswith("i"):
                     if not operation[0] == "cmp":
                         ret_val += " nuw"
                     elif operation[1] != "eq" and operation[1] != "ne":
@@ -378,7 +382,7 @@ class LLVMVisitor(ASTVisitor):
                         else:
                             ret_val += " u"
             else:
-                if node.type.startswith("i"):
+                if the_type.startswith("i"):
                     if not operation[0] == "cmp":
                         ret_val += " nsw"
                     elif operation[1] != "eq" and operation[1] != "ne":

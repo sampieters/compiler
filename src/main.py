@@ -29,8 +29,8 @@ if __name__ == '__main__':
     AST = listener.curr_node
 
     AST.to_dot("AST")
-    # visitor = ASTVisitor()
-    # visitor.visit(AST)
+    visitor = ASTVisitor()
+    visitor.visit(AST)
 
     visitor_err = SemanticalErrorVisitor()
     visitor_err.visit(AST)

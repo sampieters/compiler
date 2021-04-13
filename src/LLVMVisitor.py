@@ -20,8 +20,9 @@ class LLVMVisitor(ASTVisitor):
 
         # If we want to store a variable
         if isinstance(value, IdentifierNode):
-            # Load the variable into a new temporary address before storing it
-            self.loadVariable(value)
+            # Load the variable into a new temporary address before storing it, unless it is an argument of a function
+            if not getParent(value, ArgListNode):
+                self.loadVariable(value)
             instruction += value.type + " %" + str(value.temp_address)
         # If we want to store the result of an operation
         elif isinstance(value, BinaryOperationNode) or isinstance(value, UnaryOperationNode):
@@ -32,7 +33,7 @@ class LLVMVisitor(ASTVisitor):
         
         # If the node is a variable, get the node from the symbol table and store into the original address
         if isinstance(node, IdentifierNode):
-            instruction += ", " + node.type + "* " + str(node.original_address) + ", align " + node.alignment()
+            instruction += ", " + node.type + "* %" + str(node.original_address) + ", align " + node.alignment()
         # Otherwise, store into the temporary address of the node
         else:
             instruction += ", " + node.type + "* " + str(node.temp_address) + ", align " + node.alignment()
@@ -45,7 +46,7 @@ class LLVMVisitor(ASTVisitor):
         # Change the temporary address of the variable to the new address, load the original address into it
         load_addr = self.counter.incr()
         node.temp_address = load_addr
-        instruction = '%' + load_addr + " = load " + node.type + ", " + node.type + "* " + \
+        instruction = '%' + load_addr + " = load " + node.type + ", " + node.type + "* %" + \
                       node.original_address + ", align " + node.alignment()
         self.LLVM.append("  " + instruction)
 
@@ -96,16 +97,20 @@ class LLVMVisitor(ASTVisitor):
         """Transform declaration node to LLVM"""
         # Set the original address for the new variable, add it to the symbol table
         identifier = node.children[0]
-
-        address = '%' + self.counter.incr()
-        identifier.original_address = address
+        address = self.counter.incr()
         self.table.add_symbol(identifier)
 
         # Convert the declaration to LLVM
-        instruction = address + " = alloca "
-
+        instruction = "%" + address + " = alloca "
         instruction += identifier.type + ", align " + identifier.alignment()
         self.LLVM.append("  " + instruction)
+
+        # If there is no original address yet (the identifier is not an argument of a function)
+        if not identifier.original_address:
+            identifier.original_address = address
+        else:
+            identifier.temp_address = address
+            self.storeVariable(identifier, identifier)
 
     def exitDefinition(self, node):
         """Transform definition node to LLVM"""
@@ -207,12 +212,9 @@ class LLVMVisitor(ASTVisitor):
         for child in [child1, child2]:
             # Convert the child to the binary operation type, so that both children have the same type
             self.convertType(child, IdentifierNode(None, None, the_type))
-            if isinstance(child, LiteralNode):
-                children_LLVM.append(child.getValue())
-            else:
-                children_LLVM.append(" %" + str(child.temp_address))
+            children_LLVM.append(child.getValue())
         # Construct the LLVM instruction
-        instruction = '%' + str(node.temp_address) + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ", ".join(children_LLVM)
+        instruction = node.getValue() + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ", ".join(children_LLVM)
         self.LLVM.append("  " + instruction)
         # if node.operation in BOOLEAN_OPS:
         #     self.convertType(node, IdentifierNode(None, None, "i32"))
@@ -235,20 +237,37 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("")
         # TODO: Kweet ni wa deze lijn doet
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
-        instruction = "define " + node.children[0].children[0].type + " @" + node.children[0].children[0].name + "("
-        if len(node.children[0].children[0].arg_types) != 0:
-            for arg in node.children[0].children[0].arg_types[:-1]:
-                instruction += arg + " %" + self.counter.incr() + ", "
-            instruction += node.children[0].children[0].arg_types[-1] + " %" + self.counter.incr()
+        function = node.children[0].children[0]
+        instruction = "define " + function.type + " @" + function.name + "("
+        children_LLVM = []
+        for child in function.children[0].children:
+            child = child.children[0]
+            child.original_address = self.counter.incr()
+            children_LLVM.append(child.type + " %" + child.original_address)
+        instruction += ", ".join(children_LLVM)
         instruction += ") #0 {"
         self.LLVM.append(instruction)
+        function.original_address = self.counter.incr()
 
     def exitFunctionDefinition(self, node):
         self.LLVM.append("}")
+        self.counter.reset()
+
+    def exitFunctionDeclaration(self, node):
+        function = node.children[0]
+        self.table.add_symbol(function)
 
     def enterFunctionCall(self, node):
-        instruction = "  %" + self.counter.incr() + " call " + node.children[0].type + " @" + node.children[0].name + "("
-        # TODO: Nog een FOR LOOP doen in python om over de argumenten te gaan
+        function = self.getSymbol(node.children[0])
+        node.temp_address = self.counter.incr()
+        instruction = "  " + node.getValue() + " = call " + function.type + " @" + function.name + "("
+        children_LLVM = []
+        for child, arg_child in zip(node.children[1].children, function.children[0].children):
+            child = self.getSymbol(child)
+            arg_child = arg_child.children[0]
+            self.convertType(child, arg_child)
+            children_LLVM.append(child.type + " " + child.getValue())
+        instruction += ", ".join(children_LLVM)
         instruction += ")"
         self.LLVM.append(instruction)
 
@@ -385,7 +404,7 @@ class LLVMVisitor(ASTVisitor):
         return ret_val
 
     def getSymbol(self, node):
-        if isinstance(node, IdentifierNode) and node.name is not None:
+        if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and node.name is not None:
             return self.table.get_symbol(node.name)
         else:
             return node

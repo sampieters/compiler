@@ -38,7 +38,7 @@ class ASTNode:
     def to_dot(self, filename):
         file = open(filename + ".dot", "w")
         file.write("digraph AST {\n")
-        file.write("\tnode1[label=\"" + str(self) + "\"]\n")
+        file.write("\tnode0[label=\"" + str(self) + "\"]\n")
         self.to_dot_recursive(file)
         file.write("}")
 
@@ -90,7 +90,6 @@ class LiteralNode(ASTNode):
         visitor.exitLiteral(self)
 
     def getValue(self):
-        #TODO: handle case for floats etc
         return str(self.value)
 
 
@@ -124,14 +123,20 @@ class IdentifierNode(ASTNode):
     def alignment(self):
         return str(int(getAlignment(self)))
 
+    def getValue(self, original=False):
+        if "global" in self.type_semantics:
+            return "@" + self.name
+        elif original:
+            return "%" + str(self.original_address)
+        else:
+            return "%" + str(self.temp_address)
+
 class FunctionNode(ASTNode):
     def __init__(self, name, node_id):
         super().__init__(node_id)
         self.name = name
         self.type = None
         self.type_semantics = []
-        self.arg_types = []
-        self.arg_types_semantics = []
         self.original_address = None
         self.temp_address = None
 
@@ -142,6 +147,9 @@ class FunctionNode(ASTNode):
         visitor.enterFunction(self)
         self.visitChildren(visitor)
         visitor.exitFunction(self)
+
+    def getValue(self):
+        return "@" + self.name
 
 
 class DefinitionNode(ASTNode):
@@ -199,6 +207,9 @@ class UnaryOperationNode(ASTNode):
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
 
+    def getValue(self):
+        return "%" + str(self.temp_address)
+
 
 class BinaryOperationNode(ASTNode):
     def __init__(self, operation, node_id):
@@ -223,6 +234,10 @@ class BinaryOperationNode(ASTNode):
         new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
+
+    def getValue(self):
+        return "%" + str(self.temp_address)
+
 
 
 class AssignmentNode(ASTNode):
@@ -366,6 +381,7 @@ class ReturnNode(ASTNode):
 class FunctionCallNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
+        self.temp_address = None
 
     def __str__(self):
         return 'func_call'
@@ -374,6 +390,9 @@ class FunctionCallNode(ASTNode):
         visitor.enterFunctionCall(self)
         self.visitChildren(visitor)
         visitor.exitFunctionCall(self)
+
+    def getValue(self):
+        return "%" + str(self.temp_address)
 
 class ArgListNode(ASTNode):
     def __init__(self, node_id):

@@ -112,3 +112,45 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitFunctionDefinition(self, node):
         if not isinstance(node.parent, ProgNode):
             raise Exception("Error: Function definition is not allowed here")
+
+    def exitFunctionDeclaration(self, node):
+        function = node.children[0]
+        def_node = self.table.get_symbol_curr_scope(function.name)
+        # If the symbol was already declared before
+        if def_node is not None:
+            raise Exception(f"Error: Redefinition of '{function.name}' as different kind of symbol")
+        else:
+            self.table.add_symbol(function)
+
+    def exitFunctionCall(self, node):
+        function = self.getSymbol(node.children[0])
+        node.type = function.type
+        node.type_semantics = function.type_semantics
+        call_args = node.children[1].children
+        function_args = function.children[0].children
+
+        if len(function_args) > len(call_args):
+            raise Exception(f"Too few arguments to function call, expected {len(function_args)}, have {len(call_args)}")
+        elif len(function_args) < len(call_args):
+            raise Exception(f"Too many arguments to function call, expected {len(function_args)}, have {len(call_args)}")
+        for child1, child2 in zip(call_args, function_args):
+            child2 = child2.children[0]
+            if child1.type.endswith("*"):
+                if child2.type in INTEGER_TYPES:
+                    print(f"Warning: Incompatible pointer to integer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
+                else:
+                    raise Exception(f"Error: Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
+            elif child2.type.endswith("*"):
+                if child1.type in INTEGER_TYPES:
+                    print(f"Warning: Incompatible integer to pointer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
+                else:
+                    raise Exception(f"Error: Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
+            elif checkInfoLoss(child1.type, child2.type):
+                print(f"Warning: implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
+
+
+    def getSymbol(self, node):
+        if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and node.name is not None:
+            return self.table.get_symbol(node.name)
+        else:
+            return node

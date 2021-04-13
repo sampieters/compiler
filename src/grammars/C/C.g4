@@ -86,7 +86,7 @@ function_call: ID call_list
              | PRINTF LBRACKET expr RBRACKET
              ;
 
-arg_list: LBRACKET ((type_specifier ID COMMA)* type_specifier ID)? RBRACKET
+arg_list: LBRACKET ((declaration COMMA)* declaration)? RBRACKET
         ;
 
 call_list: LBRACKET ((expr COMMA)* expr)? RBRACKET

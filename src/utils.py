@@ -139,11 +139,14 @@ def predsspaces(address):
 
 class Counter:
     def __init__(self):
-        self.counter = 1
+        self.counter = 0
 
     def incr(self):
         self.counter += 1
         return str(self.counter - 1)
+
+    def reset(self):
+        self.counter = 0
 
     def curr(self):
         return self.counter

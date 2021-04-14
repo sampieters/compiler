@@ -152,15 +152,6 @@ class CListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by CParser#Identifier.
-    def enterIdentifier(self, ctx:CParser.IdentifierContext):
-        pass
-
-    # Exit a parse tree produced by CParser#Identifier.
-    def exitIdentifier(self, ctx:CParser.IdentifierContext):
-        pass
-
-
     # Enter a parse tree produced by CParser#Brackets.
     def enterBrackets(self, ctx:CParser.BracketsContext):
         pass
@@ -185,6 +176,24 @@ class CListener(ParseTreeListener):
 
     # Exit a parse tree produced by CParser#UnaryOpPointer.
     def exitUnaryOpPointer(self, ctx:CParser.UnaryOpPointerContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#IdentifierExpr.
+    def enterIdentifierExpr(self, ctx:CParser.IdentifierExprContext):
+        pass
+
+    # Exit a parse tree produced by CParser#IdentifierExpr.
+    def exitIdentifierExpr(self, ctx:CParser.IdentifierExprContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#UnaryOpArray.
+    def enterUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):
+        pass
+
+    # Exit a parse tree produced by CParser#UnaryOpArray.
+    def exitUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):
         pass
 
 
@@ -350,6 +359,15 @@ class CListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by CParser#InitializerList.
+    def enterInitializerList(self, ctx:CParser.InitializerListContext):
+        pass
+
+    # Exit a parse tree produced by CParser#InitializerList.
+    def exitInitializerList(self, ctx:CParser.InitializerListContext):
+        pass
+
+
     # Enter a parse tree produced by CParser#declaration.
     def enterDeclaration(self, ctx:CParser.DeclarationContext):
         pass
@@ -395,12 +413,30 @@ class CListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by CParser#function_call.
-    def enterFunction_call(self, ctx:CParser.Function_callContext):
+    # Enter a parse tree produced by CParser#CustomFunctionCall.
+    def enterCustomFunctionCall(self, ctx:CParser.CustomFunctionCallContext):
         pass
 
-    # Exit a parse tree produced by CParser#function_call.
-    def exitFunction_call(self, ctx:CParser.Function_callContext):
+    # Exit a parse tree produced by CParser#CustomFunctionCall.
+    def exitCustomFunctionCall(self, ctx:CParser.CustomFunctionCallContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#PrintfFunctionCall.
+    def enterPrintfFunctionCall(self, ctx:CParser.PrintfFunctionCallContext):
+        pass
+
+    # Exit a parse tree produced by CParser#PrintfFunctionCall.
+    def exitPrintfFunctionCall(self, ctx:CParser.PrintfFunctionCallContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#ScanfFunctionCall.
+    def enterScanfFunctionCall(self, ctx:CParser.ScanfFunctionCallContext):
+        pass
+
+    # Exit a parse tree produced by CParser#ScanfFunctionCall.
+    def exitScanfFunctionCall(self, ctx:CParser.ScanfFunctionCallContext):
         pass
 
 

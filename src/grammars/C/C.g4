@@ -20,9 +20,10 @@ stat: definition END_INSTR              # DefinitionStatement
     ;
 
 expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
-    | (MUL|REF) identifier              # UnaryOpPointer  // Unary pointer operation
-    | (INCR|DECR) identifier            # UnaryOpIdentifierPrefix // Unary identifier operation (prefix)
-    | identifier (INCR|DECR)            # UnaryOpIdentifierSuffix // Unary identifier operation (suffix)
+    | (MUL|REF) ID                      # UnaryOpPointer  // Unary pointer operation
+    | ID LSQUARE expr RSQUARE           # UnaryOpArray // Unary array operation
+    | (INCR|DECR) expr                  # UnaryOpIdentifierPrefix // Unary identifier operation (prefix)
+    | expr (INCR|DECR)                  # UnaryOpIdentifierSuffix // Unary identifier operation (suffix)
     | (ADD|SUB) expr                    # UnaryOp   // Unary integer operation
     | (NOT) expr                        # UnaryOpBoolean   // Unary boolean operation
     | expr (MUL|DIV|MOD) expr           # BinaryOp  // Binary multiplicative operation
@@ -31,13 +32,9 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | expr (DEQ|NEQ) expr               # BinaryOpBoolean  // Binary equality operation
     | expr (AND|OR) expr                # BinaryOpBoolean  // Binary logical operation
     | literal                           # LiteralExpr
-    | identifier                        # IdentifierExpr
+    | ID                                # IdentifierExpr
     | function_call                     # FunctionCall
     ;
-
-identifier: ID                          # Identifier
-          | ID (LSQUARE expr RSQUARE)+  # ArrayElement
-          ;
 
 scope: LCURLY stat* RCURLY
      ;
@@ -69,6 +66,7 @@ literal: FLOAT   # Float
        | INT     # Integer
        | STRING  # String
        | CHAR    # Character
+       | LCURLY ((expr COMMA)* expr)? RCURLY   # InitializerList
        ;
 
 declaration: type_specifier ID (LSQUARE expr? RSQUARE)*
@@ -83,7 +81,7 @@ definition: declaration EQ expr
 function_definition: function_declaration scope
                    ; 
 
-assignment: identifier EQ expr
+assignment: ID (LSQUARE expr RSQUARE)* EQ expr
           ;
 
 function_call: ID call_list         # CustomFunctionCall
@@ -96,9 +94,6 @@ arg_list: LBRACKET ((declaration COMMA)* declaration)? RBRACKET
 
 call_list: LBRACKET ((expr COMMA)* expr)? RBRACKET
          ;
-
-initializer_list: LCURLY ((expr COMMA)* expr)? RCURLY   # InitializerList
-                ;
 
 
 MUL :           '*' ; // assigns token name to '*' used above in grammar

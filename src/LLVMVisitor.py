@@ -95,7 +95,11 @@ class LLVMVisitor(ASTVisitor):
 
         # Convert the declaration to LLVM
         instruction = "%" + address + " = alloca "
-        instruction += identifier.type + ", align " + identifier.alignment()
+        for dim in identifier.dimensions:
+            instruction += f"[{dim} x "
+        instruction += identifier.type 
+        instruction += "]" * len(identifier.dimensions)
+        instruction += ", align " + identifier.alignment()
         self.LLVM.append("  " + instruction)
 
         # If there is no original address yet (the identifier is not an argument of a function)

@@ -178,3 +178,11 @@ class ASTVisitor:
     def exitArgList(self, node):
         # print("Exiting Arg List Node")
         pass
+
+    def enterInitializerList(self, node):
+        # print("Entering Initializer List Node")
+        pass
+
+    def exitInitializerList(self, node):
+        # print("Exiting Initializer List Node")
+        pass

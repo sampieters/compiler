@@ -31,6 +31,7 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | expr (LT|GT|LTE|GTE) expr         # BinaryOpBoolean  // Binary relational operation
     | expr (DEQ|NEQ) expr               # BinaryOpBoolean  // Binary equality operation
     | expr (AND|OR) expr                # BinaryOpBoolean  // Binary logical operation
+    | LCURLY ((expr COMMA)* expr)? RCURLY   # InitializerList
     | literal                           # LiteralExpr
     | ID                                # IdentifierExpr
     | function_call                     # FunctionCall
@@ -66,7 +67,6 @@ literal: FLOAT   # Float
        | INT     # Integer
        | STRING  # String
        | CHAR    # Character
-       | LCURLY ((expr COMMA)* expr)? RCURLY   # InitializerList
        ;
 
 declaration: type_specifier ID (LSQUARE expr? RSQUARE)*
@@ -144,8 +144,8 @@ LONG_DOUBLE_PREF : 'long double' ;
 FLOAT : INT? DOT [0-9]+ ;
 
 CHAR_PREF : 'char' ;
-CHAR : SQUOTE ESC? [!-~] SQUOTE ;
-STRING : '"'CHAR*'"' ;
+CHAR : SQUOTE ESC? . SQUOTE ;
+STRING : '"' .*? '"' ;
 
 PRINTF : 'printf' ;
 SCANF : 'scanf' ;

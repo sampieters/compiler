@@ -152,15 +152,6 @@ class CListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by CParser#Brackets.
-    def enterBrackets(self, ctx:CParser.BracketsContext):
-        pass
-
-    # Exit a parse tree produced by CParser#Brackets.
-    def exitBrackets(self, ctx:CParser.BracketsContext):
-        pass
-
-
     # Enter a parse tree produced by CParser#UnaryOpIdentifierSuffix.
     def enterUnaryOpIdentifierSuffix(self, ctx:CParser.UnaryOpIdentifierSuffixContext):
         pass
@@ -176,6 +167,42 @@ class CListener(ParseTreeListener):
 
     # Exit a parse tree produced by CParser#UnaryOpPointer.
     def exitUnaryOpPointer(self, ctx:CParser.UnaryOpPointerContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#UnaryOpIdentifierPrefix.
+    def enterUnaryOpIdentifierPrefix(self, ctx:CParser.UnaryOpIdentifierPrefixContext):
+        pass
+
+    # Exit a parse tree produced by CParser#UnaryOpIdentifierPrefix.
+    def exitUnaryOpIdentifierPrefix(self, ctx:CParser.UnaryOpIdentifierPrefixContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#BinaryOpBoolean.
+    def enterBinaryOpBoolean(self, ctx:CParser.BinaryOpBooleanContext):
+        pass
+
+    # Exit a parse tree produced by CParser#BinaryOpBoolean.
+    def exitBinaryOpBoolean(self, ctx:CParser.BinaryOpBooleanContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#InitializerList.
+    def enterInitializerList(self, ctx:CParser.InitializerListContext):
+        pass
+
+    # Exit a parse tree produced by CParser#InitializerList.
+    def exitInitializerList(self, ctx:CParser.InitializerListContext):
+        pass
+
+
+    # Enter a parse tree produced by CParser#Brackets.
+    def enterBrackets(self, ctx:CParser.BracketsContext):
+        pass
+
+    # Exit a parse tree produced by CParser#Brackets.
+    def exitBrackets(self, ctx:CParser.BracketsContext):
         pass
 
 
@@ -224,30 +251,12 @@ class CListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by CParser#UnaryOpIdentifierPrefix.
-    def enterUnaryOpIdentifierPrefix(self, ctx:CParser.UnaryOpIdentifierPrefixContext):
-        pass
-
-    # Exit a parse tree produced by CParser#UnaryOpIdentifierPrefix.
-    def exitUnaryOpIdentifierPrefix(self, ctx:CParser.UnaryOpIdentifierPrefixContext):
-        pass
-
-
     # Enter a parse tree produced by CParser#BinaryOp.
     def enterBinaryOp(self, ctx:CParser.BinaryOpContext):
         pass
 
     # Exit a parse tree produced by CParser#BinaryOp.
     def exitBinaryOp(self, ctx:CParser.BinaryOpContext):
-        pass
-
-
-    # Enter a parse tree produced by CParser#BinaryOpBoolean.
-    def enterBinaryOpBoolean(self, ctx:CParser.BinaryOpBooleanContext):
-        pass
-
-    # Exit a parse tree produced by CParser#BinaryOpBoolean.
-    def exitBinaryOpBoolean(self, ctx:CParser.BinaryOpBooleanContext):
         pass
 
 
@@ -356,15 +365,6 @@ class CListener(ParseTreeListener):
 
     # Exit a parse tree produced by CParser#Character.
     def exitCharacter(self, ctx:CParser.CharacterContext):
-        pass
-
-
-    # Enter a parse tree produced by CParser#InitializerList.
-    def enterInitializerList(self, ctx:CParser.InitializerListContext):
-        pass
-
-    # Exit a parse tree produced by CParser#InitializerList.
-    def exitInitializerList(self, ctx:CParser.InitializerListContext):
         pass
 
 

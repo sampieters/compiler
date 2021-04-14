@@ -64,10 +64,21 @@ class SemanticalErrorVisitor(ASTVisitor):
         child1 = node.children[0].children[0]
         child2 = node.children[1]
         if child1.type.endswith("*"):
-            if child2.type in INTEGER_TYPES:
+            if child1.type == child2.type:
+                pass
+            elif child2.type in INTEGER_TYPES:
                 print(f"Warning: Incompatible integer to pointer conversion initializing '{child1.type}' with an expression of type '{child2.type}'")
-            else:
+            elif child2.type.endswith("*"):
+                print(f"Warning: Incompatible pointer types initializing '{child1.type}' with an expression of type '{child2.type}'")
+            elif not child1.type == child2.type:
                 raise Exception(f"Error: Initializing '{child1.type}' with an expression of incompatible type '{child2.type}'")
+        if child1.dimensions:
+            if not child2.dimensions:
+                raise Exception(f"Error: Array Initializer must be an initializer list or wide string literal")
+            # TODO: wont work for multidimensional arrays
+            for child in child2.children:
+                if checkInfoLoss(child.type, child1.type):
+                    print(f"Warning: implicit conversion from '{child.type}' to '{child1.type}' can cause a loss of information.")
         elif checkInfoLoss(child2.type, child1.type):
             print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
@@ -147,7 +158,7 @@ class SemanticalErrorVisitor(ASTVisitor):
                     raise Exception(f"Error: Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
             elif checkInfoLoss(child1.type, child2.type):
                 print(f"Warning: implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
-
+        
 
     def getSymbol(self, node):
         if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and node.name is not None:

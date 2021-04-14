@@ -3,6 +3,7 @@ from grammars.C.CParser import CParser
 from ASTNode import *
 from SymbolTable import SymbolTable
 from utils import Counter, getTypeLLVM
+import re
 
 class ASTListener(CListener):
     def __init__(self):
@@ -37,8 +38,10 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#String.
     def enterString(self, ctx:CParser.StringContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText(), "i8*", self.counter.incr(), ["const"]))
+        value = ctx.getText()[1:-1] + '\\00'
+        self.curr_node.add_child(LiteralNode(value, "i8*", self.counter.incr(), ["const", "string"]))
         self.curr_node = self.curr_node.last_child()
+        self.curr_node.dimensions = len(self.curr_node.value) - 2
 
     # Exit a parse tree produced by variablesParser#String.
     def exitString(self, ctx:CParser.StringContext):
@@ -100,6 +103,13 @@ class ASTListener(CListener):
     def exitUnaryOpIdentifierSuffix(self, ctx:CParser.UnaryOpIdentifierSuffixContext):
         self.curr_node = self.curr_node.parent
 
+    def enterUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):
+        self.curr_node.add_child(UnaryOperationNode("[]", self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    def exitUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):
+        self.curr_node = self.curr_node.parent
+
     # Enter a parse tree produced by variablesParser#BinaryOp.
     def enterBinaryOp(self, ctx:CParser.BinaryOpContext):
         self.curr_node.add_child(BinaryOperationNode(ctx.getChild(1).getText(), self.counter.incr()))
@@ -118,7 +128,15 @@ class ASTListener(CListener):
     def exitBinaryOpBoolean(self, ctx:CParser.BinaryOpBooleanContext):
         self.curr_node = self.curr_node.parent
 
-        # Enter a parse tree produced by variablesParser#definition.
+    def enterInitializerList(self, ctx:CParser.InitializerListContext):
+        self.curr_node.add_child(InitializerListNode(self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+
+    def exitInitializerList(self, ctx:CParser.InitializerListContext):
+        self.curr_node.dimensions = [len(self.curr_node.children)]
+        self.curr_node = self.curr_node.parent
+
+    # Enter a parse tree produced by variablesParser#definition.
     def enterDefinition(self, ctx:CParser.DefinitionContext):
         self.curr_node.add_child(DefinitionNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
@@ -143,6 +161,15 @@ class ASTListener(CListener):
         self.curr_node.add_child(DeclarationNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
+        if ctx.getChildCount() > 3:
+            identifier = self.curr_node.last_child()
+            identifier.dimensions = []
+            dimensions = re.findall('\[.*?\]', ctx.getText())
+            # TODO: this wont work for int a[] = {...}
+            # TODO: doesnt handle identifier accesses int a[i];
+            for dim in dimensions:
+                dim = dim[1:-1]
+                identifier.dimensions.append(int(eval(dim)))
 
     # Exit a parse tree produced by variablesParser#declaration.
     def exitDeclaration(self, ctx:CParser.DeclarationContext):
@@ -152,12 +179,12 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#Identifier.
-    def enterIdentifierExpr(self, ctx:CParser.IdentifierContext):
+    def enterIdentifierExpr(self, ctx:CParser.IdentifierExprContext):
         self.curr_node.add_child(IdentifierNode(ctx.getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Identifier.
-    def exitIdentifierExpr(self, ctx:CParser.IdentifierContext):
+    def exitIdentifierExpr(self, ctx:CParser.IdentifierExprContext):
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by CParser#scope.

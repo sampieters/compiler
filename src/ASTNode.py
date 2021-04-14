@@ -75,10 +75,10 @@ class ScopeNode(ASTNode):
 
 
 class LiteralNode(ASTNode):
-    def __init__(self, value, _type, node_id):
+    def __init__(self, value, _type, node_id, type_semantics = []):
         super().__init__(node_id)
         self.value = value
-        self.type_semantics = []
+        self.type_semantics = type_semantics
         self.type = _type
 
     def __str__(self):
@@ -101,7 +101,7 @@ class IdentifierNode(ASTNode):
         self.type_semantics = []
         self.original_address = None
         self.temp_address = None
-        self.dimensions = []
+        self.dimensions = None
 
     def __str__(self):
         return self.name + f"({self.type})"
@@ -407,3 +407,17 @@ class ArgListNode(ASTNode):
         visitor.enterArgList(self)
         self.visitChildren(visitor)
         visitor.exitArgList(self)
+
+class InitializerListNode(ASTNode):
+    def __init__(self, node_id):
+        super().__init__(node_id)
+        self.children = []
+        self.dimensions = []
+
+    def __str__(self):
+        return 'initializer_list'
+
+    def accept(self, visitor:ASTVisitor):
+        visitor.enterInitializerList(self)
+        self.visitChildren(visitor)
+        visitor.exitInitializerList(self)

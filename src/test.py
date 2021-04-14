@@ -1,4 +1,5 @@
 import sys
+import os
 import filecmp
 from antlr4 import *
 from antlr4.InputStream import InputStream
@@ -43,13 +44,23 @@ if __name__ == '__main__':
 
     #AST.to_dot("tests/TEST_AST_OPT")
 
-    with open("src/tests/" + var + "_RESULT", 'w+') as f2:
+    with open("src/tests/" + var + "_RESULT.ll", 'w+') as f2:
         f2.write("\n".join(visitor_llvm.LLVM))
     f2.close()
 
     # HERE COMPARISON OF THE TWO FILES
+    os.system("lli src/tests/" + var + "_RESULT.ll &> src/tests/" + var + "_RESULT.txt")
+    f1 = open("src/tests/" + var + "_RESULT.txt", 'r')
 
-    #    f1 = open("tests/" + var + "_RESULT", 'r')
+    os.system("clang -emit-llvm -S src/tests/" + var + ".c -o src/tests/" + var + ".ll")
+    os.system("lli src/tests/" + var + ".ll &> src/tests/" + var + "_CMP.txt")
+    f2 = open("src/tests/" + var + "_CMP.txt", 'r')
+
+    if f1 == f2:
+        print(var + " succeeded")
+    else:
+        print("elements in " + var + " are not the same")
+
     #f2 = open("tests/CMP_" + var, 'r')
 
     #i = 0

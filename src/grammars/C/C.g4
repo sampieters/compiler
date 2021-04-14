@@ -20,9 +20,9 @@ stat: definition END_INSTR              # DefinitionStatement
     ;
 
 expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
-    | (MUL|REF) ID                      # UnaryOpPointer  // Unary pointer operation
-    | (INCR|DECR) ID                    # UnaryOpIdentifierPrefix // Unary identifier operation (prefix)
-    | ID (INCR|DECR)                    # UnaryOpIdentifierSuffix // Unary identifier operation (suffix)
+    | (MUL|REF) identifier              # UnaryOpPointer  // Unary pointer operation
+    | (INCR|DECR) identifier            # UnaryOpIdentifierPrefix // Unary identifier operation (prefix)
+    | identifier (INCR|DECR)            # UnaryOpIdentifierSuffix // Unary identifier operation (suffix)
     | (ADD|SUB) expr                    # UnaryOp   // Unary integer operation
     | (NOT) expr                        # UnaryOpBoolean   // Unary boolean operation
     | expr (MUL|DIV|MOD) expr           # BinaryOp  // Binary multiplicative operation
@@ -31,9 +31,13 @@ expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
     | expr (DEQ|NEQ) expr               # BinaryOpBoolean  // Binary equality operation
     | expr (AND|OR) expr                # BinaryOpBoolean  // Binary logical operation
     | literal                           # LiteralExpr
-    | ID                                # Identifier
+    | identifier                        # IdentifierExpr
     | function_call                     # FunctionCall
     ;
+
+identifier: ID                          # Identifier
+          | ID (LSQUARE expr RSQUARE)+  # ArrayElement
+          ;
 
 scope: LCURLY stat* RCURLY
      ;
@@ -67,7 +71,7 @@ literal: FLOAT   # Float
        | CHAR    # Character
        ;
 
-declaration: type_specifier ID
+declaration: type_specifier ID (LSQUARE expr? RSQUARE)*
            ;
 
 function_declaration: type_specifier ID arg_list # FunctionDeclaration
@@ -79,11 +83,12 @@ definition: declaration EQ expr
 function_definition: function_declaration scope
                    ; 
 
-assignment: ID EQ expr
+assignment: identifier EQ expr
           ;
 
-function_call: ID call_list
-             | PRINTF LBRACKET expr RBRACKET
+function_call: ID call_list         # CustomFunctionCall
+             | PRINTF call_list     # PrintfFunctionCall
+             | SCANF call_list      # ScanfFunctionCall
              ;
 
 arg_list: LBRACKET ((declaration COMMA)* declaration)? RBRACKET
@@ -91,6 +96,10 @@ arg_list: LBRACKET ((declaration COMMA)* declaration)? RBRACKET
 
 call_list: LBRACKET ((expr COMMA)* expr)? RBRACKET
          ;
+
+initializer_list: LCURLY ((expr COMMA)* expr)? RCURLY   # InitializerList
+                ;
+
 
 MUL :           '*' ; // assigns token name to '*' used above in grammar
 DIV :           '/' ;
@@ -111,6 +120,8 @@ INCR :          '++' ;
 DECR :          '--' ;
 LBRACKET :      '(' ;
 RBRACKET :      ')' ;
+LSQUARE :       '[' ;
+RSQUARE :       ']' ;
 LCURLY :        '{' ;
 RCURLY :        '}' ;
 END_INSTR :     ';' ;
@@ -142,6 +153,7 @@ CHAR : SQUOTE ESC? [!-~] SQUOTE ;
 STRING : '"'CHAR*'"' ;
 
 PRINTF : 'printf' ;
+SCANF : 'scanf' ;
 IF : 'if' ;
 ELIF : 'else if' ;
 ELSE : 'else' ;

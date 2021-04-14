@@ -152,12 +152,12 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#Identifier.
-    def enterIdentifier(self, ctx:CParser.IdentifierContext):
+    def enterIdentifierExpr(self, ctx:CParser.IdentifierContext):
         self.curr_node.add_child(IdentifierNode(ctx.getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Identifier.
-    def exitIdentifier(self, ctx:CParser.IdentifierContext):
+    def exitIdentifierExpr(self, ctx:CParser.IdentifierContext):
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by CParser#scope.

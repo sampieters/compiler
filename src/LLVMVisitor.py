@@ -56,9 +56,8 @@ class LLVMVisitor(ASTVisitor):
         if isinstance(node1, LiteralNode):
             if node1.type == "i8":
                 node1.value = ord(node1.value)
-
             # If the literal is an integer that has to be converted to decimal, use scientific notation
-            if node1.type in INTEGER_TYPES and node2.type in DECIMAL_TYPES:
+            if node2.type in DECIMAL_TYPES:
                 node1.value = "{:e}".format(node1.value)
             # If the literal is a decimal that has to be converted to integer, floor the value
             elif node1.type in DECIMAL_TYPES and node2.type in INTEGER_TYPES:
@@ -232,7 +231,7 @@ class LLVMVisitor(ASTVisitor):
         # TODO: Kweet ni wa deze lijn doet
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
         function = node.children[0].children[0]
-        instruction = "define " + function.type + " @" + function.name + "("
+        instruction = "define " + function.type + " " + function.getValue() + "("
         children_LLVM = []
         for child in function.children[0].children:
             child = child.children[0]
@@ -254,13 +253,14 @@ class LLVMVisitor(ASTVisitor):
     def enterFunctionCall(self, node):
         function = self.getSymbol(node.children[0])
         node.temp_address = self.counter.incr()
-        instruction = "  " + node.getValue() + " = call " + function.type + " @" + function.name + "("
         children_LLVM = []
         for child, arg_child in zip(node.children[1].children, function.children[0].children):
             child = self.getSymbol(child)
             arg_child = arg_child.children[0]
+            print(child, arg_child)
             self.convertType(child, arg_child)
             children_LLVM.append(child.type + " " + child.getValue())
+        instruction = "  " + node.getValue() + " = call " + function.type + " " + function.getValue() + "("
         instruction += ", ".join(children_LLVM)
         instruction += ")"
         self.LLVM.append(instruction)

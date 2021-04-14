@@ -397,6 +397,7 @@ class FunctionCallNode(ASTNode):
 class ArgListNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)
+        self.children = []
 
     def __str__(self):
         return 'arguments'

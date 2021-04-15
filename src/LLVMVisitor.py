@@ -212,10 +212,10 @@ class LLVMVisitor(ASTVisitor):
             print(node, node.type, node.temp_address)
 
     def enterContinue(self, node):
-        self.LLVM.append("  br label " + str(getParent(node, WhileNode).start_address))
+        self.LLVM.append("  br label %" + str(getParent(node, WhileNode).start_address))
 
     def enterBreak(self, node):
-        self.LLVM.append("  br label {BREAK}")
+        self.LLVM.append("  br label %{BREAK}")
         self.loop_stack.append(len(self.LLVM) - 1)
 
     def exitBinaryOperation(self, node):
@@ -245,7 +245,7 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("  br label %" + str(self.counter.counter))
         self.LLVM.append("")
         node.start_address = self.counter.counter
-        self.LLVM.append(f"; <label>:{self.counter.incr()}:{predsspaces(node.start_address)}%" + "{LABEL}, %SCOPE VAN WHILE")
+        self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(node.start_address)}%" + "{LABEL}, %SCOPE VAN WHILE")
         self.loop_stack.append(len(self.LLVM) - 1)
 
     def enterElif(self, node):
@@ -317,13 +317,13 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM[instruction_index] = self.LLVM[instruction_index].replace("{LABEL}", str(self.counter.counter))
             self.loop_stack.append(len(self.LLVM)-1)
             self.LLVM.append("")
-            self.LLVM.append(f"{self.counter.incr()}:{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
         elif isinstance(node.parent, IfNode):
             self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
             self.stat_stack.append(len(self.LLVM) - 1)
             self.LLVM.append("")
             node.parent.start_address = self.counter.counter
-            self.LLVM.append(f"{self.counter.incr()}:{predsspaces(self.counter.counter-1)}%SCOPE VAN IF")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%SCOPE VAN IF")
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):
@@ -335,18 +335,18 @@ class LLVMVisitor(ASTVisitor):
                 self.LLVM[index] = self.LLVM[index].replace("{BREAK}", str(self.counter.counter))
                 index = self.loop_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(f"; <label>:{self.counter.incr()}:{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
         elif isinstance(node.parent, IfNode):
             # TODO: Als er een else of elif nog is dan is dit adress anders
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
             index = self.stat_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(f"; <label>:{self.counter.incr()}: {predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %SCOPE VAN IF")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %SCOPE VAN IF")
         elif isinstance(node.parent, ElseNode):
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
-            self.LLVM.append(f"; <label>:{self.counter.incr()}: {predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %IF START")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %IF START")
         self.table.exit_scope()
 
     def enterReturn(self, node):
@@ -402,35 +402,36 @@ class LLVMVisitor(ASTVisitor):
         # STEP 2: The actual operation
         ret_val += operation[0]
 
+        extra = ""
         # STEP 3: Check if signed or unsigned
         if operation[0] != "div" and operation[0] != "rem":
             if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
                 if the_type.startswith("i"):
                     if not operation[0] == "cmp":
-                        ret_val += " nuw"
+                        extra += "nuw"
                     elif operation[1] != "eq" and operation[1] != "ne":
-                        ret_val += " u"
+                        extra += "u"
                 else:
                     if operation[0] == "cmp":
                         if operation[1] != "ne":
-                            ret_val += " o"
+                            extra += "o"
                         else:
-                            ret_val += " u"
+                            extra += "u"
             else:
                 if the_type.startswith("i"):
                     if not operation[0] == "cmp":
-                        ret_val += " nsw"
+                        extra += "nsw"
                     elif operation[1] != "eq" and operation[1] != "ne":
-                        ret_val += " s"
+                        extra += "s"
                 else:
                     if operation[0] == "cmp":
                         if operation[1] != "ne":
-                            ret_val += " o"
+                            extra += "o"
                         else:
-                            ret_val += " u"
+                            extra += "u"
 
-            if len(operation) == 2:
-                ret_val += operation[1]
+        if extra:
+            ret_val += " " + extra
         return ret_val
 
     def getSymbol(self, node):

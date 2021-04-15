@@ -101,7 +101,7 @@ class IdentifierNode(ASTNode):
         self.type_semantics = []
         self.original_address = None
         self.temp_address = None
-        self.dimensions = None
+        self.dimensions = []
 
     def __str__(self):
         return self.name + f"({self.type})"

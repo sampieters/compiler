@@ -156,6 +156,7 @@ class ASTListener(CListener):
     def exitAssignment(self, ctx:CParser.AssignmentContext):
         self.curr_node = self.curr_node.parent
 
+    # TODO: tree is wrong, assignment should have an expr on left side with semantical checks so that it is either identifier or array access
     # Enter a parse tree produced by variablesParser#declaration.
     def enterDeclaration(self, ctx:CParser.DeclarationContext):
         self.curr_node.add_child(DeclarationNode(self.counter.incr()))
@@ -163,7 +164,6 @@ class ASTListener(CListener):
         self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
         if ctx.getChildCount() > 3:
             identifier = self.curr_node.last_child()
-            identifier.dimensions = []
             dimensions = re.findall('\[.*?\]', ctx.getText())
             # TODO: this wont work for int a[] = {...}
             # TODO: doesnt handle identifier accesses int a[i];

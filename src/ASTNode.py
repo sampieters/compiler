@@ -31,14 +31,14 @@ class ASTNode:
     def to_dot_recursive(self, file):
         if self.children is not None:
             for child in self.children:
-                file.write("\tnode" + str(child.id) + "[label=\"" + str(child) + "\"]\n")
-                file.write("\tnode" + str(self.id) + "->node" + str(child.id) + "\n")
+                file.write(f"\tnode{str(child.id)}[label=\"{str(child)}\"]\n")
+                file.write(f"\tnode{str(self.id)}->node{str(child.id)}\n")
                 child.to_dot_recursive(file)
 
     def to_dot(self, filename):
         file = open(filename + ".dot", "w")
         file.write("digraph AST {\n")
-        file.write("\tnode0[label=\"" + str(self) + "\"]\n")
+        file.write(f"\tnode0[label=\"{str(self)}\"]\n")
         self.to_dot_recursive(file)
         file.write("}")
 
@@ -83,7 +83,7 @@ class LiteralNode(ASTNode):
         self.str_length = None
 
     def __str__(self):
-        return str(self.value) + f"({self.type})"
+        return f"{str(self.value)} ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterLiteral(self)
@@ -92,7 +92,7 @@ class LiteralNode(ASTNode):
 
     def getValue(self):
         if self.type == "i8*" and "string" in self.type_semantics:
-            return f"getelementptr inbounds ([{str(str_length)} x i8, {str(str_length)} x i8]* {str(self.value)}, i64 0, i64 0)"
+            return f"getelementptr inbounds ([{str(self.str_length)} x i8], [{str(self.str_length)} x i8]* {str(self.value)}, i64 0, i64 0)"
         else:   
             return str(self.value)
 
@@ -108,7 +108,7 @@ class IdentifierNode(ASTNode):
         self.dimensions = []
 
     def __str__(self):
-        return self.name + f"({self.type})"
+        return f"{str(self.name)} ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterIdentifier(self)
@@ -130,11 +130,11 @@ class IdentifierNode(ASTNode):
 
     def getValue(self, original=False):
         if "global" in self.type_semantics:
-            return "@" + self.name
+            return f"@{self.name}"
         elif original:
-            return "%" + str(self.original_address)
+            return f"%{str(self.original_address)}"
         else:
-            return "%" + str(self.temp_address)
+            return f"%{str(self.temp_address)}"
 
 class FunctionNode(ASTNode):
     def __init__(self, name, node_id):
@@ -146,7 +146,7 @@ class FunctionNode(ASTNode):
         self.temp_address = None
 
     def __str__(self):
-        return self.name + f"({self.type})"
+        return f"{self.name} ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterFunction(self)
@@ -163,7 +163,7 @@ class DefinitionNode(ASTNode):
         self.type = None
 
     def __str__(self):
-        return 'define' + f"({self.type})"
+        return f"define ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterDefinition(self)
@@ -177,7 +177,7 @@ class FunctionDefinitionNode(ASTNode):
         self.type = None
 
     def __str__(self):
-        return 'define_func' + f"({self.type})"
+        return f"define_func ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterFunctionDefinition(self)
@@ -194,7 +194,7 @@ class UnaryOperationNode(ASTNode):
         self.temp_address = None
 
     def __str__(self):
-        return self.operation + f"({self.type})"
+        return f"{self.operation} ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterUnaryOperation(self)
@@ -213,7 +213,7 @@ class UnaryOperationNode(ASTNode):
         self.parent.children[self.parent.children.index(self)] = new_node
 
     def getValue(self):
-        return "%" + str(self.temp_address)
+        return f"%{str(self.temp_address)}"
 
 
 class BinaryOperationNode(ASTNode):
@@ -225,7 +225,7 @@ class BinaryOperationNode(ASTNode):
         self.temp_address = None
 
     def __str__(self):
-        return self.operation + f"({self.type})"
+        return f"{self.operation} ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterBinaryOperation(self)
@@ -234,14 +234,16 @@ class BinaryOperationNode(ASTNode):
 
     def fold(self, _type):
         # Calculate the result of the binary operation in order to fold
-        result = eval(str(self.children[0].value) + self.operation + str(self.children[1].value))
+        formula = str(self.children[0].value) + self.operation + str(self.children[1].value)
+        formula = formula.replace("&&", " and ").replace("||", " or ")
+        result = int(eval(formula))
         # Replace this node by the calculated result
         new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
 
     def getValue(self):
-        return "%" + str(self.temp_address)
+        return f"%{str(self.temp_address)}"
 
 
 
@@ -264,7 +266,7 @@ class DeclarationNode(ASTNode):
         self.type = None
 
     def __str__(self):
-        return 'declare' + f"({self.type})"
+        return f"declare ({self.type})"
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterDeclaration(self)
@@ -397,7 +399,7 @@ class FunctionCallNode(ASTNode):
         visitor.exitFunctionCall(self)
 
     def getValue(self):
-        return "%" + str(self.temp_address)
+        return f"%{str(self.temp_address)}"
 
 class ArgListNode(ASTNode):
     def __init__(self, node_id):

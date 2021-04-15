@@ -3,25 +3,31 @@ import os
 import filecmp
 from antlr4 import *
 from antlr4.InputStream import InputStream
-from grammars.variables.variablesLexer import variablesLexer
-from grammars.variables.variablesParser import variablesParser
+from grammars.C.CLexer import CLexer
+from grammars.C.CParser import CParser
 from ASTListener import ASTListener
 from ASTVisitor import ASTVisitor
 from SemanticalErrorVisitor import SemanticalErrorVisitor
 from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
-if __name__ == '__main__':
-    var = input("Please enter test file: ")
+PATH = "src/tests/benchmarks/CorrectCode/"
 
-    f1 = open("src/tests/" + var)
+filenames = input("Please enter test file(s): ")
+filenames = filenames.split()
+
+for filename in filenames:
+    file_path = PATH + filename
+
+    f1 = open(f"{file_path}.c")
     line = f1.read()
+    print(line)
     f1.close()
 
     input_stream = InputStream(line)
-    lexer = variablesLexer(input_stream)
+    lexer = CLexer(input_stream)
     token_stream = CommonTokenStream(lexer)
-    parser = variablesParser(token_stream)
+    parser = CParser(token_stream)
     tree = parser.prog()
 
     lisp_tree_str = tree.toStringTree(recog=parser)
@@ -31,52 +37,44 @@ if __name__ == '__main__':
     walker = ParseTreeWalker()
     walker.walk(listener, tree)
     AST = listener.curr_node
-    #AST.to_dot("tests/TEST_AST")
+    AST.to_dot("AST")
 
     visitor_err = SemanticalErrorVisitor()
     visitor_err.visit(AST)
 
-    #visitor_opt = OptimisationVisitor()
-    #visitor_opt.visit(AST)
+    visitor_opt = OptimisationVisitor()
+    visitor_opt.visit(AST)
 
     visitor_llvm = LLVMVisitor()
     visitor_llvm.visit(AST)
 
     #AST.to_dot("tests/TEST_AST_OPT")
 
-    with open("src/tests/" + var + "_RESULT.ll", 'w+') as f2:
+    with open(f"{file_path}_RESULT.ll", 'w+') as f2:
         f2.write("\n".join(visitor_llvm.LLVM))
     f2.close()
 
+    os.system("clear")
     # HERE COMPARISON OF THE TWO FILES
-    os.system("lli src/tests/" + var + "_RESULT.ll &> src/tests/" + var + "_RESULT.txt")
-    f1 = open("src/tests/" + var + "_RESULT.txt", 'r')
+    print("GENERATED:")
+    os.system(f"lli {file_path}_RESULT.ll | tee {file_path}_RESULT.txt")
+    f1 = open(f"{file_path}_RESULT.txt", 'r')
 
-    os.system("clang -emit-llvm -S src/tests/" + var + ".c -o src/tests/" + var + ".ll")
-    os.system("lli src/tests/" + var + ".ll &> src/tests/" + var + "_CMP.txt")
-    f2 = open("src/tests/" + var + "_CMP.txt", 'r')
+    print("\n\nEXPECTED:")
 
-    if f1 == f2:
-        print(var + " succeeded")
+    os.system(f"clang -emit-llvm -S {file_path}.c -o {file_path}.ll")
+    os.system(f"lli {file_path}.ll | tee {file_path}_CMP.txt")
+    f2 = open(f"{file_path}_CMP.txt", 'r')
+
+    print("\n")
+
+    if f1.read() == f2.read():
+        print(f"{filename} succeeded")
     else:
-        print("elements in " + var + " are not the same")
+        print(f"{filename} failed")
 
-    #f2 = open("tests/CMP_" + var, 'r')
+    f1.close()
+    f2.close()
 
-    #i = 0
-    #for line1 in f1:
-    #    i += 1
-    #    for line2 in f2:
-    #        # matching line1 from both files
-    #        if line1 == line2:
-    #            # print IDENTICAL if similar
-    #            print("Line ", i, ": IDENTICAL")
-    #        else:
-    #            print("Line ", i, ":")
-    #            # else print that line from both files
-    #            print("\tFile 1:", line1, end='')
-    #            print("\tFile 2:", line2, end='')
-    #        break
-    # closing files
     f1.close()
     f2.close()

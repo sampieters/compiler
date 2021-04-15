@@ -269,8 +269,6 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(FunctionNode(ctx.getChild(1).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
-        if self.curr_node.name == "printf" or self.curr_node.name == "scanf":
-            self.curr_node.type = "i32"
         self.curr_node.add_child(ArgListNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
@@ -302,6 +300,10 @@ class ASTListener(CListener):
         self.curr_node.add_child(FunctionCallNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(FunctionNode(ctx.getChild(0).getChild(0).getText(), self.counter.incr()))
+        self.curr_node = self.curr_node.last_child()
+        if self.curr_node.name == "printf" or self.curr_node.name == "scanf":
+            self.curr_node.type = "i32 (i8*, ...)"
+        self.curr_node = self.curr_node.parent
         self.curr_node.add_child(ArgListNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 

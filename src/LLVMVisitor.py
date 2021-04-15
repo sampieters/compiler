@@ -63,7 +63,7 @@ class LLVMVisitor(ASTVisitor):
             if node2.type in DECIMAL_TYPES:
                 node1.value = "{:e}".format(node1.value)
             # If the literal is a decimal that has to be converted to integer, floor the value
-            elif node1.type in DECIMAL_TYPES and node2.type in INTEGER_TYPES:
+            elif node2.type in INTEGER_TYPES:
                 node1.value = int(node1.value)
 
             node1.type = node2.type
@@ -95,9 +95,13 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM = self.before_LLVM
 
     def enterLiteral(self, node):
-        if node.type == "str":
-            self.before_LLVM.append("@.str." + self.str_counter.incr() + " = private unnamed_addr constant " +
-                                    "ARRAY_DIM " + "c\"" + " VALUE " + "\", align 1")
+        if "string" in node.type_semantics:
+            string = node.value
+            node.value = "@.str." + self.str_counter.incr()
+            self.before_LLVM.append(node.value + " = private unnamed_addr constant [" +
+                                    str(node.str_length) + " x i8] c\"" + string + "\", align 1")
+        else:
+            self.convertType(node, node)
 
 
 
@@ -241,12 +245,12 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("  br label %" + str(self.counter.counter))
         self.LLVM.append("")
         node.start_address = self.counter.counter
-        self.LLVM.append(self.counter.incr() + ':' + predsspaces(node.start_address) + "%{LABEL}, %SCOPE VAN WHILE")
+        self.LLVM.append(f"; <label>:{self.counter.incr()}:{predsspaces(node.start_address)}%" + "{LABEL}, %SCOPE VAN WHILE")
         self.loop_stack.append(len(self.LLVM) - 1)
 
     def enterElif(self, node):
         self.LLVM.append("")
-        self.LLVM.append(self.counter.incr() + ':')
+        self.LLVM.append(f"; <label>:{self.counter.incr()}:")
 
     def enterElse(self, node):
         node.start_address = self.counter.counter-1
@@ -313,13 +317,13 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM[instruction_index] = self.LLVM[instruction_index].replace("{LABEL}", str(self.counter.counter))
             self.loop_stack.append(len(self.LLVM)-1)
             self.LLVM.append("")
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%" + str(node.parent.start_address))
+            self.LLVM.append(f"{self.counter.incr()}:{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
         elif isinstance(node.parent, IfNode):
             self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
             self.stat_stack.append(len(self.LLVM) - 1)
             self.LLVM.append("")
             node.parent.start_address = self.counter.counter
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%SCOPE VAN IF")
+            self.LLVM.append(f"{self.counter.incr()}:{predsspaces(self.counter.counter-1)}%SCOPE VAN IF")
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):
@@ -331,18 +335,18 @@ class LLVMVisitor(ASTVisitor):
                 self.LLVM[index] = self.LLVM[index].replace("{BREAK}", str(self.counter.counter))
                 index = self.loop_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter-1) + "%" + str(node.parent.start_address))
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
         elif isinstance(node.parent, IfNode):
             # TODO: Als er een else of elif nog is dan is dit adress anders
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
             index = self.stat_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter - 1) + "%" + str(node.parent.start_address) + " ,%SCOPE VAN IF")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}: {predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %SCOPE VAN IF")
         elif isinstance(node.parent, ElseNode):
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
-            self.LLVM.append(self.counter.incr() + ':' + predsspaces(self.counter.counter - 1) + "%" + str(node.parent.start_address) + " ,%IF START")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}: {predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %IF START")
         self.table.exit_scope()
 
     def enterReturn(self, node):
@@ -352,6 +356,7 @@ class LLVMVisitor(ASTVisitor):
             instruction += "void"
         else:
             instruction += node.children[0].type + " " + node.children[0].getValue()
+        self.LLVM.append(instruction)
 
     def unaryOpToLLVM(self, node):
         child = self.getSymbol(node.children[0])
@@ -429,7 +434,7 @@ class LLVMVisitor(ASTVisitor):
         return ret_val
 
     def getSymbol(self, node):
-        if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and node.name is not None:
+        if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and not node.name in [None, "printf", "scanf"]:
             return self.table.get_symbol(node.name)
         else:
             return node

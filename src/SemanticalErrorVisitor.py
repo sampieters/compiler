@@ -86,9 +86,9 @@ class SemanticalErrorVisitor(ASTVisitor):
         child1, child2 = node.children
         while not isinstance(child1, IdentifierNode):
             child1 = child1.children[0]
-        for child in [child1, child2]:
-            if isinstance(child, IdentifierNode):
-                child = self.table.get_symbol(child.name)
+        child1 = self.table.get_symbol(child1.name)
+        if isinstance(child2, IdentifierNode):
+            child2 = self.table.get_symbol(child2.name)
         if child1.type.endswith("*"):
             if child2.type in INTEGER_TYPES:
                 print(f"Warning: Incompatible integer to pointer conversion assigning to '{child1.type}' from '{child2.type}'")
@@ -137,6 +137,8 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitFunctionCall(self, node):
         function = self.getSymbol(node.children[0])
+        if function.name in ["printf", "scanf"]:
+            return
         node.type = function.type
         node.type_semantics = function.type_semantics
         call_args = node.children[1].children
@@ -163,7 +165,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         
 
     def getSymbol(self, node):
-        if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and node.name is not None:
+        if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and not node.name in [None, "printf", "scanf"]:
             return self.table.get_symbol(node.name)
         else:
             return node

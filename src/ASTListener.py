@@ -78,6 +78,7 @@ class ASTListener(CListener):
     def enterUnaryOpPointer(self, ctx:CParser.UnaryOpPointerContext):
         self.curr_node.add_child(UnaryOperationNode(ctx.getChild(0).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
+        self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
 
     # Exit a parse tree produced by variablesParser#UnaryOp.
     def exitUnaryOpPointer(self, ctx:CParser.UnaryOpPointerContext):

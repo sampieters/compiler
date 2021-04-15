@@ -67,6 +67,8 @@ class LLVMVisitor(ASTVisitor):
 
             return
 
+        if node1.type == node2.type:
+            return
         # If converting a boolean, start by converting to i32
         if node1.type == "i1":
             self.LLVM.append("  %" + self.counter.incr() + " = zext i1 %" + str(self.counter.counter-2) + " to i32")
@@ -77,8 +79,6 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
         else:
             function = getConversionFunction(node1, node2)
-            if not function:
-                return
             instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
@@ -187,6 +187,10 @@ class LLVMVisitor(ASTVisitor):
                 self.LLVM.append("  %" + self.counter.incr() + " = xor i1 %" + str(self.counter.counter - 2) + ", true")
                 # self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
+        elif node.operation == "&":
+            node.type = node.children[0].type + "*"
+            node.temp_address = self.getSymbol(node.children[0]).original_address
+            print(node, node.type, node.temp_address)
 
     def enterContinue(self, node):
         self.LLVM.append("  br label " + str(getParent(node, WhileNode).start_address))

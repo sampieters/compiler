@@ -432,6 +432,12 @@ class LLVMVisitor(ASTVisitor):
 
         if extra:
             ret_val += " " + extra
+
+        if len(operation) == 2:
+            if operation[1] == "eq" or operation[1] == "ne":
+                ret_val += " " + operation[1]
+            else:
+                ret_val += operation[1]
         return ret_val
 
     def getSymbol(self, node):

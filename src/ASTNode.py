@@ -80,6 +80,7 @@ class LiteralNode(ASTNode):
         self.value = value
         self.type_semantics = type_semantics
         self.type = _type
+        self.str_length = None
 
     def __str__(self):
         return str(self.value) + f"({self.type})"
@@ -90,7 +91,10 @@ class LiteralNode(ASTNode):
         visitor.exitLiteral(self)
 
     def getValue(self):
-        return str(self.value)
+        if self.type == "i8*" and "string" in self.type_semantics:
+            return f"getelementptr inbounds ([{str(str_length)} x i8, {str(str_length)} x i8]* {str(self.value)}, i64 0, i64 0)"
+        else:   
+            return str(self.value)
 
 
 class IdentifierNode(ASTNode):

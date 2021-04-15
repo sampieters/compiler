@@ -84,8 +84,10 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitAssignment(self, node):
         child1, child2 = node.children
+        while not isinstance(child1, IdentifierNode):
+            child1 = child1.children[0]
         for child in [child1, child2]:
-            if isinstance(IdentifierNode, child):
+            if isinstance(child, IdentifierNode):
                 child = self.table.get_symbol(child.name)
         if child1.type.endswith("*"):
             if child2.type in INTEGER_TYPES:

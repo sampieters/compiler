@@ -4,18 +4,24 @@ digraph AST {
 	node0->node1
 	node2[label="declare(None)"]
 	node1->node2
-	node3[label="x(i32)"]
+	node3[label="a(i32)"]
 	node2->node3
-	node4[label="10(i32)"]
-	node1->node4
-	node5[label="define(None)"]
-	node0->node5
-	node6[label="declare(None)"]
+	node5[label="initializer_list"]
+	node1->node5
+	node6[label="5(i32)"]
 	node5->node6
-	node7[label="xp(i32*)"]
-	node6->node7
-	node8[label="&(i32*)"]
+	node7[label="7(i32)"]
+	node5->node7
+	node8[label="3(i32)"]
 	node5->node8
-	node9[label="x(i32)"]
-	node8->node9
+	node9[label="assign"]
+	node0->node9
+	node13[label="[](None)"]
+	node9->node13
+	node10[label="a(None)"]
+	node13->node10
+	node11[label="2(i32)"]
+	node13->node11
+	node12[label="2(i32)"]
+	node9->node12
 }

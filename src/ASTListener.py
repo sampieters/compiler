@@ -38,10 +38,10 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#String.
     def enterString(self, ctx:CParser.StringContext):
-        value = ctx.getText()[1:-1] + '\\00'
+        value = ctx.getText()[1:-1] + '\\00' 
         self.curr_node.add_child(LiteralNode(value, "i8*", self.counter.incr(), ["const", "string"]))
         self.curr_node = self.curr_node.last_child()
-        self.curr_node.dimensions = len(self.curr_node.value) - 2
+        self.curr_node.str_length = len(self.curr_node.value) - 2
 
     # Exit a parse tree produced by variablesParser#String.
     def exitString(self, ctx:CParser.StringContext):
@@ -153,8 +153,15 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(IdentifierNode(ctx.getChild(0).getText(), self.counter.incr()))
 
+
     # Exit a parse tree produced by variablesParser#assignment.
     def exitAssignment(self, ctx:CParser.AssignmentContext):
+        while (len(self.curr_node.children) > 2):
+            child1 = self.curr_node.children.pop(0)
+            child2 = self.curr_node.children.pop(0)
+            operation = UnaryOperationNode("[]", self.counter.incr())
+            operation.children = [child1, child2]
+            self.curr_node.children.insert(0, operation)
         self.curr_node = self.curr_node.parent
 
     # TODO: tree is wrong, assignment should have an expr on left side with semantical checks so that it is either identifier or array access
@@ -177,6 +184,7 @@ class ASTListener(CListener):
         _type, type_semantics = getTypeLLVM(ctx.getChild(0).getText())
         self.curr_node.children[0].type = _type
         self.curr_node.children[0].type_semantics = type_semantics
+        self.curr_node.children = [self.curr_node.children[0]]
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#Identifier.
@@ -261,6 +269,8 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(FunctionNode(ctx.getChild(1).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
+        if self.curr_node.name == "printf" or self.curr_node.name == "scanf":
+            self.curr_node.type = "i32"
         self.curr_node.add_child(ArgListNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 

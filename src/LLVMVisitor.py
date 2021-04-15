@@ -6,11 +6,14 @@ from SymbolTable import *
 
 class LLVMVisitor(ASTVisitor):
     def __init__(self):
+        self.before_LLVM = []
         self.LLVM = []
+        self.after_LLVM = []
         self.loop_stack = []
         self.stat_stack = []
         self.table = SymbolTable()
         self.counter = Counter()
+        self.str_counter = Counter()
 
     def storeVariable(self, node, value):
         """Stores value (node with a type) into a variable from the symbol table"""
@@ -85,6 +88,18 @@ class LLVMVisitor(ASTVisitor):
         node1.temp_address = self.counter.counter - 1
         node1.type = node2.type
         self.LLVM.append("  " + instruction)
+
+    def exitProg(self, node):
+        self.before_LLVM.extend(self.LLVM)
+        self.before_LLVM.extend(self.after_LLVM)
+        self.LLVM = self.before_LLVM
+
+    def enterLiteral(self, node):
+        if node.type == "str":
+            self.before_LLVM.append("@.str." + self.str_counter.incr() + " = private unnamed_addr constant " +
+                                    "ARRAY_DIM " + "c\"" + " VALUE " + "\", align 1")
+
+
 
     def exitDeclaration(self, node):
         """Transform declaration node to LLVM"""
@@ -260,16 +275,23 @@ class LLVMVisitor(ASTVisitor):
         function = node.children[0]
         self.table.add_symbol(function)
 
-    def enterFunctionCall(self, node):
+    # Heb enterFunctionCall naar enter vervangen (moest iets fucken dan kan da dit zijn maar zou normaal geen probleem moeten zijn)
+    def exitFunctionCall(self, node):
         function = self.getSymbol(node.children[0])
         node.temp_address = self.counter.incr()
+
         children_LLVM = []
-        for child, arg_child in zip(node.children[1].children, function.children[0].children):
-            child = self.getSymbol(child)
-            arg_child = arg_child.children[0]
-            print(child, arg_child)
-            self.convertType(child, arg_child)
-            children_LLVM.append(child.type + " " + child.getValue())
+        if function.name == "printf":
+            if "declare i32 @printf(i8*, ...) #1" not in self.after_LLVM:
+                self.after_LLVM.append("declare i32 @printf(i8*, ...) #1")
+            for child in node.children[1].children:
+                children_LLVM.append(child.type + " " + child.getValue())
+        else:
+            for child, arg_child in zip(node.children[1].children, function.children[0].children):
+                child = self.getSymbol(child)
+                arg_child = arg_child.children[0]
+                self.convertType(child, arg_child)
+                children_LLVM.append(child.type + " " + child.getValue())
         instruction = "  " + node.getValue() + " = call " + function.type + " " + function.getValue() + "("
         instruction += ", ".join(children_LLVM)
         instruction += ")"

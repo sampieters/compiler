@@ -62,7 +62,7 @@ for filename in filenames:
 
     print("\n\nEXPECTED:")
 
-    os.system(f"clang -emit-llvm -S {file_path}.c -o {file_path}.ll")
+    os.system(f"clang -Wno-everything -emit-llvm -S {file_path}.c -o {file_path}.ll")
     os.system(f"lli {file_path}.ll | tee {file_path}_CMP.txt")
     f2 = open(f"{file_path}_CMP.txt", 'r')
 

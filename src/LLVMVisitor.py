@@ -236,7 +236,7 @@ class LLVMVisitor(ASTVisitor):
             self.convertType(child, IdentifierNode(None, None, the_type))
             children_LLVM.append(child.getValue())
         # Construct the LLVM instruction
-        instruction = node.getValue() + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ", ".join(children_LLVM)
+        instruction = f"{node.getValue()} = {self.binaryOpToLLVM(node)} {the_type} {', '.join(children_LLVM)}"
         self.LLVM.append("  " + instruction)
         # if node.operation in BOOLEAN_OPS:
         #     self.convertType(node, IdentifierNode(None, None, "i32"))
@@ -267,7 +267,7 @@ class LLVMVisitor(ASTVisitor):
             child.original_address = self.counter.incr()
             children_LLVM.append(child.type + " " + child.getValue(original=True))
         instruction += ", ".join(children_LLVM)
-        instruction += ") #0 {"
+        instruction += ") {"
         self.LLVM.append(instruction)
         function.original_address = self.counter.incr()
 
@@ -286,8 +286,8 @@ class LLVMVisitor(ASTVisitor):
 
         children_LLVM = []
         if function.name == "printf":
-            if "declare i32 @printf(i8*, ...) #1" not in self.after_LLVM:
-                self.after_LLVM.append("declare i32 @printf(i8*, ...) #1")
+            if "declare i32 @printf(i8*, ...)" not in self.after_LLVM:
+                self.after_LLVM.append("declare i32 @printf(i8*, ...)")
             for child in node.children[1].children:
                 children_LLVM.append(child.type + " " + child.getValue())
         else:

@@ -82,7 +82,10 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
         else:
             function = getConversionFunction(node1, node2)
-            instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
+            print(function)
+            print(node1.type)
+            print(node2.type)
+            instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
         node1.temp_address = self.counter.counter - 1
@@ -286,13 +289,23 @@ class LLVMVisitor(ASTVisitor):
 
         children_LLVM = []
         if function.name == "printf":
-            if "declare i32 @printf(i8*, ...) #1" not in self.after_LLVM:
-                self.after_LLVM.append("declare i32 @printf(i8*, ...) #1")
+            if "declare i32 @printf(i8*, ...)" not in self.after_LLVM:
+                self.after_LLVM.append("declare i32 @printf(i8*, ...)")
             for child in node.children[1].children:
                 child = self.getSymbol(child)
                 if "string" not in child.type_semantics:
                     self.loadVariable(child)
                 children_LLVM.append(child.type + " " + child.getValue())
+        #TODO: NOG EEN FOUT
+        elif function.name == "scanf":
+            if "declare i32 @scanf(i8*, ...)" not in self.after_LLVM:
+                self.after_LLVM.append("declare i32 @scanf(i8*, ...)")
+            for child in node.children[1].children:
+                child = self.getSymbol(child)
+                if "string" not in child.type_semantics:
+                    self.loadVariable(child)
+                children_LLVM.append(child.type + " " + child.getValue())
+
         else:
             for child, arg_child in zip(node.children[1].children, function.children[0].children):
                 child = self.getSymbol(child)

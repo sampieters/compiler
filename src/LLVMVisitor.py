@@ -363,15 +363,24 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
             self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
         elif isinstance(node.parent, IfNode):
-            # TODO: Als er een else of elif nog is dan is dit adress anders
-            self.LLVM.append("  br label %" + str(self.counter.counter))
+            possible_index = None
+            if isinstance(node.parent.parent.children[-1], ElseNode):
+                self.LLVM.append("  br label %{LABEL}")
+                possible_index = len(self.LLVM) - 1
+            else:
+                self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
             index = self.stat_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
+            if possible_index is not None:
+                self.stat_stack.append(possible_index)
+
             self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %SCOPE VAN IF")
         elif isinstance(node.parent, ElseNode):
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
+            index = self.stat_stack.pop()
+            self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
             self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %IF START")
         self.table.exit_scope()
 

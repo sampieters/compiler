@@ -10,8 +10,11 @@ from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
 if __name__ == '__main__':
+    file_path = "src/tests/benchmarks/CorrectCode/"
     if len(sys.argv) > 1:
-        input_stream = FileStream(sys.argv[1])
+        f1 = open(f"{file_path + sys.argv[1]}.c")
+        input_stream = InputStream(f1.read())
+        f1.close()
     else:
         input_stream = InputStream(sys.stdin.readline())
 

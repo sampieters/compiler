@@ -89,20 +89,22 @@ class ASTListener(CListener):
     def enterUnaryOpIdentifierPrefix(self, ctx:CParser.UnaryOpIdentifierPrefixContext):
         self.curr_node.add_child(UnaryOperationNode(ctx.getChild(0).getText() + 'x', self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
-        self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
 
     # Exit a parse tree produced by variablesParser#UnaryOp.
     def exitUnaryOpIdentifierPrefix(self, ctx:CParser.UnaryOpIdentifierPrefixContext):
+        if not self.curr_node.children:
+            self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#UnaryOp.
     def enterUnaryOpIdentifierSuffix(self, ctx:CParser.UnaryOpIdentifierSuffixContext):
         self.curr_node.add_child(UnaryOperationNode('x' + ctx.getChild(1).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
-        self.curr_node.add_child(IdentifierNode(ctx.getChild(0).getText(), self.counter.incr()))
 
     # Exit a parse tree produced by variablesParser#UnaryOp.
     def exitUnaryOpIdentifierSuffix(self, ctx:CParser.UnaryOpIdentifierSuffixContext):
+        if not self.curr_node.children:
+            self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
         self.curr_node = self.curr_node.parent
 
     def enterUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):

@@ -234,8 +234,13 @@ class BinaryOperationNode(ASTNode):
 
     def fold(self, _type):
         # Calculate the result of the binary operation in order to fold
-        formula = str(self.children[0].value) + self.operation + str(self.children[1].value)
-        formula = formula.replace("&&", " and ").replace("||", " or ")
+        child1 = self.children[0].value
+        operation = self.operation.replace("&&", " and ").replace("||", " or ")
+        child2 = self.children[1].value
+        if self.operation in ["&&", "||"]:
+            child1 = bool(child1)
+            child2 = bool(child2)
+        formula = str(child1) + operation + str(child2)
         result = int(eval(formula))
         # Replace this node by the calculated result
         new_node = LiteralNode(result, _type, self.id)

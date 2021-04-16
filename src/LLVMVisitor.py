@@ -82,9 +82,12 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
         else:
             function = getConversionFunction(node1, node2)
+<<<<<<< HEAD
+=======
             print(function)
             print(node1.type)
             print(node2.type)
+>>>>>>> 623883bc9d586b7cfa7ba4956ceebcd40bc89037
             instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
@@ -212,7 +215,6 @@ class LLVMVisitor(ASTVisitor):
         elif node.operation == "&":
             node.type = node.children[0].type + "*"
             node.temp_address = self.getSymbol(node.children[0]).original_address
-            print(node, node.type, node.temp_address)
 
     def enterContinue(self, node):
         self.LLVM.append("  br label %" + str(getParent(node, WhileNode).start_address))
@@ -239,7 +241,7 @@ class LLVMVisitor(ASTVisitor):
             self.convertType(child, IdentifierNode(None, None, the_type))
             children_LLVM.append(child.getValue())
         # Construct the LLVM instruction
-        instruction = node.getValue() + " = " + self.binaryOpToLLVM(node) + ' ' + the_type + ", ".join(children_LLVM)
+        instruction = f"{node.getValue()} = {self.binaryOpToLLVM(node)} {the_type} {', '.join(children_LLVM)}"
         self.LLVM.append("  " + instruction)
         # if node.operation in BOOLEAN_OPS:
         #     self.convertType(node, IdentifierNode(None, None, "i32"))
@@ -270,7 +272,7 @@ class LLVMVisitor(ASTVisitor):
             child.original_address = self.counter.incr()
             children_LLVM.append(child.type + " " + child.getValue(original=True))
         instruction += ", ".join(children_LLVM)
-        instruction += ") #0 {"
+        instruction += ") {"
         self.LLVM.append(instruction)
         function.original_address = self.counter.incr()
 

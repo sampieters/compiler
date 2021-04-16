@@ -16,6 +16,17 @@ digraph AST {
 	node6->node7
 	node8[label="x (i32)"]
 	node7->node8
+<<<<<<< HEAD
+	node9[label="% (None)"]
+	node6->node9
+	node10[label="7 (i32)"]
+	node9->node10
+	node11[label="2 (i32)"]
+	node9->node11
+	node12[label="func_call"]
+	node5->node12
+	node13[label="printf (i32 (i8*, ...))"]
+=======
 	node9[label="5 (i32)"]
 	node6->node9
 	node10[label="branch"]
@@ -25,9 +36,20 @@ digraph AST {
 	node12[label="< (i1)"]
 	node11->node12
 	node13[label="x (i32)"]
+>>>>>>> 623883bc9d586b7cfa7ba4956ceebcd40bc89037
 	node12->node13
-	node14[label="5 (i32)"]
+	node14[label="arguments"]
 	node12->node14
+<<<<<<< HEAD
+	node15[label="%d\0A\00 (i8*)"]
+	node14->node15
+	node16[label="x (None)"]
+	node14->node16
+	node17[label="return"]
+	node5->node17
+	node18[label="1 (i32)"]
+	node17->node18
+=======
 	node15[label="scope"]
 	node11->node15
 	node16[label="func_call"]
@@ -98,4 +120,5 @@ digraph AST {
 	node5->node48
 	node49[label="1 (i32)"]
 	node48->node49
+>>>>>>> 623883bc9d586b7cfa7ba4956ceebcd40bc89037
 }

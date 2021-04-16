@@ -80,7 +80,8 @@ def getConversionFunction(node1, node2):
     # Get conversion function when converting node1 type to node2 type
     ret_val = ""
     if node1.type == node2.type:
-        return None
+        #TODO: changed, can fuck up sometihng
+        return ret_val
     if node1.type.startswith("i"):
         if "unsigned" in node1.type_semantics:
             ret_val += "u"

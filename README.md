@@ -63,13 +63,28 @@ geïmplementeerd van opdracht 4:
 geïmplementeerd van opdracht 5:
 
 - (Mandatory) reserved words
-    - return (voltooid maar geen LLVM)
+    - return (voltooid)
     - void (niet voltooid)
 - (Mandatory) Scopes (voltooid maar testen)
 - (Mandatory) Local and global variables (niet voltooid)
 - (Mandatory) Functions (nog niet voltooid)
 
 geïmplementeerd van opdracht 6 (niet voltooid)
+
+
+### 4) Benchmarks
+
+- binaryOperations1 (werkt)
+- binaryOperations2 (werkt)
+- breakAndContinue (werkt)
+- comparisons1 (werkt, dankzij folding)
+- comparisons2 (werkt, dankzij folding)
+- dereferenceAssignment (crasht)
+- fibonacciRecursive (crasht)
+- floatToIntConversion (crasht)
+- for (werkt)
+- forwardDeclaration (crasht)
+- if (werkt, zonder &&)
 
 #TODO:
 1) zext aub weg bij while loops

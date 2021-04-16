@@ -82,12 +82,6 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
         else:
             function = getConversionFunction(node1, node2)
-<<<<<<< HEAD
-=======
-            print(function)
-            print(node1.type)
-            print(node2.type)
->>>>>>> 623883bc9d586b7cfa7ba4956ceebcd40bc89037
             instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
@@ -96,6 +90,19 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append("  " + instruction)
 
     def exitProg(self, node):
+        to_remove = []
+        end_block = False
+        for idx, line in enumerate(self.LLVM):
+            if "<label>" in line:
+                end_block = False
+            elif not end_block and ("br label" in line or "br i1" in line):
+                end_block = True
+                continue
+            if end_block:
+                to_remove.append(idx)
+        self.counter.reset()
+        for idx in to_remove:
+            self.LLVM.pop(idx - int(self.counter.incr()))
         self.before_LLVM.extend(self.LLVM)
         self.before_LLVM.extend(self.after_LLVM)
         self.LLVM = self.before_LLVM
@@ -287,7 +294,6 @@ class LLVMVisitor(ASTVisitor):
     # Heb enterFunctionCall naar enter vervangen (moest iets fucken dan kan da dit zijn maar zou normaal geen probleem moeten zijn)
     def exitFunctionCall(self, node):
         function = self.getSymbol(node.children[0])
-        node.temp_address = self.counter.incr()
 
         children_LLVM = []
         if function.name == "printf":
@@ -295,7 +301,7 @@ class LLVMVisitor(ASTVisitor):
                 self.after_LLVM.append("declare i32 @printf(i8*, ...)")
             for child in node.children[1].children:
                 child = self.getSymbol(child)
-                if "string" not in child.type_semantics:
+                if "string" not in child.type_semantics and isinstance(child, IdentifierNode):
                     self.loadVariable(child)
                 children_LLVM.append(child.type + " " + child.getValue())
         #TODO: NOG EEN FOUT
@@ -314,6 +320,8 @@ class LLVMVisitor(ASTVisitor):
                 arg_child = arg_child.children[0]
                 self.convertType(child, arg_child)
                 children_LLVM.append(child.type + " " + child.getValue())
+
+        node.temp_address = self.counter.incr()
         instruction = "  " + node.getValue() + " = call " + function.type + " " + function.getValue() + "("
         instruction += ", ".join(children_LLVM)
         instruction += ")"

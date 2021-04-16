@@ -4,7 +4,8 @@
 define i32 @main() {
   %1 = alloca i32, align 4
   store i32 1, i32* %1, align 4
-  %2 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.0, i64 0, i64 0), i32 %None)
+  %2 = load i32, i32* %1, align 4
+  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.0, i64 0, i64 0), i32 %2)
   ret i32 1
 }
 declare i32 @printf(i8*, ...)

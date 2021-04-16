@@ -12,7 +12,7 @@ define i32 @main() {
   br i1 %3, label %4, label %6
 ; <label>:4:
   %5 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @.str.0, i64 0, i64 0))
-  br label %6
+  br label %8
 ; <label>:6:
   %7 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.1, i64 0, i64 0))
   br label %8
@@ -26,7 +26,7 @@ define i32 @main() {
   br i1 %13, label %14, label %16
 ; <label>:14:
   %15 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.2, i64 0, i64 0))
-  br label %16
+  br label %18
 ; <label>:16:
   %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @.str.3, i64 0, i64 0))
   br label %18

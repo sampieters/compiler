@@ -310,7 +310,7 @@ class LLVMVisitor(ASTVisitor):
                 self.after_LLVM.append("declare i32 @scanf(i8*, ...)")
             for child in node.children[1].children:
                 child = self.getSymbol(child)
-                if "string" not in child.type_semantics:
+                if "string" not in child.type_semantics and isinstance(child, IdentifierNode):
                     self.loadVariable(child)
                 children_LLVM.append(child.type + " " + child.getValue())
 

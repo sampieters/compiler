@@ -82,7 +82,7 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
         else:
             function = getConversionFunction(node1, node2)
-            instruction = "%" + self.counter.incr() + " = " + getConversionFunction(node1, node2) + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
+            instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
         node1.temp_address = self.counter.counter - 1
@@ -209,7 +209,6 @@ class LLVMVisitor(ASTVisitor):
         elif node.operation == "&":
             node.type = node.children[0].type + "*"
             node.temp_address = self.getSymbol(node.children[0]).original_address
-            print(node, node.type, node.temp_address)
 
     def enterContinue(self, node):
         self.LLVM.append("  br label %" + str(getParent(node, WhileNode).start_address))

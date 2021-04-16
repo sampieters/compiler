@@ -38,10 +38,11 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#String.
     def enterString(self, ctx:CParser.StringContext):
-        value = ctx.getText()[1:-1] + '\\00' 
+        #TODO: other escaped characters?
+        value = ctx.getText()[1:-1].replace("\\n", "\\0A") + '\\00' 
         self.curr_node.add_child(LiteralNode(value, "i8*", self.counter.incr(), ["const", "string"]))
         self.curr_node = self.curr_node.last_child()
-        self.curr_node.str_length = len(self.curr_node.value) - 2
+        self.curr_node.str_length = len(self.curr_node.value) - (2 * value.count("\\0"))
 
     # Exit a parse tree produced by variablesParser#String.
     def exitString(self, ctx:CParser.StringContext):

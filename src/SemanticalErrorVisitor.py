@@ -9,6 +9,12 @@ class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
 
+    def enterScope(self, node):
+        self.table.enter_scope()
+
+    def exitScope(self, node):
+        self.table.exit_scope()
+
     def exitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
         if node.type == "void":

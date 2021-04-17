@@ -21,7 +21,10 @@ class SymbolTable:
         return result
 
     def get_symbol_curr_scope(self, symbol):
-        return self.symbols[symbol]
+        try:
+            return self.symbols[symbol]
+        except KeyError:
+            return None
 
     def add_symbol(self, symbol):
         """

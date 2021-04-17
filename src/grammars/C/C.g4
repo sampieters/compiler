@@ -81,7 +81,7 @@ definition: declaration EQ expr
 function_definition: function_declaration scope
                    ; 
 
-assignment: ID (LSQUARE expr RSQUARE)* EQ expr
+assignment: expr EQ expr
           ;
 
 function_call: ID call_list         # CustomFunctionCall

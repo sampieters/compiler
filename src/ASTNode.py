@@ -192,6 +192,7 @@ class UnaryOperationNode(ASTNode):
         self.type = None
         self.type_semantics = []
         self.temp_address = None
+        self.original_address = None
 
     def __str__(self):
         return f"{self.operation} ({self.type})"
@@ -212,8 +213,14 @@ class UnaryOperationNode(ASTNode):
         new_node.parent = self.parent
         self.parent.children[self.parent.children.index(self)] = new_node
 
-    def getValue(self):
-        return f"%{str(self.temp_address)}"
+    def getValue(self, original=False):
+        if original:
+            return f"%{str(self.original_address)}"
+        else:
+            return f"%{str(self.temp_address)}"
+
+    def alignment(self):
+        return str(int(getAlignment(self)))
 
 
 class BinaryOperationNode(ASTNode):

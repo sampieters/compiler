@@ -22,29 +22,28 @@ class LLVMVisitor(ASTVisitor):
         value = self.getSymbol(value)
 
         # If we want to store a variable
-        if isinstance(value, IdentifierNode) and not getParent(value, ArgListNode):
+        if not getParent(value, ArgListNode):
             # Load the variable into a new temporary address before storing it, unless it is an argument of a function
             self.loadVariable(value)
         
         instruction += value.type + " " + value.getValue()
         
-        # If the node is a variable, get the node from the symbol table and store into the original address
-        if isinstance(node, IdentifierNode):
-            instruction += ", " + node.type + "* " + node.getValue(original=True) + ", align " + node.alignment()
-        # Otherwise, store into the temporary address of the node
-        else:
-            instruction += ", " + node.type + "* " + node.getValue() + ", align " + node.alignment()
+
+        instruction += ", " + node.type + "* " + node.getValue(original=True) + ", align " + node.alignment()
+
         self.LLVM.append("  " + instruction)
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
+        if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and node.operation == "*")):
+            return
         node = self.getSymbol(node)
 
         # Change the temporary address of the variable to the new address, load the original address into it
         load_addr = self.counter.incr()
-        node.temp_address = load_addr
         instruction = '%' + load_addr + " = load " + node.type + ", " + node.type + "* " + \
                       node.getValue(original=True) + ", align " + node.alignment()
+        node.temp_address = load_addr
         self.LLVM.append("  " + instruction)
 
     def convertType(self, node1, node2):
@@ -98,7 +97,7 @@ class LLVMVisitor(ASTVisitor):
             elif not end_block and ("br label" in line or "br i1" in line):
                 end_block = True
                 continue
-            if end_block:
+            if end_block and line != "":
                 to_remove.append(idx)
         self.counter.reset()
         for idx in to_remove:
@@ -161,8 +160,7 @@ class LLVMVisitor(ASTVisitor):
         # If the unary operation is -
         if node.operation == '-':
             # If the unary operation is performed on a variable, load it into a new temporary address
-            if isinstance(child, IdentifierNode):
-                self.loadVariable(child)
+            self.loadVariable(child)
             node.temp_address = self.counter.counter
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, LiteralNode):
@@ -209,8 +207,7 @@ class LLVMVisitor(ASTVisitor):
             self.storeVariable(child, bin_op)
         # If the operation is !
         elif node.operation == "!":
-            if isinstance(child, IdentifierNode):
-                self.loadVariable(child)
+            self.loadVariable(child)
             node.temp_address = self.counter.counter
             if not isinstance(child, LiteralNode):
                 literal = LiteralNode(0, child.type, None)
@@ -220,8 +217,14 @@ class LLVMVisitor(ASTVisitor):
                 # self.convertType(node, IdentifierNode(None, None, "i32"))
                 node.temp_address = self.counter.counter-1
         elif node.operation == "&":
+            # Convert the type to a pointer, copy the original address of the identifier node
             node.type = node.children[0].type + "*"
             node.temp_address = self.getSymbol(node.children[0]).original_address
+        elif node.operation == "*":
+            # Since type is already generated in SemanticalErrorVisitor, simply take the original address of the identifier node
+            identifier = self.getSymbol(getChild(node, IdentifierNode))
+            self.loadVariable(identifier)
+            node.original_address = identifier.temp_address
 
     def enterContinue(self, node):
         self.LLVM.append("  br label %" + str(getParent(node, WhileNode).start_address))
@@ -236,8 +239,7 @@ class LLVMVisitor(ASTVisitor):
         child2 = self.getSymbol(node.children[1])
         # For each child that is a variable, load the variable into a new temporary address
         for child in [child1, child2]:
-            if isinstance(child, IdentifierNode):
-                self.loadVariable(child)
+            self.loadVariable(child)
         # Store the result of the binary operation in a new address
         node.temp_address = int(self.counter.incr())
         # Convert the children to LLVM, depending on their node types
@@ -301,7 +303,7 @@ class LLVMVisitor(ASTVisitor):
                 self.after_LLVM.append("declare i32 @printf(i8*, ...)")
             for child in node.children[1].children:
                 child = self.getSymbol(child)
-                if "string" not in child.type_semantics and isinstance(child, IdentifierNode):
+                if "string" not in child.type_semantics:
                     self.loadVariable(child)
                 children_LLVM.append(child.type + " " + child.getValue())
         #TODO: NOG EEN FOUT
@@ -310,7 +312,7 @@ class LLVMVisitor(ASTVisitor):
                 self.after_LLVM.append("declare i32 @scanf(i8*, ...)")
             for child in node.children[1].children:
                 child = self.getSymbol(child)
-                if "string" not in child.type_semantics and isinstance(child, IdentifierNode):
+                if "string" not in child.type_semantics:
                     self.loadVariable(child)
                 children_LLVM.append(child.type + " " + child.getValue())
 
@@ -331,9 +333,9 @@ class LLVMVisitor(ASTVisitor):
         #TODO:: 0 moet nog verandert worden door de 0 van het juiste type
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
+            self.loadVariable(condition)
             if isinstance(node.parent.children[0], IdentifierNode):
                 condition = self.getSymbol(node.parent.children[0])
-                self.loadVariable(condition)
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
                                 condition.type + " " + condition.getValue() + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):

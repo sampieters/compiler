@@ -14,7 +14,9 @@ UNARY_OPS_LLVM = {
             "x--": ["add", "-1"],
             "--x": ["add", "-1"],
             "!": ["not", ""],
-            "&": ["", ""]
+            "&": ["", ""],
+            "*": ["", ""],
+            "[]": ["", ""]
         }
 
 BINARY_OPS_LLVM = {
@@ -37,6 +39,13 @@ def getParent(node, parentClass):
     while parent and not isinstance(parent, parentClass):
         parent = parent.parent
     return parent
+
+def getChild(node, childClass):
+    "Get the closest child of a certain class, returns None if no such child is found"
+    child = node.children[0]
+    while child and not isinstance(child, childClass):
+        child = child.children[0]
+    return child
 
 def getTypeLLVM(_type):
     ret_val = ["", []]

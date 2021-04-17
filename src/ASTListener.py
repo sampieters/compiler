@@ -154,17 +154,10 @@ class ASTListener(CListener):
     def enterAssignment(self, ctx:CParser.AssignmentContext):
         self.curr_node.add_child(AssignmentNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
-        self.curr_node.add_child(IdentifierNode(ctx.getChild(0).getText(), self.counter.incr()))
 
 
     # Exit a parse tree produced by variablesParser#assignment.
     def exitAssignment(self, ctx:CParser.AssignmentContext):
-        while (len(self.curr_node.children) > 2):
-            child1 = self.curr_node.children.pop(0)
-            child2 = self.curr_node.children.pop(0)
-            operation = UnaryOperationNode("[]", self.counter.incr())
-            operation.children = [child1, child2]
-            self.curr_node.children.insert(0, operation)
         self.curr_node = self.curr_node.parent
 
     # TODO: tree is wrong, assignment should have an expr on left side with semantical checks so that it is either identifier or array access

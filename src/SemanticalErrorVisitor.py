@@ -84,16 +84,35 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitAssignment(self, node):
         child1, child2 = node.children
+        # Get the identifier node on the left side by going down potential unary operations
         while not isinstance(child1, IdentifierNode):
-            child1 = child1.children[0]
+            # If the unary operation node on the left is not a [] or * operation, throw an exception
+            if isinstance(child1, UnaryOperationNode) and (child1.operation == "[]" or child1.operation == "*"):
+                child1 = child1.children[0]
+            else:
+                raise Exception("Error: Expression is not assignable")
+        # Make a temporary copy of the identifier on the left, take the child1 node from the symbol table
+        tmp = child1
         child1 = self.table.get_symbol(child1.name)
+        tmp.type = child1.type
+        # For each * operation, remove a * from the type, throw an exception if it becomes an expression by doing this
+        while not isinstance(tmp.parent, AssignmentNode):
+            if tmp.parent.operation == "*" and tmp.type.endswith("*"):
+                tmp.parent.type = tmp.type[:-1]
+            elif tmp.parent.operation == "*":
+                raise Exception("Error: Expression is not assignable")
+            #TODO: maybe do something for [] operations?
+            tmp = tmp.parent
+        # If the right side of the expression is an identifier, grab it from the symbol table
         if isinstance(child2, IdentifierNode):
             child2 = self.table.get_symbol(child2.name)
+        # If the identifier on the left of the assignment is a pointer, throw the appropriate exceptions/warnings
         if child1.type.endswith("*"):
             if child2.type in INTEGER_TYPES:
                 print(f"Warning: Incompatible integer to pointer conversion assigning to '{child1.type}' from '{child2.type}'")
             else:
                 raise Exception(f"Error: Assigning to '{child1.type}' from incompatible type '{child2.type}'")
+        # Otherwise check if an information loss occurs
         elif checkInfoLoss(child2.type, child1.type):
             print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 

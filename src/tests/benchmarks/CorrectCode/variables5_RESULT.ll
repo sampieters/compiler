@@ -14,5 +14,6 @@ define i32 @main() {
   %7 = load i32, i32* %2, align 4
   %8 = load i32, i32* %4, align 4
   %9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str.0, i64 0, i64 0), i32 %6, i32 %7, i32 %8)
+  ret i32 0
 }
 declare i32 @printf(i8*, ...)

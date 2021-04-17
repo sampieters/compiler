@@ -30,7 +30,9 @@ BINARY_OPS_LLVM = {
             "<=": ["cmp", "le"],
             ">=": ["cmp", "ge"],
             ">": ["cmp", "gt"],
-            "<": ["cmp",  "lt"]
+            "<": ["cmp",  "lt"],
+            "&&": ["cmp", "ne"],
+            "||": ["cmp", "ne"]
         }
 
 def getParent(node, parentClass):

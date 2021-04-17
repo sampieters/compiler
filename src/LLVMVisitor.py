@@ -252,6 +252,14 @@ class LLVMVisitor(ASTVisitor):
         # Construct the LLVM instruction
         instruction = f"{node.getValue()} = {self.binaryOpToLLVM(node)} {the_type} {', '.join(children_LLVM)}"
         self.LLVM.append("  " + instruction)
+        #if node.operation == "&&" or node.operation == "||":
+            #self.LLVM.append("  br i1 %5, label %" + self.counter.incr() + ", label %{LABEL}")
+            #self.LLVM.append("")
+            #self.LLVM.append("; <label>:" + str(self.counter.counter-1) + ":")
+            #self.LLVM.append("  %LUL1 = load i32, i32* %3, align 4")
+            #self.LLVM.append("  %LUL2 = icmp ne i32 %7, 0")
+
+
         # if node.operation in BOOLEAN_OPS:
         #     self.convertType(node, IdentifierNode(None, None, "i32"))
 

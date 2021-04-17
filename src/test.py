@@ -33,7 +33,6 @@ for filename in filenames:
 
     f1 = open(f"{file_path}.c")
     line = f1.read()
-    print(line)
     f1.close()
 
     input_stream = InputStream(line)

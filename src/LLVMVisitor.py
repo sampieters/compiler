@@ -379,7 +379,10 @@ class LLVMVisitor(ASTVisitor):
         elif isinstance(node.parent, IfNode):
             to_fill = None
             if isinstance(node.parent.children[0], LiteralNode):
-                to_fill = str(node.parent.children[0].value)
+                if node.parent.children[0].value == 0:
+                    to_fill = "0"
+                else:
+                    to_fill = "1"
             elif isinstance(node.parent.children[0], IdentifierNode):
                 pass
             else:

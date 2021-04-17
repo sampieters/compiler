@@ -13,7 +13,7 @@ define i32 @main() {
   %4 = load i32, i32* %3, align 4
   %5 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i64 0, i64 0), i32 %4)
   store i32 30, i32* %3, align 4
-  br i1 10, label %6, label %12
+  br i1 1, label %6, label %12
 
 ; <label>:6:
   %7 = load i32, i32* %3, align 4

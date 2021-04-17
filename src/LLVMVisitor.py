@@ -237,7 +237,7 @@ class LLVMVisitor(ASTVisitor):
             node.temp_address = self.getSymbol(node.children[0]).original_address
         elif node.operation == "*":
             # Since type is already generated in SemanticalErrorVisitor, simply take the original address of the identifier node
-            identifier = self.getSymbol(getChild(node, IdentifierNode))
+            identifier = self.getSymbol(node.children[0])
             self.loadVariable(identifier)
             node.original_address = identifier.temp_address
 
@@ -507,14 +507,12 @@ class LLVMVisitor(ASTVisitor):
                         else:
                             extra += "u"
 
+        if len(operation) == 2:
+            extra += operation[1]
+
         if extra:
             ret_val += " " + extra
-
-        if len(operation) == 2:
-            if operation[1] == "eq" or operation[1] == "ne":
-                ret_val += " " + operation[1]
-            else:
-                ret_val += operation[1]
+            
         return ret_val
 
     def getSymbol(self, node):

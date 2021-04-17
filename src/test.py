@@ -27,6 +27,7 @@ if id == "1":
 elif id == "2":
     filenames = input("Please enter test file(s): ")
 filenames = filenames.split()
+filenames.sort()
 print(filenames)
 
 for filename in filenames:

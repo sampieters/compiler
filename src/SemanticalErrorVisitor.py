@@ -20,6 +20,8 @@ class SemanticalErrorVisitor(ASTVisitor):
         if node.type == "void":
             raise Exception("Variable has incomplete type 'void'")
         if node.isBeingDeclared():
+            if not getParent(node, ScopeNode):
+                node.type_semantics.append("global")
             def_node = self.table.get_symbol_curr_scope(node.name)
             # If the identifier was already declared before
             if def_node is not None:
@@ -196,7 +198,6 @@ class SemanticalErrorVisitor(ASTVisitor):
             return node
 
     def checkInfoLoss(self, node1, node2):
-        print(node1, node2)
         if isinstance(node1, LiteralNode) and node1.type in DECIMAL_TYPES and node2.type in DECIMAL_TYPES:
             return False
         else:

@@ -295,6 +295,23 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.last_child()
 
     def exitFunctionDefinitionStatement(self, ctx:CParser.FunctionDefinitionStatementContext):
+        print(self.curr_node)
+        print(self.curr_node.children[1])
+        # TODO: Check if right
+        return_available = False
+        if self.curr_node.children[1].children is not None:
+            for child in self.curr_node.children[1].children:
+                if isinstance(child, ReturnNode):
+                    return_available = True
+            if not return_available:
+                # TODO: Weet niet of de id juist is die meegegeven is aan de ReturnNode
+                self.curr_node.children[1].children.append(ReturnNode(self.counter.incr()))
+        else:
+            print(self.curr_node.children[1].children)
+            return_node = ReturnNode(self.counter.incr())
+            return_type = self.curr_node.children[0].children[0].type
+            return_node.children = [LiteralNode(0, return_type, self.counter.incr())]
+            self.curr_node.children[1].children = [return_node]
         self.curr_node = self.curr_node.parent
 
     def enterFunctionCall(self, ctx:CParser.FunctionCallContext):

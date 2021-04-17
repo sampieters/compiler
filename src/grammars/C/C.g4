@@ -20,7 +20,8 @@ stat: definition END_INSTR              # DefinitionStatement
     ;
 
 expr: LBRACKET expr RBRACKET            # Brackets  // Parentheses
-    | (MUL|REF) ID                      # UnaryOpPointer  // Unary pointer operation
+    | MUL expr                          # UnaryOpPointer  // Unary pointer operation
+    | REF ID                            # UnaryOpPointer
     | ID LSQUARE expr RSQUARE           # UnaryOpArray // Unary array operation
     | (INCR|DECR) expr                  # UnaryOpIdentifierPrefix // Unary identifier operation (prefix)
     | expr (INCR|DECR)                  # UnaryOpIdentifierSuffix // Unary identifier operation (suffix)

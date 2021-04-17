@@ -56,11 +56,11 @@ class LLVMVisitor(ASTVisitor):
         node2 = self.getSymbol(node2)
         # If the node being converted is a literal, modify the literal so no conversion is needed
         if isinstance(node1, LiteralNode):
-            if node1.type == "i8":
+            if node1.type == "i8" and isinstance(node1.value,str):
                 node1.value = ord(node1.value)
             # If the literal is an integer that has to be converted to decimal, use scientific notation
             if node2.type in DECIMAL_TYPES:
-                node1.value = "{:e}".format(node1.value)
+                node1.value = "{:e}".format(float(node1.value))
             # If the literal is a decimal that has to be converted to integer, floor the value
             elif node2.type in INTEGER_TYPES:
                 node1.value = int(node1.value)

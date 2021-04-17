@@ -13,8 +13,20 @@ from LLVMVisitor import LLVMVisitor
 
 PATH = "src/tests/benchmarks/CorrectCode/"
 
-filenames = input("Please enter test file(s): ")
+variables = ""
+for file in os.listdir(PATH):
+    if file.endswith(".c"):
+        file = file.replace(".c", "")
+        variables += file + " "
+id = input("1) Run all files\n2) Run specific file\n")
+filenames = ""
+if id == "1":
+    filenames = variables
+    print(filenames)
+elif id == "2":
+    filenames = input("Please enter test file(s): ")
 filenames = filenames.split()
+print(filenames)
 
 for filename in filenames:
     file_path = PATH + filename

@@ -384,7 +384,16 @@ class LLVMVisitor(ASTVisitor):
                 else:
                     to_fill = "1"
             elif isinstance(node.parent.children[0], IdentifierNode):
-                pass
+                self.loadVariable(node.parent.children[0])
+                identifier = self.getSymbol(node.parent.children[0])
+                new_node = BinaryOperationNode("!=", -1)
+                new_node.add_child(identifier)
+                new_node.add_child(LiteralNode(0, "i32", -1))
+                self.convertType(new_node.children[1], new_node.children[0])
+                self.LLVM.append("  %" + self.counter.incr() + " = " + self.binaryOpToLLVM(new_node) + ' ' +
+                                 identifier.type + ' ' + new_node.children[0].getValue() + ", " +
+                                 new_node.children[1].getValue())
+                to_fill = '%' + str(self.counter.counter - 1)
             else:
                 to_fill = '%' + str(self.counter.counter - 1)
             self.LLVM.append("  br i1 " + to_fill + ", label %" + str(self.counter.counter) + ", label %{LABEL}")

@@ -26,24 +26,21 @@ define i32 @main() {
 ; <label>:11:
   %12 = load i32, i32* %1, align 4
   %13 = icmp eq i32 %12, 5
-  %15 = zext i1 %14 to i32
-  %16 =  i32 %15 to i32
-  %14 = icmp ne i32 %16, 1
-  br i1 %16, label %17, label %23
+  br i1 %13, label %14, label %20
+
+; <label>:14:
+  %15 = load i32, i32* %1, align 4
+  %16 = icmp ne i32 %15, 4
+  br i1 %16, label %17, label %19
 
 ; <label>:17:
-  %18 = load i32, i32* %1, align 4
-  %19 = icmp ne i32 %18, 4
-  br i1 %19, label %20, label %22
+  %18 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.2, i64 0, i64 0))
+  br label %19
+
+; <label>:19:
+  br label %20
 
 ; <label>:20:
-  %21 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.2, i64 0, i64 0))
-  br label %22
-
-; <label>:22:
-  br label %23
-
-; <label>:23:
   ret i32 1
 }
 declare i32 @printf(i8*, ...)

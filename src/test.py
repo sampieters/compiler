@@ -52,11 +52,12 @@ for filename in filenames:
         AST = listener.curr_node
         AST.to_dot("AST")
 
-        visitor_err = SemanticalErrorVisitor()
-        visitor_err.visit(AST)
 
         visitor_opt = OptimisationVisitor()
         visitor_opt.visit(AST)
+
+        visitor_err = SemanticalErrorVisitor()
+        visitor_err.visit(AST)
 
         visitor_llvm = LLVMVisitor()
         visitor_llvm.visit(AST)
@@ -67,22 +68,19 @@ for filename in filenames:
             f2.write("\n".join(visitor_llvm.LLVM))
         f2.close()
 
-        if id == 2:
-            os.system("clear")
+        os.system("clear")
         # HERE COMPARISON OF THE TWO FILES
-            print("GENERATED:")
+        print("GENERATED:")
         os.system(f"lli {file_path}_RESULT.ll | tee {file_path}_RESULT.txt")
         f1 = open(f"{file_path}_RESULT.txt", 'r')
 
-        if id == 2:
-            print("\n\nEXPECTED:")
+        print("\n\nEXPECTED:")
 
         os.system(f"clang -Wno-everything -emit-llvm -S {file_path}.c -o {file_path}.ll")
         os.system(f"lli {file_path}.ll | tee {file_path}_CMP.txt")
         f2 = open(f"{file_path}_CMP.txt", 'r')
 
-        if id == 2:
-            print("\n")
+        print("\n")
 
         if f1.read() == f2.read():
             s = f"{filename} succeeded\n"

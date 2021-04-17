@@ -250,7 +250,7 @@ class BinaryOperationNode(ASTNode):
             child1 = bool(child1)
             child2 = bool(child2)
         formula = str(child1) + operation + str(child2)
-        result = int(eval(formula))
+        result = float(eval(formula))
         # Replace this node by the calculated result
         new_node = LiteralNode(result, _type, self.id)
         new_node.parent = self.parent

@@ -22,14 +22,14 @@ class LLVMVisitor(ASTVisitor):
         value = self.getSymbol(value)
 
         # If we want to store a variable
-        if not getParent(value, ArgListNode):
+        if not getParent(value, ArgListNode) and node.type == value.type:
             # Load the variable into a new temporary address before storing it, unless it is an argument of a function
             self.loadVariable(value)
         
-        instruction += value.type + " " + value.getValue()
-        
-
-        instruction += ", " + node.type + "* " + node.getValue(original=True) + ", align " + node.alignment()
+        instruction += node.type + " " + value.getValue()
+        instruction += ", " + node.type + "* " 
+        instruction += node.getValue(original=True) 
+        instruction += ", align " + node.alignment()
 
         self.LLVM.append("  " + instruction)
 
@@ -63,10 +63,9 @@ class LLVMVisitor(ASTVisitor):
                 node1.value = "{:e}".format(float(node1.value))
             # If the literal is a decimal that has to be converted to integer, floor the value
             elif node2.type in INTEGER_TYPES:
-                node1.value = int(node1.value)
+                node1.value = int(float(node1.value))
 
             node1.type = node2.type
-
             return
 
         if node1.type == node2.type:
@@ -81,11 +80,12 @@ class LLVMVisitor(ASTVisitor):
             instruction = "%" + self.counter.incr() + " = inttoptr i64 %" + str(self.counter.counter-1) + " to " + node2.type
         else:
             function = getConversionFunction(node1, node2)
-            instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " %" + str(self.counter.counter - 2) + " to " + node2.type
+            self.loadVariable(node1)
+            instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " " + node1.getValue() + " to " + node2.type
         
         # TODO: node van identifier nog gelijkstellen aan nieuwe node
         node1.temp_address = self.counter.counter - 1
-        node1.type = node2.type
+        # node1.type = node2.type
         self.LLVM.append("  " + instruction)
 
     def exitProg(self, node):
@@ -313,7 +313,11 @@ class LLVMVisitor(ASTVisitor):
                 child = self.getSymbol(child)
                 if "string" not in child.type_semantics:
                     self.loadVariable(child)
-                children_LLVM.append(child.type + " " + child.getValue())
+                if child.type == "float":
+                    self.convertType(child, IdentifierNode(None, None, "double"))
+                    children_LLVM.append("double " + child.getValue())
+                else:
+                    children_LLVM.append(child.type + " " + child.getValue())
         #TODO: NOG EEN FOUT
         elif function.name == "scanf":
             if "declare i32 @scanf(i8*, ...)" not in self.after_LLVM:

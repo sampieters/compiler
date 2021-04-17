@@ -77,9 +77,9 @@ class SemanticalErrorVisitor(ASTVisitor):
                 raise Exception(f"Error: Array Initializer must be an initializer list or wide string literal")
             # TODO: wont work for multidimensional arrays
             for child in child2.children:
-                if checkInfoLoss(child.type, child1.type):
+                if self.checkInfoLoss(child, child1):
                     print(f"Warning: implicit conversion from '{child.type}' to '{child1.type}' can cause a loss of information.")
-        elif checkInfoLoss(child2.type, child1.type):
+        elif self.checkInfoLoss(child2, child1):
             print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitAssignment(self, node):
@@ -113,7 +113,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             else:
                 raise Exception(f"Error: Assigning to '{child1.type}' from incompatible type '{child2.type}'")
         # Otherwise check if an information loss occurs
-        elif checkInfoLoss(child2.type, child1.type):
+        elif self.checkInfoLoss(child2, child1):
             print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitDeclaration(self, node):
@@ -179,7 +179,7 @@ class SemanticalErrorVisitor(ASTVisitor):
                     print(f"Warning: Incompatible integer to pointer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
                 else:
                     raise Exception(f"Error: Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
-            elif checkInfoLoss(child1.type, child2.type):
+            elif self.checkInfoLoss(child1, child2):
                 print(f"Warning: implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
         
 
@@ -188,3 +188,10 @@ class SemanticalErrorVisitor(ASTVisitor):
             return self.table.get_symbol(node.name)
         else:
             return node
+
+    def checkInfoLoss(self, node1, node2):
+        print(node1, node2)
+        if isinstance(node1, LiteralNode) and node1.type in DECIMAL_TYPES and node2.type in DECIMAL_TYPES:
+            return False
+        else:
+            return checkInfoLoss(node1.type, node2.type)

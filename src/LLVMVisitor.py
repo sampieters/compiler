@@ -123,28 +123,44 @@ class LLVMVisitor(ASTVisitor):
         identifier = node.children[0]
         address = self.counter.incr()
         self.table.add_symbol(identifier)
+        if "global" in identifier.type_semantics:
+            instruction = identifier.getValue() + " = "
+            value = None
+            if not isinstance(node.parent, DefinitionNode):
+                instruction += "common "
+                lit = LiteralNode(0, "i32", -1)
+                self.convertType(lit, identifier)
+                value = lit.value
+            else:
+                lit = LiteralNode(node.parent.children[1].value, node.parent.children[1].type, -1)
+                self.convertType(lit, identifier)
+                value = lit.value
+            instruction += "global " + identifier.type + " " + str(value) + ", align " + identifier.alignment()
+            self.LLVM.append(instruction)
 
-        # Convert the declaration to LLVM
-        instruction = "%" + address + " = alloca "
-        for dim in identifier.dimensions:
-            instruction += f"[{dim} x "
-        instruction += identifier.type 
-        instruction += "]" * len(identifier.dimensions)
-        instruction += ", align " + identifier.alignment()
-        self.LLVM.append("  " + instruction)
-
-        # If there is no original address yet (the identifier is not an argument of a function)
-        if not identifier.original_address:
-            identifier.original_address = address
         else:
-            identifier.temp_address = address
-            self.storeVariable(identifier, identifier)
+            # Convert the declaration to LLVM
+            instruction = "%" + address + " = alloca "
+            for dim in identifier.dimensions:
+                instruction += f"[{dim} x "
+            instruction += identifier.type
+            instruction += "]" * len(identifier.dimensions)
+            instruction += ", align " + identifier.alignment()
+            self.LLVM.append("  " + instruction)
+
+            # If there is no original address yet (the identifier is not an argument of a function)
+            if not identifier.original_address:
+                identifier.original_address = address
+            else:
+                identifier.temp_address = address
+                self.storeVariable(identifier, identifier)
 
     def exitDefinition(self, node):
         """Transform definition node to LLVM"""
         # Simply store the right side of the definition into the variable on the left, the rest is handled by declaration
-        self.convertType(node.children[1], node.children[0].children[0])
-        self.storeVariable(node.children[0].children[0], node.children[1])
+        if not "global" in node.children[0].children[0].type_semantics:
+            self.convertType(node.children[1], node.children[0].children[0])
+            self.storeVariable(node.children[0].children[0], node.children[1])
 
     def exitAssignment(self, node):
         """Transform definition node to LLVM"""

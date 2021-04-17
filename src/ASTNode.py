@@ -131,7 +131,7 @@ class IdentifierNode(ASTNode):
         return str(int(getAlignment(self)))
 
     def getValue(self, original=False):
-        if "global" in self.type_semantics:
+        if "global" in self.type_semantics and original:
             return f"@{self.name}"
         elif original:
             return f"%{str(self.original_address)}"

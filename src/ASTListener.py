@@ -293,7 +293,8 @@ class ASTListener(CListener):
         if not self.curr_node.children[1].last_child() or not isinstance(self.curr_node.children[1].last_child(), ReturnNode):
             return_node = ReturnNode(self.counter.incr())
             return_type = self.curr_node.children[0].children[0].type
-            return_node.add_child(LiteralNode(0, return_type, self.counter.incr()))
+            if return_type != 'void':
+                return_node.add_child(LiteralNode(0, return_type, self.counter.incr()))
             self.curr_node.children[1].add_child(return_node)
         self.curr_node = self.curr_node.parent
 

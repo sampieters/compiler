@@ -123,7 +123,7 @@ class LLVMVisitor(ASTVisitor):
         identifier = node.children[0]
         self.table.add_symbol(identifier)
         if "global" in identifier.type_semantics:
-            instruction = identifier.getValue() + " = "
+            instruction = identifier.getValue(original=True) + " = "
             value = None
             if not isinstance(node.parent, DefinitionNode):
                 instruction += "common "
@@ -350,8 +350,11 @@ class LLVMVisitor(ASTVisitor):
                 self.convertType(child, arg_child)
                 children_LLVM.append(child.type + " " + child.getValue())
 
-        node.temp_address = self.counter.incr()
-        instruction = "  " + node.getValue() + " = call " + function.type + " " + function.getValue() + "("
+        instruction = "  "
+        if not function.type == "void":
+            node.temp_address = self.counter.incr()
+            instruction += node.getValue() + " = "
+        instruction += "call " + function.type + " " + function.getValue() + "("
         instruction += ", ".join(children_LLVM)
         instruction += ")"
         self.LLVM.append(instruction)

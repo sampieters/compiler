@@ -7,7 +7,7 @@ dereferenceAssignment succeeded
 fibonacciRecursive crashed
 floatToIntConversion succeeded
 for succeeded
-forwardDeclaration crashed
+forwardDeclaration succeeded
 if succeeded
 ifElse succeeded
 intToFloatConversion succeeded

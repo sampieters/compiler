@@ -8,6 +8,7 @@ from utils import *
 class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
+        self.defined_functions = []
 
     def enterScope(self, node):
         self.table.enter_scope()
@@ -157,10 +158,12 @@ class SemanticalErrorVisitor(ASTVisitor):
         function = node.children[0]
         def_node = self.table.get_symbol_curr_scope(function.name)
         # If the symbol was already declared before
-        if def_node is not None:
+        if def_node is not None and function.name in self.defined_functions:
             raise Exception(f"Error: Redefinition of '{function.name}' as different kind of symbol")
         else:
             self.table.add_symbol(function)
+            if isinstance(node.parent, FunctionDefinitionNode):
+                self.defined_functions.append(function.name)
 
     def exitFunctionCall(self, node):
         function = self.getSymbol(node.children[0])

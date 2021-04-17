@@ -121,7 +121,6 @@ class LLVMVisitor(ASTVisitor):
         """Transform declaration node to LLVM"""
         # Set the original address for the new variable, add it to the symbol table
         identifier = node.children[0]
-        address = self.counter.incr()
         self.table.add_symbol(identifier)
         if "global" in identifier.type_semantics:
             instruction = identifier.getValue() + " = "
@@ -137,8 +136,8 @@ class LLVMVisitor(ASTVisitor):
                 value = lit.value
             instruction += "global " + identifier.type + " " + str(value) + ", align " + identifier.alignment()
             self.LLVM.append(instruction)
-
         else:
+            address = self.counter.incr()
             # Convert the declaration to LLVM
             instruction = "%" + address + " = alloca "
             for dim in identifier.dimensions:

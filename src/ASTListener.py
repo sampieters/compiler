@@ -300,7 +300,7 @@ class ASTListener(CListener):
                     return_available = True
             if not return_available:
                 # TODO: Weet niet of de id juist is die meegegeven is aan de ReturnNode
-                self.curr_node.children[1].children.append(ReturnNode(self.counter.incr()))
+                self.curr_node.children[1].children.add_child(ReturnNode(self.counter.incr()))
         else:
             print(self.curr_node.children[1].children)
             return_node = ReturnNode(self.counter.incr())

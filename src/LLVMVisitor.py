@@ -333,9 +333,9 @@ class LLVMVisitor(ASTVisitor):
         #TODO:: 0 moet nog verandert worden door de 0 van het juiste type
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
+            condition = self.getSymbol(node.parent.children[0])
             self.loadVariable(condition)
             if isinstance(node.parent.children[0], IdentifierNode):
-                condition = self.getSymbol(node.parent.children[0])
                 self.LLVM.append("  %" + self.counter.incr() + " = icmp ne " +
                                 condition.type + " " + condition.getValue() + ", 0")
             elif isinstance(node.parent.children[0], LiteralNode):

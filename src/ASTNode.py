@@ -26,6 +26,8 @@ class ASTNode:
         self.last_child().parent = self
 
     def last_child(self):
+        if not self.children:
+            return None
         return self.children[-1]
 
     def to_dot_recursive(self, file):

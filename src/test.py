@@ -12,6 +12,7 @@ from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
 PATH = "src/tests/benchmarks/CorrectCode/"
+OUTPUT = open("results.txt", "w+")
 
 variables = ""
 for file in os.listdir(PATH):
@@ -42,50 +43,62 @@ for filename in filenames:
     tree = parser.prog()
 
     lisp_tree_str = tree.toStringTree(recog=parser)
-    print(lisp_tree_str)
+    # print(lisp_tree_str)
 
-    listener = ASTListener()
-    walker = ParseTreeWalker()
-    walker.walk(listener, tree)
-    AST = listener.curr_node
-    AST.to_dot("AST")
+    try:
+        listener = ASTListener()
+        walker = ParseTreeWalker()
+        walker.walk(listener, tree)
+        AST = listener.curr_node
+        AST.to_dot("AST")
 
-    visitor_err = SemanticalErrorVisitor()
-    visitor_err.visit(AST)
+        visitor_err = SemanticalErrorVisitor()
+        visitor_err.visit(AST)
 
-    visitor_opt = OptimisationVisitor()
-    visitor_opt.visit(AST)
+        visitor_opt = OptimisationVisitor()
+        visitor_opt.visit(AST)
 
-    visitor_llvm = LLVMVisitor()
-    visitor_llvm.visit(AST)
+        visitor_llvm = LLVMVisitor()
+        visitor_llvm.visit(AST)
 
-    #AST.to_dot("tests/TEST_AST_OPT")
+        #AST.to_dot("tests/TEST_AST_OPT")
 
-    with open(f"{file_path}_RESULT.ll", 'w+') as f2:
-        f2.write("\n".join(visitor_llvm.LLVM))
-    f2.close()
+        with open(f"{file_path}_RESULT.ll", 'w+') as f2:
+            f2.write("\n".join(visitor_llvm.LLVM))
+        f2.close()
 
-    os.system("clear")
-    # HERE COMPARISON OF THE TWO FILES
-    print("GENERATED:")
-    os.system(f"lli {file_path}_RESULT.ll | tee {file_path}_RESULT.txt")
-    f1 = open(f"{file_path}_RESULT.txt", 'r')
+        if id == 2:
+            os.system("clear")
+        # HERE COMPARISON OF THE TWO FILES
+            print("GENERATED:")
+        os.system(f"lli {file_path}_RESULT.ll | tee {file_path}_RESULT.txt")
+        f1 = open(f"{file_path}_RESULT.txt", 'r')
 
-    print("\n\nEXPECTED:")
+        if id == 2:
+            print("\n\nEXPECTED:")
 
-    os.system(f"clang -Wno-everything -emit-llvm -S {file_path}.c -o {file_path}.ll")
-    os.system(f"lli {file_path}.ll | tee {file_path}_CMP.txt")
-    f2 = open(f"{file_path}_CMP.txt", 'r')
+        os.system(f"clang -Wno-everything -emit-llvm -S {file_path}.c -o {file_path}.ll")
+        os.system(f"lli {file_path}.ll | tee {file_path}_CMP.txt")
+        f2 = open(f"{file_path}_CMP.txt", 'r')
 
-    print("\n")
+        if id == 2:
+            print("\n")
 
-    if f1.read() == f2.read():
-        print(f"{filename} succeeded")
-    else:
-        print(f"{filename} failed")
+        if f1.read() == f2.read():
+            s = f"{filename} succeeded\n"
+            print(s)
+            OUTPUT.write(s)
+        else:
+            s = f"{filename} failed\n"
+            print(s)
+            OUTPUT.write(s)
 
+        f2.close()
+
+    except Exception as e:
+        s = f"{filename} crashed\n"
+        print(s)
+        print(str(e))
+        OUTPUT.write(s)
+    
     f1.close()
-    f2.close()
-
-    f1.close()
-    f2.close()

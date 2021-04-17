@@ -16,34 +16,34 @@ digraph AST {
 	node6->node7
 	node8[label="i (i32)"]
 	node7->node8
-	node9[label="0 (i32)"]
+	node9[label="10 (i32)"]
 	node6->node9
-	node10[label="while"]
+	node10[label="branch"]
 	node5->node10
-	node11[label="< (None)"]
+	node11[label="if"]
 	node10->node11
-	node12[label="i (None)"]
+	node12[label="< (i1)"]
 	node11->node12
-	node13[label="5 (i32)"]
-	node11->node13
-	node14[label="scope"]
-	node10->node14
-	node15[label="x++ (None)"]
-	node14->node15
-	node16[label="i (None)"]
+	node13[label="i (i32)"]
+	node12->node13
+	node14[label="100 (i32)"]
+	node12->node14
+	node15[label="scope"]
+	node11->node15
+	node16[label="--x (i32)"]
 	node15->node16
-	node17[label="func_call"]
-	node14->node17
-	node18[label="printf (i32 (i8*, ...))"]
-	node17->node18
-	node19[label="arguments"]
-	node17->node19
-	node20[label="%d;\00 (i8*)"]
+	node17[label="i (i32)"]
+	node16->node17
+	node18[label="else"]
+	node10->node18
+	node19[label="scope"]
+	node18->node19
+	node20[label="++x (i32)"]
 	node19->node20
-	node21[label="i (None)"]
-	node19->node21
+	node21[label="i (i32)"]
+	node20->node21
 	node22[label="return"]
 	node5->node22
-	node23[label="1 (i32)"]
+	node23[label="0 (i32)"]
 	node22->node23
 }

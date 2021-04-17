@@ -9,7 +9,7 @@ int main(){
 	int x = 20;
 	printf("%d;", x);
     x = 30;
-	if (1){
+	if (10){
 		printf("%d;", x);
 		int x = 40;
 		printf("%d;", x);

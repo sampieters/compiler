@@ -377,7 +377,14 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM.append("")
             self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
         elif isinstance(node.parent, IfNode):
-            self.LLVM.append("  br i1 %" + str(self.counter.counter - 1) + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
+            to_fill = None
+            if isinstance(node.parent.children[0], LiteralNode):
+                to_fill = str(node.parent.children[0].value)
+            elif isinstance(node.parent.children[0], IdentifierNode):
+                pass
+            else:
+                to_fill = '%' + str(self.counter.counter - 1)
+            self.LLVM.append("  br i1 " + to_fill + ", label %" + str(self.counter.counter) + ", label %{LABEL}")
             self.stat_stack.append(len(self.LLVM) - 1)
             self.LLVM.append("")
             node.parent.start_address = self.counter.counter

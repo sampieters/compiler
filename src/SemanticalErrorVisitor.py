@@ -124,7 +124,9 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitBinaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             self.handleWarning(node, "Expression result unused")
-        if node.operation in BOOLEAN_OPS:
+        if node.children[0].type.endswith('*') or node.children[1].type.endswith('*'):
+            self.handleError(node, f"Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}')")
+        elif node.operation in BOOLEAN_OPS:
             node.type = "i1"
         else:
             node.type = getBinaryType(node.children[0].type, node.children[1].type)

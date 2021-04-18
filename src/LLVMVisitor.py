@@ -35,6 +35,7 @@ class LLVMVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
+        # Types where there has to be no loads
         if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and (node.operation == "*" or node.operation == "[]")) or isinstance(node, FunctionNode)):
             return
         node = self.getSymbol(node)
@@ -51,7 +52,6 @@ class LLVMVisitor(ASTVisitor):
         # type2 identifier_2 = identifier_1; <-- This in this function is converted to llvm
         # node parameter needs to have type 1 in it
         # Convert node1 type to node2 type
-        #TODO: kommagetallen (literals) kunnen zowel float als double zijn dus conversie niet nodig
         node1 = self.getSymbol(node1)
         node2 = self.getSymbol(node2)
         # If the node being converted is a literal, modify the literal so no conversion is needed
@@ -66,7 +66,6 @@ class LLVMVisitor(ASTVisitor):
                 node1.value = int(float(node1.value))
             elif node1.value == 0 and node2.type.startswith("["):
                 node1.value = "zeroinitializer"
-
             node1.type = node2.type
             return
 
@@ -84,15 +83,13 @@ class LLVMVisitor(ASTVisitor):
             function = getConversionFunction(node1, node2)
             self.loadVariable(node1)
             instruction = "%" + self.counter.incr() + " = " + function + " " + node1.type + " " + node1.getValue() + " to " + node2.type
-        
-        # TODO: node van identifier nog gelijkstellen aan nieuwe node
         node1.temp_address = self.counter.counter - 1
-        # node1.type = node2.type
         self.LLVM.append("  " + instruction)
 
     def exitProg(self, node):
         to_remove = []
         end_block = False
+        # Check for return in program if return then branch
         for idx, line in enumerate(self.LLVM):
             if "<label>" in line or line == "}":
                 end_block = False
@@ -109,6 +106,7 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM = self.before_LLVM
 
     def enterLiteral(self, node):
+        # string linteral is the only literal with @ and no address (special type in LLVM)
         if "string" in node.type_semantics:
             string = node.value
             node.value = "@.str." + self.str_counter.incr()
@@ -117,18 +115,19 @@ class LLVMVisitor(ASTVisitor):
         else:
             self.convertType(node, node)
 
-
-
     def exitDeclaration(self, node):
         """Transform declaration node to LLVM"""
         # Set the original address for the new variable, add it to the symbol table
         identifier = node.children[0]
         if not isinstance(node.parent.parent, ArgListNode):
             self.table.add_symbol(identifier)
+        # If the declaration is in the global scope then it needs to be treated differently
         if "global" in identifier.type_semantics:
             instruction = identifier.getValue(original=True) + " = "
             value = None
+            # If there is no assignement then assign a default value to it
             if not isinstance(node.parent, DefinitionNode):
+                # If default assignement, set common before global
                 instruction += "common "
                 lit = LiteralNode(0, "i32", -1)
                 self.convertType(lit, identifier)
@@ -140,6 +139,7 @@ class LLVMVisitor(ASTVisitor):
             instruction += "global " + identifier.type + " " + str(value) + ", align " + identifier.alignment()
             self.LLVM.append(instruction)
         else:
+            # If it is not global, then assign to address
             address = self.counter.incr()
             # Convert the declaration to LLVM
             instruction = "%" + address + " = alloca "
@@ -180,13 +180,12 @@ class LLVMVisitor(ASTVisitor):
             node.temp_address = self.counter.counter
             instruction = '%' + self.counter.incr() + " = "
             if isinstance(child, LiteralNode):
-                # TODO: Ik denk niet dat dit moet
-                # CONFUSED (weet niet wat eerste parameter is voor store variable)
                 self.storeVariable(node, child)
             elif isinstance(child, BinaryOperationNode) or isinstance(child, UnaryOperationNode) or isinstance(child, IdentifierNode):
                 if child.type.startswith("i"):
                     instruction += temp[0] + ' ' + child.type + " " + temp[1] + ", " + child.getValue()
                 else:
+                    # Special instruction for floats and doubles
                     instruction += "fneg " + child.type + " " + child.getValue()
             self.LLVM.append("  " + instruction)
         # If the operation is a prefix ++ or --
@@ -200,8 +199,6 @@ class LLVMVisitor(ASTVisitor):
             bin_op.type = child.type
             bin_op.temp_address = self.counter.counter
             # Perform the binary operation
-            #TODO: Wass eerst uitgecommente maar deed een paar dingen te veel/niet dus nieuwe lijn exitBinaryOp
-            #self.binaryOpToLLVM(bin_op)
             self.exitBinaryOperation(bin_op)
             # Store the result of the operation to the original variable
             self.storeVariable(child, bin_op)
@@ -215,8 +212,6 @@ class LLVMVisitor(ASTVisitor):
             bin_op.type = child.type
             bin_op.temp_address = self.counter.counter
             # Perform the binary operation
-            #TODO: Wass eerst uitgecommente maar deed een paar dingen te veel/niet dus nieuwe lijn exitBinaryOp
-            #self.binaryOpToLLVM(bin_op)
             self.exitBinaryOperation(bin_op)
 
             # Store the result of the operation to the original variable
@@ -250,9 +245,11 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM.append(f"  {node.getValue(original=True)} = getelementptr inbounds {identifier.type}, {identifier.type}* {identifier.getValue(original=True)}, i64 0, i64 {value.getValue()}")
 
     def enterContinue(self, node):
+        # branch to the LLVM branch of the While condition
         self.LLVM.append("  br label %" + str(getParent(node, WhileNode).start_address))
 
     def enterBreak(self, node):
+        # break to a yet to be declared branch, this branch is the end of the scope
         self.LLVM.append("  br label %{BREAK}")
         self.loop_stack.append(len(self.LLVM) - 1)
 
@@ -275,25 +272,17 @@ class LLVMVisitor(ASTVisitor):
         # Construct the LLVM instruction
         instruction = f"{node.getValue()} = {self.binaryOpToLLVM(node)} {the_type} {', '.join(children_LLVM)}"
         self.LLVM.append("  " + instruction)
-        #if node.operation == "&&" or node.operation == "||":
-            #self.LLVM.append("  br i1 %5, label %" + self.counter.incr() + ", label %{LABEL}")
-            #self.LLVM.append("")
-            #self.LLVM.append("; <label>:" + str(self.counter.counter-1) + ":")
-            #self.LLVM.append("  %LUL1 = load i32, i32* %3, align 4")
-            #self.LLVM.append("  %LUL2 = icmp ne i32 %7, 0")
-
-
-        # if node.operation in BOOLEAN_OPS:
-        #     self.convertType(node, IdentifierNode(None, None, "i32"))
 
     def enterWhile(self, node):
+        # branch to the condition that has to be met for the while
         self.LLVM.append("  br label %" + str(self.counter.counter))
         self.LLVM.append("")
         node.start_address = self.counter.counter
-        self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(node.start_address)}%" + "{LABEL}, %SCOPE VAN WHILE")
+        self.LLVM.append(f"; <label>:{self.counter.incr()}:")
         self.loop_stack.append(len(self.LLVM) - 1)
 
     def enterElif(self, node):
+        # branch to the condition that has to be met for the elif
         self.LLVM.append("")
         self.LLVM.append(f"; <label>:{self.counter.incr()}:")
 
@@ -301,11 +290,11 @@ class LLVMVisitor(ASTVisitor):
         node.start_address = self.counter.counter-1
 
     def enterFunctionDefinition(self, node):
+        # Define a function in LLVM with the define instruction
         self.LLVM.append("")
-        # TODO: Kweet ni wa deze lijn doet
-        self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
         function = node.children[0].children[0]
         instruction = "define " + function.type + " " + function.getValue() + "("
+        # generate all the parameters for the function
         children_LLVM = []
         for child in function.children[0].children:
             child = child.children[0]
@@ -317,6 +306,7 @@ class LLVMVisitor(ASTVisitor):
 
         function.original_address = self.counter.incr()
 
+        # If the function's return type is not void, then there needs to be a return (always)
         if function.type != "void":
             ret_address = self.counter.incr()
             function.original_address = ret_address
@@ -324,21 +314,23 @@ class LLVMVisitor(ASTVisitor):
             instruction = function.getValue(original=True) + " = alloca " + function.type
             instruction += ", align " + function.alignment()
             self.LLVM.append("  " + instruction)
-            # TODO: automatically store default return value
 
     def exitFunctionDefinition(self, node):
+        # End Function definition
         self.LLVM.append("}")
         self.counter.reset()
 
     def exitFunctionDeclaration(self, node):
+        # add the function to the symbol table
         function = node.children[0]
         self.table.add_symbol(function)
 
-    # Heb enterFunctionCall naar enter vervangen (moest iets fucken dan kan da dit zijn maar zou normaal geen probleem moeten zijn)
     def exitFunctionCall(self, node):
+        # Get the function with the right addresses from the table
         function = self.getSymbol(node.children[0])
 
         children_LLVM = []
+        # Special cases 'printf' and 'scanf'
         if function.name == "printf" or function.name == "scanf":
             if f"declare i32 @{function.name}(i8*, ...)" not in self.after_LLVM:
                 self.after_LLVM.append(f"declare i32 @{function.name}(i8*, ...)")
@@ -373,7 +365,7 @@ class LLVMVisitor(ASTVisitor):
         self.LLVM.append(instruction)
 
     def enterScope(self, node):
-        #TODO:: 0 moet nog verandert worden door de 0 van het juiste type
+        # Cases split when entering a scope (while, if, else, ...)
         self.table.enter_scope()
         if isinstance(node.parent, WhileNode):
             condition = self.getSymbol(node.parent.children[0])
@@ -388,7 +380,7 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM[instruction_index] = self.LLVM[instruction_index].replace("{LABEL}", str(self.counter.counter))
             self.loop_stack.append(len(self.LLVM)-1)
             self.LLVM.append("")
-            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")
         elif isinstance(node.parent, IfNode):
             to_fill = None
             if isinstance(node.parent.children[0], LiteralNode):
@@ -419,7 +411,6 @@ class LLVMVisitor(ASTVisitor):
         if isinstance(node.parent, WhileNode):
             self.LLVM.append("  br label %" + str(node.parent.start_address))
             self.LLVM.append("")
-            #TODO: De break echt nog nakijken
             index = self.loop_stack.pop()
             while "{BREAK}" in self.LLVM[index]:
                 self.LLVM[index] = self.LLVM[index].replace("{BREAK}", str(self.counter.counter))
@@ -438,24 +429,20 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
             if possible_index is not None:
                 self.stat_stack.append(possible_index)
-
-            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %SCOPE VAN IF")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")
         elif isinstance(node.parent, ElseNode):
             self.LLVM.append("  br label %" + str(self.counter.counter))
             self.LLVM.append("")
             index = self.stat_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %IF START")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")
         self.table.exit_scope()
 
     def exitReturn(self, node):
-        #TODO: Wss nog omzetting naar juiste type maken
         function = getParent(node, FunctionDefinitionNode).children[0].children[0]
         if not isinstance(node.parent.parent, FunctionDefinitionNode):
             if function.type != "void":
                 self.storeVariable(function, node.children[0])
-            # instruction = "  br label %{FINALLABEL}"
-            # self.LLVM.append(instruction)
         else:
             instruction = "  ret "
             if not node.children:
@@ -537,7 +524,7 @@ class LLVMVisitor(ASTVisitor):
                             extra += "o"
                         else:
                             extra += "u"
-
+        # If the operation exist of multiple parts (icmp ne)
         if len(operation) == 2:
             extra += operation[1]
 

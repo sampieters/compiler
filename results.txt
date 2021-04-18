@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 binaryOperations1 succeeded
 binaryOperations2 succeeded
 breakAndContinue succeeded
@@ -31,6 +30,3 @@ variables6 succeeded
 variables7 succeeded
 variables8 succeeded
 while succeeded
-=======
-forwardDeclaration crashed
->>>>>>> 281d3bfca6a520a55468ea54c968e5ff771a260e

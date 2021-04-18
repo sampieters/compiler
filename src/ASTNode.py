@@ -7,6 +7,9 @@ class ASTNode:
         self.id = node_id
         self.parent = None
         self.children = None
+        self.lineNr = None
+        self.column = None
+        self.symbol = None
 
     def setLineInfo(self, ctx):
         self.lineNr = str(ctx.start.line)

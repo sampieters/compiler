@@ -24,10 +24,17 @@ class SemanticalErrorVisitor(ASTVisitor):
             raise Exception(self.errors[0])
 
     def handleWarning(self, node, msg):
-        self.warnings.append(f"Warning at line {node.lineNr}:{node.column}: {msg}")
+        if node.lineNr and node.column:
+            self.warnings.append(f"Warning at line {node.lineNr}:{node.column}: {msg}")
+        else:
+            self.warnings.append(f"Warning: {msg}")
 
     def handleError(self, node, msg):
-        self.errors.append(f"Error at line {node.lineNr}:{node.column}: {msg}")
+        if node.lineNr and node.column:
+            self.errors.append(f"Error at line {node.lineNr}:{node.column}: {msg}")
+        else:
+            self.errors.append(f"Error: {msg}")
+
 
     def get_arg_amount(self, string):
         arg_list = []
@@ -106,6 +113,9 @@ class SemanticalErrorVisitor(ASTVisitor):
             if isinstance(node.children[0], LiteralNode):
                 self.handleError(node, f"Cannot take the address of an rvalue of type '{node.children[0].type}'")
             node.type = "i64"
+        elif node.operation == '[]':
+            if node.children[1].type not in INTEGER_TYPES:
+                self.handleError("Array subscript is not an integer")
         else:
             node.type = node.children[0].type
 

@@ -4,7 +4,6 @@
 @.str.3 = private unnamed_addr constant [3 x i8] c"2\0A\00", align 1
 @.str.4 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4

@@ -3,7 +3,6 @@
 @.str.2 = private unnamed_addr constant [14 x i8] c"Hello world!\0A\00", align 1
 @.str.3 = private unnamed_addr constant [21 x i8] c"Something went wrong\00", align 1
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4

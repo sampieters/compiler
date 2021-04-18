@@ -37,7 +37,6 @@ class LLVMVisitor(ASTVisitor):
         """Loads a variable into a new temporary address"""
         if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and (node.operation == "*" or node.operation == "[]")) or isinstance(node, FunctionNode)):
             return
-        print(node)
         node = self.getSymbol(node)
 
         # Change the temporary address of the variable to the new address, load the original address into it

@@ -11,6 +11,22 @@ class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
         self.defined_functions = []
+        self.warnings = []
+        self.errors = []
+
+    def printWarnings(self):
+        print("\n".join(self.warnings))
+
+    def printErrors(self):
+        print("\n".join(self.errors))
+        if self.errors:
+            raise Exception()
+
+    def handleWarning(self, msg):
+        self.warnings.append("Warning: " + message)
+
+    def handleError(self, msg):
+        self.errors.append("Error: " + message)
 
     def enterProg(self, node):
         main_found = False
@@ -19,7 +35,11 @@ class SemanticalErrorVisitor(ASTVisitor):
                 if child.children[0].children[0].name == "main":
                     main_found = True
         if not main_found:
-            raise Exception("Error: No main function found")
+            self.handleError("No main function found")
+
+    def exitProg(self, node):
+        self.printWarnings()
+        self.printErrors()
 
     def enterScope(self, node):
         self.table.enter_scope()
@@ -30,7 +50,7 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitIdentifier(self, node):
         # If the identifier is on the left side of a definition or declaration
         if node.type == "void":
-            raise Exception("Variable has incomplete type 'void'")
+            self.handleError("Variable has incomplete type 'void'")
         if node.isBeingDeclared():
             def_node = None
             if not getParent(node, ScopeNode) and not getParent(node, FunctionDeclarationNode):
@@ -39,34 +59,34 @@ class SemanticalErrorVisitor(ASTVisitor):
                 def_node = self.table.get_symbol_curr_scope(node.name)
             # If the identifier was already declared before
             if def_node is not None and not isinstance(def_node.parent.parent, ArgListNode):
-                err_msg = f"Error: Redefinition of '{node.name}'"
+                err_msg = f"Redefinition of '{node.name}'"
                 if def_node.type != node.type:
                     err_msg += f" with a different type: '{node.type}' vs '{def_node.type}'" 
-                raise Exception(err_msg)
+                self.handleError(err_msg)
             else:
                 self.table.add_symbol(node)
         # If the identifier is on the left side of an assignment
         elif node.isBeingAssigned():
             def_node = self.table.get_symbol(node.name)
             if def_node is None:
-                raise Exception(f"Error: Use of undeclared variable '{node.name}'")
+                self.handleError(f"Use of undeclared variable '{node.name}'")
             if "const" in def_node.type_semantics:
-                raise Exception(f"Error: Cannot assign to variable '{node.name}' with const-qualified type '{node.type}'")
+                self.handleError(f"Cannot assign to variable '{node.name}' with const-qualified type '{node.type}'")
         else:
             def_node = self.table.get_symbol(node.name)
             if def_node is None:
-                raise Exception(f"Error: Use of undeclared variable '{node.name}'")
+                self.handleError(f"Use of undeclared variable '{node.name}'")
             else:
                 node.type = def_node.type
 
     def exitUnaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
-            print("Warning: Expression result unused")
+            self.handleWarning("Expression result unused")
         if node.operation in BOOLEAN_OPS:
             node.type = "i1"
         elif node.operation == "*":
             if not node.children[0].type.endswith("*"):
-                raise Exception(f"Error: Indirection requires pointer operand ('{node.children[0].type}' invalid)")
+                self.handleError(f"Indirection requires pointer operand ('{node.children[0].type}' invalid)")
             else:
                 node.type = node.children[0].type[:-1]
         elif node.operation == "&":
@@ -76,13 +96,13 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitBinaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
-            print("Warning: Expression result unused")
+            self.handleWarning("Expression result unused")
         if node.operation in BOOLEAN_OPS:
             node.type = "i1"
         else:
             node.type = getBinaryType(node.children[0].type, node.children[1].type)
             if node.operation == "%" and node.type in ["float", "double"]:
-                raise Exception(f"Error: Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}'")
+                self.handleError(f"Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}'")
 
     def exitDefinition(self, node):
         child1 = node.children[0].children[0]
@@ -91,20 +111,20 @@ class SemanticalErrorVisitor(ASTVisitor):
             if child1.type == child2.type:
                 pass
             elif child2.type in INTEGER_TYPES:
-                print(f"Warning: Incompatible integer to pointer conversion initializing '{child1.type}' with an expression of type '{child2.type}'")
+                self.handleWarning(f"Incompatible integer to pointer conversion initializing '{child1.type}' with an expression of type '{child2.type}'")
             elif child2.type.endswith("*"):
-                print(f"Warning: Incompatible pointer types initializing '{child1.type}' with an expression of type '{child2.type}'")
+                self.handleWarning(f"Incompatible pointer types initializing '{child1.type}' with an expression of type '{child2.type}'")
             elif not child1.type == child2.type:
-                raise Exception(f"Error: Initializing '{child1.type}' with an expression of incompatible type '{child2.type}'")
+                self.handleError(f"Initializing '{child1.type}' with an expression of incompatible type '{child2.type}'")
         if child1.dimensions:
             if not child2.dimensions:
-                raise Exception(f"Error: Array Initializer must be an initializer list or wide string literal")
+                self.handleError(f"Array Initializer must be an initializer list or wide string literal")
             # TODO: wont work for multidimensional arrays
             for child in child2.children:
                 if self.checkInfoLoss(child, child1):
-                    print(f"Warning: implicit conversion from '{child.type}' to '{child1.type}' can cause a loss of information.")
+                    self.handleWarning(f"implicit conversion from '{child.type}' to '{child1.type}' can cause a loss of information.")
         elif self.checkInfoLoss(child2, child1):
-            print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
+            self.handleWarning(f"implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitAssignment(self, node):
         child1, child2 = node.children
@@ -114,8 +134,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             if isinstance(child1, UnaryOperationNode) and (child1.operation == "[]" or child1.operation == "*"):
                 child1 = child1.children[0]
             else:
-                print(child1.operation)
-                raise Exception("Error: Expression is not assignable")
+                self.handleError("Expression is not assignable")
         # Make a temporary copy of the identifier on the left, take the child1 node from the symbol table
         tmp = child1
         child1 = self.table.get_symbol(child1.name)
@@ -125,7 +144,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             if tmp.parent.operation == "*" and tmp.type.endswith("*"):
                 tmp.parent.type = tmp.type[:-1]
             elif tmp.parent.operation == "*":
-                raise Exception("Error: Expression is not assignable")
+                self.handleError("Expression is not assignable")
             #TODO: maybe do something for [] operations?
             tmp = tmp.parent
         # If the right side of the expression is an identifier, grab it from the symbol table
@@ -134,27 +153,27 @@ class SemanticalErrorVisitor(ASTVisitor):
         # If the identifier on the left of the assignment is a pointer, throw the appropriate exceptions/warnings
         if child1.type.endswith("*"):
             if child2.type in INTEGER_TYPES:
-                print(f"Warning: Incompatible integer to pointer conversion assigning to '{child1.type}' from '{child2.type}'")
+                self.handleWarning(f"Incompatible integer to pointer conversion assigning to '{child1.type}' from '{child2.type}'")
             else:
-                raise Exception(f"Error: Assigning to '{child1.type}' from incompatible type '{child2.type}'")
+                self.handleError(f"Assigning to '{child1.type}' from incompatible type '{child2.type}'")
         # Otherwise check if an information loss occurs
         elif self.checkInfoLoss(child2, child1):
-            print(f"Warning: implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
+            self.handleWarning(f"implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitDeclaration(self, node):
         pass
 
     def exitBreak(self, node):
         if not (isinstance(node.parent, ScopeNode) and getParent(node, WhileNode)):
-            raise Exception("Error: 'break' statement not in loop or switch statement")
+            self.handleError("'break' statement not in loop or switch statement")
 
     def exitContinue(self, node):
         if not (isinstance(node.parent, ScopeNode) and getParent(node, WhileNode)):
-            raise Exception("Error: 'continue' statement not in loop statement")
+            self.handleError("'continue' statement not in loop statement")
 
     def exitReturn(self, node):
         if not (isinstance(node.parent, ScopeNode) and getParent(node, FunctionDefinitionNode)):
-            raise Exception("Error: 'return' statement not in function body")
+            self.handleError("'return' statement not in function body")
         if not node.children:
             node.type = 'void'
         else:
@@ -162,22 +181,22 @@ class SemanticalErrorVisitor(ASTVisitor):
         func_name = getParent(node, FunctionDefinitionNode).children[0].children[0].name
         func_type = self.table.get_symbol(func_name).type
         if func_type == 'void' and node.type != 'void':
-            raise Exception(f"Error: Void function '{func_name}' should not return a value")
+            self.handleError(f"Void function '{func_name}' should not return a value")
         elif func_type != 'void' and node.type == 'void':
-            raise Exception(f"Error: Non-void function '{func_name}' should return a value")
+            self.handleError(f"Non-void function '{func_name}' should return a value")
 
     def exitFunctionDefinition(self, node):
         if not isinstance(node.parent, ProgNode):
-            raise Exception("Error: Function definition is not allowed here")
+            self.handleError("Function definition is not allowed here")
 
     def enterFunctionDeclaration(self, node):
         function = node.children[0]
         def_node = self.table.get_symbol_curr_scope(function.name)
         # If the symbol was already declared before
         if def_node is not None and function.name in self.defined_functions:
-            raise Exception(f"Error: Redefinition of '{function.name}' as different kind of symbol")
+            self.handleError(f"Redefinition of '{function.name}' as different kind of symbol")
         elif def_node is not None and def_node.type != function.type:
-            raise Exception(f"Error: Conflicting types for '{function.name}'")
+            self.handleError(f"Conflicting types for '{function.name}'")
         else:
             self.table.add_symbol(function)
             if isinstance(node.parent, FunctionDefinitionNode):
@@ -186,7 +205,7 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitFunctionCall(self, node):
         function = self.getSymbol(node.children[0])
         if function is None:
-            raise Exception(f"Error: Implicit declaration of function \'{node.children[0].name}\' is invalid in C99")
+            self.handleError(f"Implicit declaration of function \'{node.children[0].name}\' is invalid in C99")
         if function.name in ["printf", "scanf"]:
             return
         node.type = function.type
@@ -195,25 +214,25 @@ class SemanticalErrorVisitor(ASTVisitor):
         function_args = function.children[0].children
 
         if len(function_args) > len(call_args):
-            raise Exception(f"Too few arguments to function call, expected {len(function_args)}, have {len(call_args)}")
+            self.handleError(f"Too few arguments to function call, expected {len(function_args)}, have {len(call_args)}")
         elif len(function_args) < len(call_args):
-            raise Exception(f"Too many arguments to function call, expected {len(function_args)}, have {len(call_args)}")
+            self.handleError(f"Too many arguments to function call, expected {len(function_args)}, have {len(call_args)}")
         for child1, child2 in zip(call_args, function_args):
             child2 = child2.children[0]
             if child1.type == child2.type:
                 continue
             elif child1.type.endswith("*"):
                 if child2.type in INTEGER_TYPES:
-                    print(f"Warning: Incompatible pointer to integer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
+                    self.handleWarning(f"Incompatible pointer to integer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
                 else:
-                    raise Exception(f"Error: Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
+                    self.handleError(f"Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
             elif child2.type.endswith("*"):
                 if child1.type in INTEGER_TYPES:
-                    print(f"Warning: Incompatible integer to pointer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
+                    self.handleWarning(f"Incompatible integer to pointer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
                 else:
-                    raise Exception(f"Error: Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
+                    self.handleError(f"Passing '{child1.type}' to parameter of incompatible type '{child2.type}'")
             elif self.checkInfoLoss(child1, child2):
-                print(f"Warning: implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
+                self.handleWarning(f"implicit conversion from '{child1.type}' to '{child2.type}' can cause a loss of information.")
         
 
     def getSymbol(self, node):

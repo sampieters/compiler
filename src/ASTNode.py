@@ -8,6 +8,11 @@ class ASTNode:
         self.parent = None
         self.children = None
 
+    def setLineInfo(self, ctx):
+        self.lineNr = str(ctx.start.line)
+        self.column = str(ctx.start.column)
+        self.symbol = ctx.getText()
+
     def __str__(self):
         return "error"
 
@@ -18,12 +23,14 @@ class ASTNode:
         assert self.parent is None
         self.parent = node
 
-    def add_child(self, node):
+    def add_child(self, node, ctx=None):
         if not self.children:
             self.children = [node]
         else:
             self.children.append(node)
         self.last_child().parent = self
+        if ctx:
+            self.setLineInfo(ctx)
 
     def last_child(self):
         if not self.children:

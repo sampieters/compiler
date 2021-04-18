@@ -1,1 +1,1 @@
-scanf2 failed
+functionCallargumentMismatch4 succeeded

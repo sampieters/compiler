@@ -5,10 +5,22 @@ from utils import *
 #TODO: replace error messages with actual exceptions
 #TODO: Check if void only in functions
 
+
+
 class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
         self.defined_functions = []
+
+    def enterProg(self, node):
+
+        main_found = False
+        for child in node.children:
+            if isinstance(child, FunctionDefinitionNode):
+                if child.children[0].children[0].name == "main":
+                    main_found = True
+        if not main_found:
+            raise Exception("Error: No main function found")
 
     def enterScope(self, node):
         self.table.enter_scope()
@@ -35,6 +47,8 @@ class SemanticalErrorVisitor(ASTVisitor):
         # If the identifier is on the left side of an assignment
         elif node.isBeingAssigned():
             def_node = self.table.get_symbol(node.name)
+            if def_node is None:
+                raise Exception(f"Error: Use of undeclared variable '{node.name}'")
             if "const" in def_node.type_semantics:
                 raise Exception(f"Error: Cannot assign to variable '{node.name}' with const-qualified type '{node.type}'")
         else:
@@ -167,6 +181,8 @@ class SemanticalErrorVisitor(ASTVisitor):
 
     def exitFunctionCall(self, node):
         function = self.getSymbol(node.children[0])
+        if function is None:
+            raise Exception(f"Error: Implicit declaration of function \'{node.children[0].name}\' is invalid in C99")
         if function.name in ["printf", "scanf"]:
             return
         node.type = function.type

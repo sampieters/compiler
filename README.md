@@ -113,3 +113,6 @@ geïmplementeerd van opdracht 6 (niet voltooid)
 3) for loop doet nog iets anders (extra branch)
 4) if else doet een branch instructie anders -> nog aanpassen maar zorgen dat de adrres blijft wanneer enkel if
 # VRAGEN
+
+1) Mss nog checken of params in main juist zijn
+2) parameters in functions worden aanschouwd als global moet vervangen worden

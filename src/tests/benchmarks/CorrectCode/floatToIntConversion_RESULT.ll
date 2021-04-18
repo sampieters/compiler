@@ -1,6 +1,5 @@
 @.str.0 = private unnamed_addr constant [9 x i8] c"%f %d %d\00", align 1
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() {
   %1 = alloca i32, align 4
   %2 = alloca float, align 4

@@ -2,7 +2,6 @@
 @.str.1 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 @.str.2 = private unnamed_addr constant [15 x i8] c"fib(%d)\09= %d;\0A\00", align 1
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @f(i32) {
   %2 = alloca i32, align 4
   %3 = alloca i32, align 4
@@ -32,7 +31,6 @@ define i32 @f(i32) {
   ret i32 %17
 }
 
-; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() {
   %1 = alloca i32, align 4
   %2 = alloca i32, align 4

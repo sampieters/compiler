@@ -5,42 +5,44 @@
 ; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() {
   %1 = alloca i32, align 4
-  store i32 5, i32* %1, align 4
-  %2 = load i32, i32* %1, align 4
-  %3 = icmp slt i32 %2, 5
-  br i1 %3, label %4, label %6
+  %2 = alloca i32, align 4
+  store i32 5, i32* %2, align 4
+  %3 = load i32, i32* %2, align 4
+  %4 = icmp slt i32 %3, 5
+  br i1 %4, label %5, label %7
 
-; <label>:4:
-  %5 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @.str.0, i64 0, i64 0))
-  br label %6
+; <label>:5:
+  %6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @.str.0, i64 0, i64 0))
+  br label %7
 
-; <label>:6:
-  %7 = load i32, i32* %1, align 4
-  %8 = icmp sge i32 %7, 5
-  br i1 %8, label %9, label %11
+; <label>:7:
+  %8 = load i32, i32* %2, align 4
+  %9 = icmp sge i32 %8, 5
+  br i1 %9, label %10, label %12
 
-; <label>:9:
-  %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.1, i64 0, i64 0))
-  br label %11
+; <label>:10:
+  %11 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.1, i64 0, i64 0))
+  br label %12
 
-; <label>:11:
-  %12 = load i32, i32* %1, align 4
-  %13 = icmp eq i32 %12, 5
-  br i1 %13, label %14, label %20
+; <label>:12:
+  %13 = load i32, i32* %2, align 4
+  %14 = icmp eq i32 %13, 5
+  br i1 %14, label %15, label %21
 
-; <label>:14:
-  %15 = load i32, i32* %1, align 4
-  %16 = icmp ne i32 %15, 4
-  br i1 %16, label %17, label %19
+; <label>:15:
+  %16 = load i32, i32* %2, align 4
+  %17 = icmp ne i32 %16, 4
+  br i1 %17, label %18, label %20
 
-; <label>:17:
-  %18 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.2, i64 0, i64 0))
-  br label %19
-
-; <label>:19:
+; <label>:18:
+  %19 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.2, i64 0, i64 0))
   br label %20
 
 ; <label>:20:
-  ret i32 1
+  br label %21
+
+; <label>:21:
+  %22 = load i32, i32* %1, align 4
+  ret i32 %22
 }
 declare i32 @printf(i8*, ...)

@@ -15,17 +15,17 @@ class LLVMVisitor(ASTVisitor):
         self.counter = Counter()
         self.str_counter = Counter()
 
-    def storeVariable(self, node, value):
+    def storeVariable(self, node, value, load=True):
         """Stores value (node with a type) into a variable from the symbol table"""
         instruction = "store "
         node = self.getSymbol(node)
         value = self.getSymbol(value)
 
         # If we want to store a variable
-        if not getParent(value, ArgListNode) and node.type == value.type:
+        if load and node.type == value.type:
             # Load the variable into a new temporary address before storing it, unless it is an argument of a function
             self.loadVariable(value)
-        
+
         instruction += node.type + " " + value.getValue()
         instruction += ", " + node.type + "* " 
         instruction += node.getValue(original=True) 
@@ -35,8 +35,9 @@ class LLVMVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
-        if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and node.operation == "*")):
+        if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and node.operation == "*") or isinstance(node, FunctionNode)):
             return
+        print(node)
         node = self.getSymbol(node)
 
         # Change the temporary address of the variable to the new address, load the original address into it
@@ -92,9 +93,9 @@ class LLVMVisitor(ASTVisitor):
         to_remove = []
         end_block = False
         for idx, line in enumerate(self.LLVM):
-            if "<label>" in line:
+            if "<label>" in line or line == "}":
                 end_block = False
-            elif not end_block and ("br label" in line or "br i1" in line):
+            elif not end_block and ("br label" in line or "br i1" in line or "ret " in line):
                 end_block = True
                 continue
             if end_block and line != "":
@@ -121,7 +122,8 @@ class LLVMVisitor(ASTVisitor):
         """Transform declaration node to LLVM"""
         # Set the original address for the new variable, add it to the symbol table
         identifier = node.children[0]
-        self.table.add_symbol(identifier)
+        if not isinstance(node.parent.parent, ArgListNode):
+            self.table.add_symbol(identifier)
         if "global" in identifier.type_semantics:
             instruction = identifier.getValue(original=True) + " = "
             value = None
@@ -148,11 +150,9 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM.append("  " + instruction)
 
             # If there is no original address yet (the identifier is not an argument of a function)
-            if not identifier.original_address:
-                identifier.original_address = address
-            else:
-                identifier.temp_address = address
-                self.storeVariable(identifier, identifier)
+            identifier.original_address = address
+            if isinstance(identifier.parent.parent, ArgListNode):
+                self.storeVariable(identifier, identifier, False)
 
     def exitDefinition(self, node):
         """Transform definition node to LLVM"""
@@ -293,6 +293,7 @@ class LLVMVisitor(ASTVisitor):
         node.start_address = self.counter.counter-1
 
     def enterFunctionDefinition(self, node):
+        self.table.enter_scope()
         self.LLVM.append("")
         # TODO: Kweet ni wa deze lijn doet
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
@@ -301,14 +302,25 @@ class LLVMVisitor(ASTVisitor):
         children_LLVM = []
         for child in function.children[0].children:
             child = child.children[0]
-            child.original_address = self.counter.incr()
-            children_LLVM.append(child.type + " " + child.getValue(original=True))
+            child.temp_address = self.counter.incr()
+            children_LLVM.append(child.type)
         instruction += ", ".join(children_LLVM)
         instruction += ") {"
         self.LLVM.append(instruction)
+
         function.original_address = self.counter.incr()
 
+        if function.type != "void":
+            ret_address = self.counter.incr()
+            function.original_address = ret_address
+            # Convert the declaration to LLVM
+            instruction = function.getValue(original=True) + " = alloca " + function.type
+            instruction += ", align " + function.alignment()
+            self.LLVM.append("  " + instruction)
+            # TODO: automatically store default return value
+
     def exitFunctionDefinition(self, node):
+        self.table.exit_scope()
         self.LLVM.append("}")
         self.counter.reset()
 
@@ -348,6 +360,7 @@ class LLVMVisitor(ASTVisitor):
                 child = self.getSymbol(child)
                 arg_child = arg_child.children[0]
                 self.convertType(child, arg_child)
+                self.loadVariable(child)
                 children_LLVM.append(child.type + " " + child.getValue())
 
         instruction = "  "
@@ -435,14 +448,23 @@ class LLVMVisitor(ASTVisitor):
             self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)} %{str(node.parent.start_address)}, %IF START")
         self.table.exit_scope()
 
-    def enterReturn(self, node):
+    def exitReturn(self, node):
         #TODO: Wss nog omzetting naar juiste type maken
-        instruction = "  ret "
-        if not node.children:
-            instruction += "void"
+        function = getParent(node, FunctionDefinitionNode).children[0].children[0]
+        if not isinstance(node.parent.parent, FunctionDefinitionNode):
+            if function.type != "void":
+                self.storeVariable(function, node.children[0])
+            # instruction = "  br label %{FINALLABEL}"
+            # self.LLVM.append(instruction)
         else:
-            instruction += node.children[0].type + " " + node.children[0].getValue()
-        self.LLVM.append(instruction)
+            instruction = "  ret "
+            if not node.children:
+                instruction += "void"
+            else:
+                ret_val = self.getSymbol(node.children[0])
+                self.loadVariable(function)
+                instruction += ret_val.type + " %" + function.temp_address
+            self.LLVM.append(instruction)
 
     def unaryOpToLLVM(self, node):
         child = self.getSymbol(node.children[0])
@@ -521,7 +543,7 @@ class LLVMVisitor(ASTVisitor):
 
         if extra:
             ret_val += " " + extra
-            
+
         return ret_val
 
     def getSymbol(self, node):

@@ -21,7 +21,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         if node.type == "void":
             raise Exception("Variable has incomplete type 'void'")
         if node.isBeingDeclared():
-            if not getParent(node, ScopeNode):
+            if not getParent(node, ScopeNode) and not getParent(node, FunctionDefinitionNode):
                 node.type_semantics.append("global")
             def_node = self.table.get_symbol_curr_scope(node.name)
             # If the identifier was already declared before
@@ -143,14 +143,18 @@ class SemanticalErrorVisitor(ASTVisitor):
             node.type = 'void'
         else:
             node.type = node.children[0].type
-        func_name = node.parent.parent.children[0].children[0].name
+        func_name = getParent(node, FunctionDefinitionNode).children[0].children[0].name
         func_type = self.table.get_symbol(func_name).type
         if func_type == 'void' and node.type != 'void':
             raise Exception(f"Error: Void function '{func_name}' should not return a value")
         elif func_type != 'void' and node.type == 'void':
             raise Exception(f"Error: Non-void function '{func_name}' should return a value")
 
+    def enterFunctionDefinition(self, node):
+        self.table.enter_scope()
+
     def exitFunctionDefinition(self, node):
+        self.table.exit_scope()
         if not isinstance(node.parent, ProgNode):
             raise Exception("Error: Function definition is not allowed here")
 
@@ -180,7 +184,9 @@ class SemanticalErrorVisitor(ASTVisitor):
             raise Exception(f"Too many arguments to function call, expected {len(function_args)}, have {len(call_args)}")
         for child1, child2 in zip(call_args, function_args):
             child2 = child2.children[0]
-            if child1.type.endswith("*"):
+            if child1.type == child2.type:
+                continue
+            elif child1.type.endswith("*"):
                 if child2.type in INTEGER_TYPES:
                     print(f"Warning: Incompatible pointer to integer conversion passing '{child1.type}' to parameter of type '{child2.type}'; dereference with *")
                 else:

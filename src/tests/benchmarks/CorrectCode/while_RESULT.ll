@@ -3,23 +3,25 @@
 ; Function Attrs: noinline nounwind optnone ssp uwtable
 define i32 @main() {
   %1 = alloca i32, align 4
-  store i32 0, i32* %1, align 4
-  br label %2
+  %2 = alloca i32, align 4
+  store i32 0, i32* %2, align 4
+  br label %3
 
-; <label>:2:
-  %3 = load i32, i32* %1, align 4
-  %4 = icmp slt i32 %3, 5
-  br i1 %4, label %5, label %10
+; <label>:3:
+  %4 = load i32, i32* %2, align 4
+  %5 = icmp slt i32 %4, 5
+  br i1 %5, label %6, label %11
 
-; <label>:5:
-  %6 = load i32, i32* %1, align 4
-  %7 = add nsw i32 %6, 1
-  store i32 %7, i32* %1, align 4
-  %8 = load i32, i32* %1, align 4
-  %9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.0, i64 0, i64 0), i32 %8)
-  br label %2
+; <label>:6:
+  %7 = load i32, i32* %2, align 4
+  %8 = add nsw i32 %7, 1
+  store i32 %8, i32* %2, align 4
+  %9 = load i32, i32* %2, align 4
+  %10 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.0, i64 0, i64 0), i32 %9)
+  br label %3
 
-; <label>:10:
-  ret i32 1
+; <label>:11:
+  %12 = load i32, i32* %1, align 4
+  ret i32 %12
 }
 declare i32 @printf(i8*, ...)

@@ -155,8 +155,14 @@ class FunctionNode(ASTNode):
         self.visitChildren(visitor)
         visitor.exitFunction(self)
 
-    def getValue(self):
-        return "@" + self.name
+    def getValue(self, original=False):
+        if original:
+            return "%" + self.original_address
+        else:
+            return "@" + self.name
+
+    def alignment(self):
+        return str(int(getAlignment(self)))
 
 
 class DefinitionNode(ASTNode):

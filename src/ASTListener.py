@@ -50,7 +50,7 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#Character.
     def enterCharacter(self, ctx:CParser.CharacterContext):
-        self.curr_node.add_child(LiteralNode(ctx.getText()[1], "i8", self.counter.incr()))
+        self.curr_node.add_child(LiteralNode(ord(ctx.getText()[1]), "i8", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
 
     # Exit a parse tree produced by variablesParser#Character.

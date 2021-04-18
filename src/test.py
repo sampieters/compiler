@@ -11,7 +11,7 @@ from SemanticalErrorVisitor import SemanticalErrorVisitor
 from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
-PATH = "src/tests/benchmarks/CorrectCode/"
+PATH = "src/tests/benchmarks/SemanticErrors/"
 OUTPUT = open("results.txt", "w+")
 
 variables = ""

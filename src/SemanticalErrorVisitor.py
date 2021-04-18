@@ -5,7 +5,7 @@ from utils import *
 #TODO: replace error messages with actual exceptions
 #TODO: Check if void only in functions
 
-
+PRINTF_TO_TYPE = {'d': "i32", 'i': "i32", 's': "i8*", 'c': "i8"}
 
 class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
@@ -20,13 +20,21 @@ class SemanticalErrorVisitor(ASTVisitor):
     def printErrors(self):
         print("\n".join(self.errors))
         if self.errors:
-            raise Exception()
+            raise Exception(self.errors[0])
 
     def handleWarning(self, msg):
-        self.warnings.append("Warning: " + message)
+        self.warnings.append("Warning: " + msg)
 
     def handleError(self, msg):
-        self.errors.append("Error: " + message)
+        self.errors.append("Error: " + msg)
+
+    def get_arg_amount(self, string):
+        arg_list = []
+        for i in range(len(string)):
+            if string[i] == '%' and i == range(len(string)):
+                if string[i+1] in ['d', 'i', 's', 'c']:
+                    arg_list.append(PRINTF_TO_TYPE[string[i+1]])
+        return arg_list
 
     def enterProg(self, node):
         main_found = False
@@ -82,6 +90,8 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitUnaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             self.handleWarning("Expression result unused")
+        if isinstance(node.children[0], LiteralNode):
+            self.handleError("Expression is not assignable")
         if node.operation in BOOLEAN_OPS:
             node.type = "i1"
         elif node.operation == "*":
@@ -192,10 +202,22 @@ class SemanticalErrorVisitor(ASTVisitor):
     def enterFunctionDeclaration(self, node):
         function = node.children[0]
         def_node = self.table.get_symbol_curr_scope(function.name)
+
+        # Check if there are multiple paramaters with the same name
+        arg_names = []
+        for arg in function.children[0].children:
+            if arg.children[0].name not in arg_names:
+                arg_names.append(arg.children[0].name)
+            else:
+                raise Exception(f"Error: Redefinition of parameter {arg.children[0].name}")
         # If the symbol was already declared before
         if def_node is not None and function.name in self.defined_functions:
             self.handleError(f"Redefinition of '{function.name}' as different kind of symbol")
+        # Elif the return type is different of the same function
         elif def_node is not None and def_node.type != function.type:
+            self.handleError(f"Conflicting types for '{function.name}'")
+        # Elif the number of arguments is not the same
+        elif def_node is not None and function.children[0] != def_node.children[0]:
             self.handleError(f"Conflicting types for '{function.name}'")
         else:
             self.table.add_symbol(function)
@@ -207,6 +229,21 @@ class SemanticalErrorVisitor(ASTVisitor):
         if function is None:
             self.handleError(f"Implicit declaration of function \'{node.children[0].name}\' is invalid in C99")
         if function.name in ["printf", "scanf"]:
+            arg_list = node.children[1].children
+            arg_char_list = self.get_arg_amount(node.children[1].children[0].value)
+            if len(arg_list)-1 > len(arg_char_list):
+                print(f"Warning: Data argument(s) not used by format string")
+            elif len(arg_list)-1 < len(arg_char_list):
+                print(f"Warning: More '%' conversions than data arguments")
+            #TODO: NOG AFWERKEN
+            else:
+                for i in range(len(arg_char_list)):
+                    if arg_list[i] != arg_char_list[i]:
+                        print(f"Warning: LUL")
+
+
+
+
             return
         node.type = function.type
         node.type_semantics = function.type_semantics

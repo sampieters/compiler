@@ -1,16 +1,20 @@
-; ModuleID = 'src/tests/benchmarks/SemanticErrors/incompatibleTypes5.c'
-source_filename = "src/tests/benchmarks/SemanticErrors/incompatibleTypes5.c"
+; ModuleID = 'src/tests/benchmarks/SemanticErrors/incompatibleTypes7.c'
+source_filename = "src/tests/benchmarks/SemanticErrors/incompatibleTypes7.c"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 
 ; Function Attrs: noinline nounwind optnone uwtable
+define void @f(i32) #0 {
+  %2 = alloca i32, align 4
+  store i32 %0, i32* %2, align 4
+  ret void
+}
+
+; Function Attrs: noinline nounwind optnone uwtable
 define i32 @main() #0 {
   %1 = alloca i32, align 4
-  %2 = alloca i32*, align 8
   store i32 0, i32* %1, align 4
-  %3 = load i32*, i32** %2, align 8
-  %4 = load i32, i32* %3, align 4
-  %5 = add nsw i32 97, %4
+  call void @f(i32 99)
   ret i32 1
 }
 

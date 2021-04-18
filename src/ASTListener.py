@@ -14,7 +14,6 @@ class ASTListener(CListener):
         assert self.curr_node is None
         self.curr_node = ProgNode(ctx.getChild(0).getText() == "#include <stdio.h>", self.counter.incr())
         self.curr_node.setLineInfo(ctx)
-        print(ctx.getText())
 
 
     # Exit a parse tree produced by variablesParser#Program.

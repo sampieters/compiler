@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 // Should generate warning
 int main(){
     float x = 0.5;

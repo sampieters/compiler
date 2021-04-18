@@ -103,6 +103,8 @@ class SemanticalErrorVisitor(ASTVisitor):
             else:
                 node.type = node.children[0].type[:-1]
         elif node.operation == "&":
+            if isinstance(node.children[0], LiteralNode):
+                self.handleError(node, f"Cannot take the address of an rvalue of type '{node.children[0].type}'")
             node.type = "i64"
         else:
             node.type = node.children[0].type
@@ -222,8 +224,10 @@ class SemanticalErrorVisitor(ASTVisitor):
         elif def_node is not None and def_node.type != function.type:
             self.handleError(node, f"Conflicting types for '{function.name}'")
         # Elif the number of arguments is not the same
-        elif def_node is not None and function.children[0] != def_node.children[0]:
-            self.handleError(node, f"Conflicting types for '{function.name}'")
+        elif def_node is not None:
+            for child1, child2 in zip(function.children[0].children, def_node.children[0].children):
+                if child1.type != child2.type:
+                    self.handleError(node, f"Conflicting types for '{function.name}'")
         else:
             self.table.add_symbol(function)
             if isinstance(node.parent, FunctionDefinitionNode):
@@ -246,9 +250,6 @@ class SemanticalErrorVisitor(ASTVisitor):
                 for i in range(len(arg_char_list)):
                     if arg_list[i+1].type != arg_char_list[i]:
                         self.handleWarning(node, f"Format specifies type '{arg_char_list[i]}' but the argument has type '{arg_list[i+1].type}'")
-
-
-
 
             return
         node.type = function.type

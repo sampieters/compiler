@@ -1,3 +1,4 @@
+#include <stdio.h>
 // Should NOT generate warning
 int main(){
     int x = 5;

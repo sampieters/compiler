@@ -32,11 +32,13 @@ class SemanticalErrorVisitor(ASTVisitor):
         if node.type == "void":
             raise Exception("Variable has incomplete type 'void'")
         if node.isBeingDeclared():
-            if not getParent(node, ScopeNode) and not getParent(node, FunctionDefinitionNode):
+            def_node = None
+            if not getParent(node, ScopeNode) and not getParent(node, FunctionDeclarationNode):
                 node.type_semantics.append("global")
-            def_node = self.table.get_symbol_curr_scope(node.name)
+            if not (getParent(node, FunctionDeclarationNode) and not getParent(node, FunctionDefinitionNode)):
+                def_node = self.table.get_symbol_curr_scope(node.name)
             # If the identifier was already declared before
-            if def_node is not None:
+            if def_node is not None and not isinstance(def_node.parent.parent, ArgListNode):
                 err_msg = f"Error: Redefinition of '{node.name}'"
                 if def_node.type != node.type:
                     err_msg += f" with a different type: '{node.type}' vs '{def_node.type}'" 
@@ -163,20 +165,18 @@ class SemanticalErrorVisitor(ASTVisitor):
         elif func_type != 'void' and node.type == 'void':
             raise Exception(f"Error: Non-void function '{func_name}' should return a value")
 
-    def enterFunctionDefinition(self, node):
-        self.table.enter_scope()
-
     def exitFunctionDefinition(self, node):
-        self.table.exit_scope()
         if not isinstance(node.parent, ProgNode):
             raise Exception("Error: Function definition is not allowed here")
 
-    def exitFunctionDeclaration(self, node):
+    def enterFunctionDeclaration(self, node):
         function = node.children[0]
         def_node = self.table.get_symbol_curr_scope(function.name)
         # If the symbol was already declared before
         if def_node is not None and function.name in self.defined_functions:
             raise Exception(f"Error: Redefinition of '{function.name}' as different kind of symbol")
+        elif def_node is not None and def_node.type != function.type:
+            raise Exception(f"Error: Conflicting types for '{function.name}'")
         else:
             self.table.add_symbol(function)
             if isinstance(node.parent, FunctionDefinitionNode):

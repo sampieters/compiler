@@ -293,7 +293,6 @@ class LLVMVisitor(ASTVisitor):
         node.start_address = self.counter.counter-1
 
     def enterFunctionDefinition(self, node):
-        self.table.enter_scope()
         self.LLVM.append("")
         # TODO: Kweet ni wa deze lijn doet
         self.LLVM.append("; Function Attrs: noinline nounwind optnone ssp uwtable")
@@ -320,7 +319,6 @@ class LLVMVisitor(ASTVisitor):
             # TODO: automatically store default return value
 
     def exitFunctionDefinition(self, node):
-        self.table.exit_scope()
         self.LLVM.append("}")
         self.counter.reset()
 

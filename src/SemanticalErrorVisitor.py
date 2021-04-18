@@ -243,7 +243,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             else:
                 for i in range(len(arg_char_list)):
                     if arg_list[i+1].type != arg_char_list[i]:
-                        self.handleWarning(node, f"Format specifies type '{arg_char_list[i]}' but the argument has type '{arg_list[i].type}'")
+                        self.handleWarning(node, f"Format specifies type '{arg_char_list[i]}' but the argument has type '{arg_list[i+1].type}'")
 
 
 

@@ -31,7 +31,7 @@ class SemanticalErrorVisitor(ASTVisitor):
     def get_arg_amount(self, string):
         arg_list = []
         for i in range(len(string)):
-            if string[i] == '%' and i == range(len(string)):
+            if string[i] == '%' and i != range(len(string)):
                 if string[i+1] in ['d', 'i', 's', 'c']:
                     arg_list.append(PRINTF_TO_TYPE[string[i+1]])
         return arg_list

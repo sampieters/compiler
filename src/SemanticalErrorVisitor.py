@@ -11,6 +11,7 @@ class SemanticalErrorVisitor(ASTVisitor):
     def __init__(self):
         self.table = SymbolTable()
         self.defined_functions = []
+        self.stdio_included = False
         self.warnings = []
         self.errors = []
 
@@ -32,11 +33,13 @@ class SemanticalErrorVisitor(ASTVisitor):
         arg_list = []
         for i in range(len(string)):
             if string[i] == '%' and i != range(len(string)):
-                if string[i+1] in ['d', 'i', 's', 'c']:
+                if string[i+1] in ['d', 'i', 's', 'c', 'f']:
                     arg_list.append(PRINTF_TO_TYPE[string[i+1]])
         return arg_list
 
     def enterProg(self, node):
+        if node.symbol.startswith("#include <stdio.h>"):
+            self.stdio_included = True
         main_found = False
         for child in node.children:
             if isinstance(child, FunctionDefinitionNode):
@@ -229,6 +232,8 @@ class SemanticalErrorVisitor(ASTVisitor):
         if function is None:
             self.handleError(node, f"Implicit declaration of function \'{node.children[0].name}\' is invalid in C99")
         if function.name in ["printf", "scanf"]:
+            if not self.stdio_included:
+                self.handleError(node, f"Implicitly declaring library function '{function.name}' with type '{function.type}'")
             arg_list = node.children[1].children
             arg_char_list = self.get_arg_amount(node.children[1].children[0].value)
             if len(arg_list)-1 > len(arg_char_list):

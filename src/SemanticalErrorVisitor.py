@@ -129,8 +129,8 @@ class SemanticalErrorVisitor(ASTVisitor):
                 self.handleWarning(node, f"Incompatible pointer types initializing '{child1.type}' with an expression of type '{child2.type}'")
             elif not child1.type == child2.type:
                 self.handleError(node, f"Initializing '{child1.type}' with an expression of incompatible type '{child2.type}'")
-        if child1.dimensions:
-            if not child2.dimensions:
+        if child1.type.startswith("["):
+            if not child2.type.startswith("["):
                 self.handleError(node, f"Array Initializer must be an initializer list or wide string literal")
             # TODO: wont work for multidimensional arrays
             for child in child2.children:
@@ -163,6 +163,8 @@ class SemanticalErrorVisitor(ASTVisitor):
         # If the right side of the expression is an identifier, grab it from the symbol table
         if isinstance(child2, IdentifierNode):
             child2 = self.table.get_symbol(child2.name)
+        if child2.type == 'void':
+            self.handleError(node, f"Assigning to '{child1.type} from incompatible type '{child2.type}'")
         # If the identifier on the left of the assignment is a pointer, throw the appropriate exceptions/warnings
         if child1.type.endswith("*"):
             if child2.type in INTEGER_TYPES:

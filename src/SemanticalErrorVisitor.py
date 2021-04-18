@@ -2,9 +2,6 @@ from SymbolTable import SymbolTable
 from ASTNode import *
 from utils import *
 
-#TODO: replace error messages with actual exceptions
-#TODO: Check if void only in functions
-
 PRINTF_TO_TYPE = {'d': "i32", 'i': "i32", 's': "i8*", 'c': "i8", 'f': "double"}
 
 class SemanticalErrorVisitor(ASTVisitor):
@@ -37,6 +34,7 @@ class SemanticalErrorVisitor(ASTVisitor):
 
 
     def get_arg_amount(self, string):
+        # arguments that needed to be supported in the printf function for this project
         arg_list = []
         for i in range(len(string)):
             if string[i] == '%' and i != range(len(string)):
@@ -45,8 +43,10 @@ class SemanticalErrorVisitor(ASTVisitor):
         return arg_list
 
     def enterProg(self, node):
+        # Check for the hardcoded stdio include needed for printf and scanf
         if node.include:
             self.stdio_included = True
+        # Find a main function, if there is none give error
         main_found = False
         for child in node.children:
             if isinstance(child, FunctionDefinitionNode):
@@ -100,8 +100,10 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitUnaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             self.handleWarning(node, "Expression result unused")
+        # If unary operations with stores on literals
         if isinstance(node.children[0], LiteralNode) and node.operation in ["++x", "x++", "--x", "x--"]:
             self.handleError(node, "Expression is not assignable")
+        # if the operation is a boolean operation, then type is i1 (boolean type)
         if node.operation in BOOLEAN_OPS:
             node.type = "i1"
         elif node.operation == "*":
@@ -109,10 +111,12 @@ class SemanticalErrorVisitor(ASTVisitor):
                 self.handleError(node, f"Indirection requires pointer operand ('{node.children[0].type}' invalid)")
             else:
                 node.type = node.children[0].type[:-1]
+        # If trying to take the address of a literal. this is not possible
         elif node.operation == "&":
             if isinstance(node.children[0], LiteralNode):
                 self.handleError(node, f"Cannot take the address of an rvalue of type '{node.children[0].type}'")
             node.type = "i64"
+        # If the unary operation is to ask an element in an array
         elif node.operation == '[]':
             if not node.children[0].type.startswith("["):
                 self.handleError(node, "Subscripted value is not an array, pointer or vector")
@@ -124,8 +128,10 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitBinaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             self.handleWarning(node, "Expression result unused")
+        # Can't to binary operation on a pointer
         if node.children[0].type.endswith('*') or node.children[1].type.endswith('*'):
             self.handleError(node, f"Invalid operands to binary expression ('{node.children[0].type}' and '{node.children[1].type}')")
+        # if the operation is a boolean operation, then type is i1 (boolean type)
         elif node.operation in BOOLEAN_OPS:
             node.type = "i1"
         else:
@@ -148,7 +154,6 @@ class SemanticalErrorVisitor(ASTVisitor):
         if child1.type.startswith("["):
             if not child2.type.startswith("["):
                 self.handleError(node, f"Array Initializer must be an initializer list or wide string literal")
-            # TODO: wont work for multidimensional arrays
             for child in child2.children:
                 if self.checkInfoLoss(child, child1):
                     self.handleWarning(node, f"implicit conversion from '{child.type}' to '{child1.type}' can cause a loss of information.")
@@ -174,7 +179,6 @@ class SemanticalErrorVisitor(ASTVisitor):
                 tmp.parent.type = tmp.type[:-1]
             elif tmp.parent.operation == "*":
                 self.handleError(node, "Expression is not assignable")
-            #TODO: maybe do something for [] operations?
             tmp = tmp.parent
         # If the right side of the expression is an identifier, grab it from the symbol table
         if isinstance(child2, IdentifierNode):
@@ -204,8 +208,10 @@ class SemanticalErrorVisitor(ASTVisitor):
             self.handleError(node, "'continue' statement not in loop statement")
 
     def exitReturn(self, node):
+        # A return statement can't be declared outside a function
         if not (isinstance(node.parent, ScopeNode) and getParent(node, FunctionDefinitionNode)):
             self.handleError(node, "'return' statement not in function body")
+        # If there are no children of the return node, then the type is void
         if not node.children:
             node.type = 'void'
         else:

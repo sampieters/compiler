@@ -405,7 +405,7 @@ class LLVMVisitor(ASTVisitor):
             self.stat_stack.append(len(self.LLVM) - 1)
             self.LLVM.append("")
             node.parent.start_address = self.counter.counter
-            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%SCOPE VAN IF")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")
 
     def exitScope(self, node):
         if isinstance(node.parent, WhileNode):
@@ -416,7 +416,7 @@ class LLVMVisitor(ASTVisitor):
                 self.LLVM[index] = self.LLVM[index].replace("{BREAK}", str(self.counter.counter))
                 index = self.loop_stack.pop()
             self.LLVM[index] = self.LLVM[index].replace("{LABEL}", str(self.counter.counter))
-            self.LLVM.append(f"; <label>:{self.counter.incr()}:")#{predsspaces(self.counter.counter-1)}%{str(node.parent.start_address)}")
+            self.LLVM.append(f"; <label>:{self.counter.incr()}:")
         elif isinstance(node.parent, IfNode):
             possible_index = None
             if isinstance(node.parent.parent.children[-1], ElseNode):

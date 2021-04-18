@@ -40,7 +40,6 @@ class ASTListener(CListener):
 
     # Enter a parse tree produced by variablesParser#String.
     def enterString(self, ctx:CParser.StringContext):
-        #TODO: other escaped characters?
         value = ctx.getText()[1:-1].replace("\\n", "\\0A").replace("\\t", "\\09") + '\\00' 
         self.curr_node.add_child(LiteralNode(value, "i8*", self.counter.incr(), ["const", "string"]), ctx)
         self.curr_node = self.curr_node.last_child()
@@ -164,7 +163,6 @@ class ASTListener(CListener):
     def exitAssignment(self, ctx:CParser.AssignmentContext):
         self.curr_node = self.curr_node.parent
 
-    # TODO: tree is wrong, assignment should have an expr on left side with semantical checks so that it is either identifier or array access
     # Enter a parse tree produced by variablesParser#declaration.
     def enterDeclaration(self, ctx:CParser.DeclarationContext):
         self.curr_node.add_child(DeclarationNode(self.counter.incr()), ctx)

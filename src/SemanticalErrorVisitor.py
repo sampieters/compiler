@@ -190,7 +190,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             self.handleWarning(node, f"implicit conversion from '{child2.type}' to '{child1.type}' can cause a loss of information.")
 
     def exitDeclaration(self, node):
-        if node.getChild(IdentifierNode).type.startswith("[") and node.getChild(IdentifierNode).type.contains("."):
+        if node.children[0].type.startswith("[") and "." in node.children[0].type:
             self.handleError(node, "Size of array has non-integer type 'double'")
 
     def exitBreak(self, node):

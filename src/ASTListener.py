@@ -181,7 +181,7 @@ class ASTListener(CListener):
             dimensions = re.findall('\[.*?\]', ctx.getText())
             for dim in dimensions:
                 dim = dim[1:-1]
-                identifier.type = f"[{str(int(eval(dim)))} x {identifier.type}]"
+                identifier.type = f"[{str(eval(dim))} x {identifier.type}]"
         self.curr_node.children = [self.curr_node.children[0]]
         self.curr_node = self.curr_node.parent
 

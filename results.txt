@@ -10,6 +10,7 @@ for succeeded
 forwardDeclaration succeeded
 if succeeded
 ifElse succeeded
+initializerList crashed
 intToFloatConversion succeeded
 modulo succeeded
 pointerArgument succeeded

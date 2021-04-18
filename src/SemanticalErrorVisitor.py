@@ -114,8 +114,10 @@ class SemanticalErrorVisitor(ASTVisitor):
                 self.handleError(node, f"Cannot take the address of an rvalue of type '{node.children[0].type}'")
             node.type = "i64"
         elif node.operation == '[]':
+            if not node.children[0].type.startswith("["):
+                self.handleError(node, "Subscripted value is not an array, pointer or vector")
             if node.children[1].type not in INTEGER_TYPES:
-                self.handleError("Array subscript is not an integer")
+                self.handleError(node, "Array subscript is not an integer")
         else:
             node.type = node.children[0].type
 

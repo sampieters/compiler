@@ -39,7 +39,7 @@ geïmplementeerd van opdracht 2:
 - (Mandatory) Reserved words (voltooid)
 - (Mandatory) Variables (voltooid)
 - (Mandatory) Pointer Operations (voltooid)
-- (Optional) Identifier Operations (werkt niet volledig)
+- (Optional) Identifier Operations (werkt deels)
 - (Optional) Conversions (voltooid)
 
 - (Optional) Constant Propagation (niet voltooid)
@@ -97,10 +97,10 @@ geïmplementeerd van opdracht 6:
 - printf1 (werkt)
 - printf2 (werkt)
 - printf3 (werkt)
-- scanf1 (werkt?)
-- scanf2 (crasht)
+- scanf1 (werkt)
+- scanf2 (werkt)
 - scoping (werkt)
-- unaryOperations (crasht)
+- unaryOperations (werkt)
 - variables1 (werkt)
 - variables2 (werkt)
 - variables3 (werkt)
@@ -110,13 +110,3 @@ geïmplementeerd van opdracht 6:
 - variables7 (werkt)
 - variables8 (werkt)
 - while (werkt)
-
-#TODO:
-1) zext aub weg bij while loops
-2) icmp slt bij while loop heeft een spatie te weinig, maar kvind ni war die da doet
-3) for loop doet nog iets anders (extra branch)
-4) if else doet een branch instructie anders -> nog aanpassen maar zorgen dat de adrres blijft wanneer enkel if
-# VRAGEN
-
-1) Mss nog checken of params in main juist zijn
-2) parameters in functions worden aanschouwd als global moet vervangen worden

@@ -1,6 +1,2 @@
 
-int main(){
-	int* p;
-	p = &5;
-	return 1;
-}
+int main(){int* p;p = &5;return 1;}

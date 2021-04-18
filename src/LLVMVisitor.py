@@ -35,7 +35,7 @@ class LLVMVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         """Loads a variable into a new temporary address"""
-        if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and node.operation == "*") or isinstance(node, FunctionNode)):
+        if not (isinstance(node, IdentifierNode) or (isinstance(node, UnaryOperationNode) and (node.operation == "*" or node.operation == "[]")) or isinstance(node, FunctionNode)):
             return
         print(node)
         node = self.getSymbol(node)
@@ -65,6 +65,8 @@ class LLVMVisitor(ASTVisitor):
             # If the literal is a decimal that has to be converted to integer, floor the value
             elif node2.type in INTEGER_TYPES:
                 node1.value = int(float(node1.value))
+            elif node1.value == 0 and node2.type.startswith("["):
+                node1.value = "zeroinitializer"
 
             node1.type = node2.type
             return
@@ -240,6 +242,13 @@ class LLVMVisitor(ASTVisitor):
             identifier = self.getSymbol(node.children[0])
             self.loadVariable(identifier)
             node.original_address = identifier.temp_address
+        elif node.operation == "[]":
+            identifier = self.getSymbol(node.children[0])
+            value = self.getSymbol(node.children[1])
+            self.convertType(value, IdentifierNode(None, -1, "i64"))
+            node.type = "".join(identifier.type.split()[2:])[:-1]
+            node.original_address = self.counter.incr()
+            self.LLVM.append(f"  {node.getValue(original=True)} = getelementptr inbounds {identifier.type}, {identifier.type}* {identifier.getValue(original=True)}, i64 0, i64 {value.getValue()}")
 
     def enterContinue(self, node):
         self.LLVM.append("  br label %" + str(getParent(node, WhileNode).start_address))

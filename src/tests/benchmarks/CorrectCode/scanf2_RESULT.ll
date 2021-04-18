@@ -7,9 +7,9 @@ define i32 @main() {
   %1 = alloca i32, align 4
   %2 = alloca [5 x i8], align 1
   %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([28 x i8], [28 x i8]* @.str.0, i64 0, i64 0))
-  %4 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i64 0, i64 0), i8* %2)
-  %5 = load i8, i8* %2, align 1
-  %6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i64 0, i64 0), i8 %5)
+  %4 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i64 0, i64 0), [5 x i8]* %2)
+  %5 = load [5 x i8], [5 x i8]* %2, align 1
+  %6 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.2, i64 0, i64 0), [5 x i8] %5)
   %7 = load i32, i32* %1, align 4
   ret i32 %7
 }

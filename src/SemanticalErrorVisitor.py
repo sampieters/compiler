@@ -114,6 +114,7 @@ class SemanticalErrorVisitor(ASTVisitor):
             if isinstance(child1, UnaryOperationNode) and (child1.operation == "[]" or child1.operation == "*"):
                 child1 = child1.children[0]
             else:
+                print(child1.operation)
                 raise Exception("Error: Expression is not assignable")
         # Make a temporary copy of the identifier on the left, take the child1 node from the symbol table
         tmp = child1

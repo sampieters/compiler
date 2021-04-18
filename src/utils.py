@@ -80,12 +80,15 @@ def getTypeLLVM(_type):
     return ret_val
 
 def getAlignment(node):
-    if node.type.endswith("*"):
+    _type = node.type
+    if _type.endswith("]"):
+        _type = _type.split()[-1].replace(']', '')
+    if _type.endswith("*"):
         return 8
-    elif node.type.startswith("i"):
-        return int(node.type[1:]) / 8
+    elif _type.startswith("i"):
+        return int(_type[1:]) / 8
     else:
-        return ALIGNMENT[node.type]
+        return ALIGNMENT[_type]
 
 def getConversionFunction(node1, node2):
     # Get conversion function when converting node1 type to node2 type

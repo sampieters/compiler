@@ -1,1 +1,1 @@
-../SemanticErrors/declarationDeclarationMismatch1 crashed
+scanf2 failed

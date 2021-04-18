@@ -46,4 +46,4 @@ if __name__ == '__main__':
 
     print("\n".join(visitor_llvm.LLVM))
     
-    AST.to_dot("AST")
+    # AST.to_dot("AST")

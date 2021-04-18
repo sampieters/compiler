@@ -111,6 +111,7 @@ class ASTListener(CListener):
     def enterUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):
         self.curr_node.add_child(UnaryOperationNode("[]", self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
+        self.curr_node.add_child(IdentifierNode(ctx.getChild(0).getText(), self.counter.incr()))
 
     def exitUnaryOpArray(self, ctx:CParser.UnaryOpArrayContext):
         self.curr_node = self.curr_node.parent
@@ -138,7 +139,7 @@ class ASTListener(CListener):
         self.curr_node = self.curr_node.last_child()
 
     def exitInitializerList(self, ctx:CParser.InitializerListContext):
-        self.curr_node.dimensions = [len(self.curr_node.children)]
+        self.curr_node.type = f"[{len(self.curr_node.children)} x {self.curr_node.children[0].type}]"
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#definition.
@@ -167,21 +168,18 @@ class ASTListener(CListener):
         self.curr_node.add_child(DeclarationNode(self.counter.incr()))
         self.curr_node = self.curr_node.last_child()
         self.curr_node.add_child(IdentifierNode(ctx.getChild(1).getText(), self.counter.incr()))
-        if ctx.getChildCount() > 3:
-            identifier = self.curr_node.last_child()
-            dimensions = re.findall('\[.*?\]', ctx.getText())
-            # TODO: this wont work for int a[] = {...}
-            # TODO: doesnt handle identifier accesses int a[i];
-            for dim in dimensions:
-                dim = dim[1:-1]
-                identifier.dimensions.append(int(eval(dim)))
 
     # Exit a parse tree produced by variablesParser#declaration.
     def exitDeclaration(self, ctx:CParser.DeclarationContext):
         _type, type_semantics = getTypeLLVM(ctx.getChild(0).getText())
-        self.curr_node.children[0].type = _type
-        self.curr_node.children[0].type_semantics = type_semantics
-        self.curr_node.children = [self.curr_node.children[0]]
+        identifier = self.curr_node.children[0]
+        identifier.type = _type
+        identifier.type_semantics = type_semantics
+        if ctx.getChildCount() > 3:
+            dimensions = re.findall('\[.*?\]', ctx.getText())
+            for dim in dimensions:
+                dim = dim[1:-1]
+                identifier.type = f"[{str(int(eval(dim)))} x {identifier.type}]"
         self.curr_node = self.curr_node.parent
 
     # Enter a parse tree produced by variablesParser#Identifier.

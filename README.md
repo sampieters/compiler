@@ -29,18 +29,18 @@ geïmplementeerd van opdracht 1:
 - (Mandatory) Brackets to overwrite the order of operations (voltooid)
 - (Mandatory) Binary operator % (voltooid)
 - (optional) Comparison operators >=, <=, != (voltooid)
-- (optional) Logical operators &&, ||, and ! (niet voltooid)
+- (optional) Logical operators &&, ||, and ! (enkel ! voltooid)
 
 - (optional) Constant folding (voltooid)
 
 geïmplementeerd van opdracht 2:
 
 - (Mandatory) Types (voltooid)
-- (Mandatory) reserved words (voltooid)
+- (Mandatory) Reserved words (voltooid)
 - (Mandatory) Variables (voltooid)
-- (Mandatory) Pointer Operations (Nog uitgebreid testen / niet voltooid)
-- (Optional) Identifier Operations (Nog uitgebreid testen / niet voltooid)
-- (Optional) Conversions (testen / voltooid)
+- (Mandatory) Pointer Operations (voltooid)
+- (Optional) Identifier Operations (werkt niet volledig)
+- (Optional) Conversions (voltooid)
 
 - (Optional) Constant Propagation (niet voltooid)
 
@@ -49,27 +49,31 @@ geïmplementeerd van opdracht 3:
 - (Mandatory) Comments (voltooid)
     - (Optional) retain comments (niet voltooid)
     - (Optional) comment every instruction (niet voltooid)
-- (Mandatory) Printf (niet voltooid)
+- (Mandatory) Printf (voltooid)
 
 geïmplementeerd van opdracht 4:
 
 - (Mandatory) Reserved words
     - (Mandatory) for (voltooid)
-    - (Mandatory) break (voltooid maar geen LLVM)
-    - (Mandatory) continue (voltooid maar geen LLVM)
+    - (Mandatory) break (voltooid)
+    - (Mandatory) continue (voltooid)
     - (Optional) switch, case and default (niet voltooid)
-- (Mandatory) Scopes (niet voltooid)
+- (Mandatory) Scopes (voltooid)
 
 geïmplementeerd van opdracht 5:
 
 - (Mandatory) reserved words
     - return (voltooid)
-    - void (niet voltooid)
-- (Mandatory) Scopes (voltooid maar testen)
-- (Mandatory) Local and global variables (niet voltooid)
-- (Mandatory) Functions (nog niet voltooid)
+    - void (voltooid)
+- (Mandatory) Scopes (voltooid)
+- (Mandatory) Local and global variables (voltooid)
+- (Mandatory) Functions (voltooid)
 
-geïmplementeerd van opdracht 6 (niet voltooid)
+geïmplementeerd van opdracht 6:
+- (Mandatory) Arrays (voltooid)
+    - (Optional) multi-dimensional arrays (niet voltooid)
+    - (Optional) dynamic arrays (niet voltooid)
+- (Mandatory) Import (voltooid)
 
 
 ### 4) Benchmarks
@@ -80,31 +84,31 @@ geïmplementeerd van opdracht 6 (niet voltooid)
 - comparisons1 (werkt, dankzij folding)
 - comparisons2 (werkt, dankzij folding)
 - dereferenceAssignment (werkt)
-- fibonacciRecursive (crasht)
-- floatToIntConversion (crasht)
+- fibonacciRecursive (werkt, zonder i++ in while)
+- floatToIntConversion (werkt)
 - for (werkt)
-- forwardDeclaration (crasht)
+- forwardDeclaration (werkt)
 - if (werkt, zonder &&)
 - ifElse (werkt, zonder &&)
-- intToFloatConversion (crasht)
+- intToFloatConversion (werkt)
 - modulo (werkt)
-- pointerArgument (crasht)
-- prime (crasht)
-- printf1 (crasht)
-- printf2 (crasht)
-- printf3 (crasht)
+- pointerArgument (werkt)
+- prime (werkt, zonder multiple declaration)
+- printf1 (werkt)
+- printf2 (werkt)
+- printf3 (werkt)
 - scanf1 (werkt?)
 - scanf2 (crasht)
-- scoping (crasht)
+- scoping (werkt)
 - unaryOperations (crasht)
-- variables1 (gefikst nog run testen)
-- variables2 (gefikst nog run testen)
-- variables3 (crasht)
-- variables4 (crasht)
-- variables5 (crasht)
-- variables6 (crasht)
-- variables7 (crasht)
-- variables8 (crasht)
+- variables1 (werkt)
+- variables2 (werkt)
+- variables3 (werkt)
+- variables4 (werkt)
+- variables5 (werkt)
+- variables6 (werkt)
+- variables7 (werkt)
+- variables8 (werkt)
 - while (werkt)
 
 #TODO:

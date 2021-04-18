@@ -1,1 +1,1 @@
-scanf2 failed
+unaryOperations succeeded

@@ -340,28 +340,22 @@ class LLVMVisitor(ASTVisitor):
         function = self.getSymbol(node.children[0])
 
         children_LLVM = []
-        if function.name == "printf":
-            if "declare i32 @printf(i8*, ...)" not in self.after_LLVM:
-                self.after_LLVM.append("declare i32 @printf(i8*, ...)")
+        if function.name == "printf" or function.name == "scanf":
+            if f"declare i32 @{function.name}(i8*, ...)" not in self.after_LLVM:
+                self.after_LLVM.append(f"declare i32 @{function.name}(i8*, ...)")
             for child in node.children[1].children:
                 child = self.getSymbol(child)
-                if "string" not in child.type_semantics:
+                if "string" not in child.type_semantics and not child.type.endswith("i8]"):
                     self.loadVariable(child)
-                if child.type == "float":
+                if child.type.endswith("i8]"):
+                    addr = self.counter.incr()
+                    self.LLVM.append(f"  %{addr} = getelementptr inbounds {child.type}, {child.type}* {child.getValue(original=True)}, i64 0, i64 0")
+                    children_LLVM.append(f"i8* %{addr}")
+                elif child.type == "float":
                     self.convertType(child, IdentifierNode(None, None, "double"))
                     children_LLVM.append("double " + child.getValue())
                 else:
                     children_LLVM.append(child.type + " " + child.getValue())
-        #TODO: NOG EEN FOUT
-        elif function.name == "scanf":
-            if "declare i32 @scanf(i8*, ...)" not in self.after_LLVM:
-                self.after_LLVM.append("declare i32 @scanf(i8*, ...)")
-            for child in node.children[1].children:
-                child = self.getSymbol(child)
-                if "string" not in child.type_semantics:
-                    self.loadVariable(child)
-                children_LLVM.append(child.type + " " + child.getValue())
-
         else:
             for child, arg_child in zip(node.children[1].children, function.children[0].children):
                 child = self.getSymbol(child)

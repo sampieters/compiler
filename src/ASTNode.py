@@ -59,8 +59,9 @@ class ASTNode:
 
 
 class ProgNode(ASTNode):
-    def __init__(self, node_id=0):
+    def __init__(self, include, node_id=0):
         super().__init__(node_id)
+        self.include = include
 
     def __str__(self):
         return 'prog'

@@ -38,7 +38,7 @@ class SemanticalErrorVisitor(ASTVisitor):
         return arg_list
 
     def enterProg(self, node):
-        if node.symbol.startswith("#include <stdio.h>"):
+        if node.include:
             self.stdio_included = True
         main_found = False
         for child in node.children:

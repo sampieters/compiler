@@ -10,7 +10,7 @@ class OptimisationVisitor(ASTVisitor):
             self.exitUnaryOp(node)
 
     def exitUnaryOp(self, node):
-        if isinstance(node.children[0], LiteralNode) and node.operation not in ["[]", "x++", "++x", "x--", "--x"]:
+        if isinstance(node.children[0], LiteralNode) and node.operation not in ["[]", "x++", "++x", "x--", "--x", "*", "&"]:
             node.fold(node.children[0].type)     
 
     def exitUnaryOpBoolean(self, node):

@@ -93,7 +93,7 @@ class SemanticalErrorVisitor(ASTVisitor):
     def exitUnaryOperation(self, node):
         if isinstance(node.parent, ScopeNode) or isinstance(node.parent, ProgNode):
             self.handleWarning(node, "Expression result unused")
-        if isinstance(node.children[0], LiteralNode):
+        if isinstance(node.children[0], LiteralNode) and node.operation in ["++x", "x++", "--x", "x--"]:
             self.handleError(node, "Expression is not assignable")
         if node.operation in BOOLEAN_OPS:
             node.type = "i1"

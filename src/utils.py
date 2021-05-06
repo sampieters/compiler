@@ -1,3 +1,10 @@
+# MIPS
+MIPS_ALIGNMENT = {"i32": 4, "i1": 4, "i64": 8}
+
+
+
+
+# LLVM
 CONVERSION_HIERARCHY = {"i1": 0, "i8": 1, "i16": 2, "i32": 3, "i64": 4, "float": 5, "double": 6, "x86_fp80": 7}
 ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
 
@@ -166,6 +173,10 @@ class Counter:
 
     def curr(self):
         return self.counter
+
+    def incr_amount(self, amount):
+        self.counter += amount
+        return self.counter - amount
 
     def __str__(self):
         return str(self.counter)

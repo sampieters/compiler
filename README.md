@@ -14,10 +14,30 @@ Met PATH het pad van waar de grammar zich bevind t.o.v. van waar de terminal is 
 ### 2) Input geven
 Om input mee te geven aan de grammar moet de main.py uitgevoerd worden.
 
-<u>Python3 main.py</u>
+<u>Python3 main.py [filenames]</u>
 
-Nu kan een input worden ingevoerd. Als de main.py is uitgevoerd zal er ook een .dot formaat gegeneerd
-worden van de AST van de gegeven input. 
+Als filenames worden meegegeven, zullen deze worden uitgevoerd (de files staan in src/tests/benchmarks/CorrectCode/ en de parameter hoeft geen .c extensie te bevatten)
+
+Als geen files worden meegegeven kan een input worden ingevoerd na het uitvoeren van main.
+
+Na uitvoer van main zal de LLVM worden uitgeprint, en de AST en geoptimaliseerde AST in dot formaat worden gegenereerd op AST.dot en AST_OPT.dot respectievelijk.
+
+Bovendien kan ook test.py worden uitgevoerd als volgt:
+
+<u>Python3 test.py</u>
+
+Hierna kan men 1 invoeren, om automatisch voor alle .c files in src/tests/benchmarks/CorrectCode/ LLVM te genereren, deze uit te voeren en de output te vergelijken met de gewenste output die door de juist LLVM wordt gegenereerd.
+
+Ook kan men dit op individuele bestanden uitvoeren door 2 in te voeren, waarna men de filenames invoert.
+
+Elke test die dezelfde uitvoer heeft door de LLVM van onze compiler en de echte LLVM te runnen en vergelijken, zal in results.txt komen te staan als filename succeeded.
+
+Alle tests die compileren maar een andere uitvoer geven zullen in results.txt komen te staan als filename failed.
+
+Alle tests die niet compileren vanwege een crash of een semantical error, zal in results.txt komen te staan als filename crashed.
+
+Voor meer details bij een crash, zoals de semantical error message moet je main.py op de file uitvoeren.
+
 
 ### 3) geïmplementeerd
 

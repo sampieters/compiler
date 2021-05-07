@@ -1,5 +1,5 @@
 # MIPS
-MIPS_ALIGNMENT = {"i32": 4, "i1": 4, "i64": 8}
+
 
 
 

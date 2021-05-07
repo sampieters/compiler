@@ -6,8 +6,8 @@ from SymbolTable import *
 
 class MIPSVisitor(ASTVisitor):
     def __init__(self):
-        self.before_MIPS = []
-        self.MIPS = []
+        self.before_MIPS = [".data"]
+        self.MIPS = [".text"]
         self.after_MIPS = []
         self.counter = Counter()
         self.spacing = '        '
@@ -16,7 +16,7 @@ class MIPSVisitor(ASTVisitor):
         # Every time a  variable is used it has to be loaded in
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
-            if node.type == "int":
+            if node.type in INTEGER_TYPES:
                 self.MIPS.append(self.spacing + "li      $2," + str(node.value))
             elif node.type == "float":
                 self.MIPS.append(self.spacing + "l.s     $2," + "LITERALNAME")
@@ -27,9 +27,8 @@ class MIPSVisitor(ASTVisitor):
     def enterLiteral(self, node):
         # if type is float or double, then the literals are saved in the .data segment
         if node.type in ["float", "double"]:
-            if "data:" not in self.before_MIPS:
-                self.before_MIPS.append("data:")
-            self.before_MIPS.append(node.type + ": ." + node.type + " " + node.value)
+            self.before_MIPS.append(node.type + "COUNTER" + ": ." + node.type + " " + node.value)
+        # tODO: fiks counter en slaag naam ergens op (in dict)
 
 
     def enterFunctionDefinition(self, node):
@@ -37,6 +36,7 @@ class MIPSVisitor(ASTVisitor):
         self.MIPS.append("")
         function = node.children[0].children[0]
         self.MIPS.append(function.name + ':')
+        #TODO: TBA moet nog gealloceerde plaats zijn
         self.MIPS.append(self.spacing + "daddiu  $sp,$sp, -TBA")
         self.MIPS.append(self.spacing + "sd      $fp,TBA($sp)")
         self.MIPS.append(self.spacing + "move    $fp,$sp")
@@ -53,25 +53,23 @@ class MIPSVisitor(ASTVisitor):
 
     def exitReturn(self, node):
         # TODO: Return wordt automatisch aangemaakt wanneer er geen return is, mag opzich wel denk ik zou geen probleem moeten vormen in MIPS
+        # TODO: niet altijd nop enkel bij void
         self.MIPS.append(self.spacing + "nop")
 
     def exitDefinition(self, node):
-        # When there is a definition, definitly do a store word
+        # When there is a definition, do a store word
         self.loadVariable(node.children[1])
-        #TODO: Incr amount moet de grootte van het type zijn nu is dit 4 (wat de grootte is van een integer)
-        node.children[0].children[0].temp_address = self.counter.incr_amount(MIPS_ALIGNMENT[node.children[0].children[0].type])
-        self.MIPS.append(self.spacing + "sw      $2," + str(node.children[0].children[0].temp_address) + "($fp)")
+        align = node.children[0].children[0].alignment()
+        node.children[0].children[0].temp_address = self.counter.incr_amount(align)
+        self.MIPS.append(self.spacing + "sw      $2," + node.children[0].children[0].temp_address + "($fp)")
 
     def exitAssignment(self, node):
         # When there is an assignement, check if it's already stored. If not then store
         self.loadVariable(node.children[1])
         # if the identifier is not stored somewhere then store in a new address else store in previous address
-        # TODO: Ik denk dat de if niet moet want er is zwz een store van een definition
-        if node.children[0].temp_address is None:
-            # TODO: ALs i gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
-            node.children[0].temp_address = self.counter.incr_amount(MIPS_ALIGNMENT[node.children[0].type])
-            self.MIPS.append(self.spacing + "sw      $2," + str(node.children[0].temp_address) + "($fp)")
-        # TODO: nog een else??? ik denk van niet
+        # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
+        self.MIPS.append(self.spacing + "sw      $2," + str(node.children[0].temp_address) + "($fp)")
+
 # TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
 #self.MIPS.append(self.spacing + "move    $2,$0")
 

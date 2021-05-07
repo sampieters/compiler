@@ -1,7 +1,7 @@
-from ASTVisitor import *
-from ASTNode import *
-from utils import *
-from SymbolTable import *
+from .ASTVisitor import *
+from .ASTNode import *
+from .utils import *
+from .SymbolTable import *
 from collections import Counter as Ctr
 
 
@@ -15,7 +15,7 @@ class MIPSVisitor(ASTVisitor):
         self.symbol_table = SymbolTable()
         self.literal_table = dict()
 
-    def addInstruction(instr="", params="", spacing=True, before=False, after=False):
+    def addInstruction(self, instr="", params="", spacing=True, before=False, after=False):
         if before:
             self.before_MIPS.append(instr + ": " + params)
         elif after:
@@ -25,7 +25,7 @@ class MIPSVisitor(ASTVisitor):
 
     def getSymbol(self, node):
         if (isinstance(node, IdentifierNode) or isinstance(node, FunctionNode)) and not node.name in [None, "printf", "scanf"]:
-            return self.table.get_symbol(node.name)
+            return self.symbol_table.get_symbol(node.name)
         else:
             return node
 
@@ -47,9 +47,9 @@ class MIPSVisitor(ASTVisitor):
 
     def storeVariable(self, node):
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
-        self.MIPS.append(self.spacing + "sw      $2," + str(node.temp_address) + "($fp)")
+        self.addInstruction("sw", "$2," + str(node.temp_address) + "($fp)")
 
-    def binaryOpToLLVM(self, node):
+    def binaryOpToMIPS(self, node):
         child1 = self.getSymbol(node.children[0])
         child2 = self.getSymbol(node.children[1])
 
@@ -112,13 +112,10 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction(name, value, before=True)
             node.value = name
 
-<<<<<<< HEAD
     def exitFunctionDeclaration(self, node):
         function = node.children[0]
-        self.table.add_symbol(function)
+        self.symbol_table.add_symbol(function)
 
-=======
->>>>>>> c9d0d0c3fa01ff5876f293ec98579cb19fae0c42
     def enterFunctionDefinition(self, node):
         # Define a function in MIPS starting with the name of the function and allocating eenough space on the stack
         self.addInstruction("")
@@ -151,30 +148,24 @@ class MIPSVisitor(ASTVisitor):
     def exitDeclaration(self, node):
         identifier = node.children[0]
         if not isinstance(node.parent.parent, ArgListNode):
-            self.table.add_symbol(identifier)
+            self.symbol_table.add_symbol(identifier)
 
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         self.loadVariable(node.children[1])
-<<<<<<< HEAD
         identifier = node.children[0].children[0]
         align = identifier.alignment()
         identifier.temp_address = self.counter.incr_amount(align)
         self.addInstruction("sw", f"$2,{identifier.temp_address}($fp)")
-=======
         self.storeVariable(node.children[0].children[0])
->>>>>>> c9d0d0c3fa01ff5876f293ec98579cb19fae0c42
 
     def exitAssignment(self, node):
         # When there is an assignement, check if it's already stored. If not then store
         self.loadVariable(node.children[1])
         # if the identifier is not stored somewhere then store in a new address else store in previous address
-<<<<<<< HEAD
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
         self.addInstruction("sw", f"$2,{str(node.children[0].temp_address)}($fp)")
-=======
         self.storeVariable(node.children[0])
->>>>>>> c9d0d0c3fa01ff5876f293ec98579cb19fae0c42
 
 # TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
 #self.MIPS.append(self.spacing + "move    $2,$0")

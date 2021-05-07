@@ -23,13 +23,18 @@ class MIPSVisitor(ASTVisitor):
             elif node.type == "double":
                 self.MIPS.append(self.spacing + "l.d     $2," + "LITERALNAME")
 
+        align = node.children[0].children[0].alignment()
+        node.children[0].children[0].temp_address = self.counter.incr_amount(align)
+
+    def storeVariable(self, node):
+        # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
+        self.MIPS.append(self.spacing + "sw      $2," + str(node.temp_address) + "($fp)")
 
     def enterLiteral(self, node):
         # if type is float or double, then the literals are saved in the .data segment
         if node.type in ["float", "double"]:
             self.before_MIPS.append(node.type + "COUNTER" + ": ." + node.type + " " + node.value)
         # tODO: fiks counter en slaag naam ergens op (in dict)
-
 
     def enterFunctionDefinition(self, node):
         # Define a function in MIPS starting with the name of the function and allocating eenough space on the stack
@@ -59,16 +64,13 @@ class MIPSVisitor(ASTVisitor):
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         self.loadVariable(node.children[1])
-        align = node.children[0].children[0].alignment()
-        node.children[0].children[0].temp_address = self.counter.incr_amount(align)
-        self.MIPS.append(self.spacing + "sw      $2," + node.children[0].children[0].temp_address + "($fp)")
+        self.storeVariable(node.children[0].children[0])
 
     def exitAssignment(self, node):
         # When there is an assignement, check if it's already stored. If not then store
         self.loadVariable(node.children[1])
         # if the identifier is not stored somewhere then store in a new address else store in previous address
-        # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
-        self.MIPS.append(self.spacing + "sw      $2," + str(node.children[0].temp_address) + "($fp)")
+        self.storeVariable(node.children[0])
 
 # TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
 #self.MIPS.append(self.spacing + "move    $2,$0")

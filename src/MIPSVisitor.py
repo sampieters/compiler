@@ -42,6 +42,66 @@ class MIPSVisitor(ASTVisitor):
             params = "$2," + str(node.value)
             self.addInstruction(instr, params)
 
+        align = node.children[0].children[0].alignment()
+        node.children[0].children[0].temp_address = self.counter.incr_amount(align)
+
+    def storeVariable(self, node):
+        # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
+        self.MIPS.append(self.spacing + "sw      $2," + str(node.temp_address) + "($fp)")
+
+    def binaryOpToLLVM(self, node):
+        child1 = self.getSymbol(node.children[0])
+        child2 = self.getSymbol(node.children[1])
+
+        the_type = getBinaryType(child1.type, child2.type)
+
+        ret_val = ""
+        try:
+            operation = BINARY_OPS_MIPS[node.operation]
+        except KeyError:
+            raise Exception(f"Invalid binary operation '{node.operation}'")
+
+        # STEP 1: The actual operation
+        ret_val += operation[0]
+
+        # STEP 2:
+
+        extra = ""
+        # STEP 3: Check if signed or unsigned
+        if operation[0] != "div" and operation[0] != "rem":
+            if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
+                if the_type.startswith("i"):
+                    if not operation[0] == "cmp":
+                        extra += "nuw"
+                    elif operation[1] != "eq" and operation[1] != "ne":
+                        extra += "u"
+                else:
+                    if operation[0] == "cmp":
+                        if operation[1] != "ne":
+                            extra += "o"
+                        else:
+                            extra += "u"
+            else:
+                if the_type.startswith("i"):
+                    if not operation[0] == "cmp":
+                        extra += "nsw"
+                    elif operation[1] != "eq" and operation[1] != "ne":
+                        extra += "s"
+                else:
+                    if operation[0] == "cmp":
+                        if operation[1] != "ne":
+                            extra += "o"
+                        else:
+                            extra += "u"
+        # If the operation exist of multiple parts (icmp ne)
+        if len(operation) == 2:
+            extra += operation[1]
+
+        if extra:
+            ret_val += " " + extra
+
+        return ret_val
+
 
     def enterLiteral(self, node):
         # if type is float or double, then the literals are saved in the .data segment
@@ -52,10 +112,13 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction(name, value, before=True)
             node.value = name
 
+<<<<<<< HEAD
     def exitFunctionDeclaration(self, node):
         function = node.children[0]
         self.table.add_symbol(function)
 
+=======
+>>>>>>> c9d0d0c3fa01ff5876f293ec98579cb19fae0c42
     def enterFunctionDefinition(self, node):
         # Define a function in MIPS starting with the name of the function and allocating eenough space on the stack
         self.addInstruction("")
@@ -93,17 +156,25 @@ class MIPSVisitor(ASTVisitor):
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         self.loadVariable(node.children[1])
+<<<<<<< HEAD
         identifier = node.children[0].children[0]
         align = identifier.alignment()
         identifier.temp_address = self.counter.incr_amount(align)
         self.addInstruction("sw", f"$2,{identifier.temp_address}($fp)")
+=======
+        self.storeVariable(node.children[0].children[0])
+>>>>>>> c9d0d0c3fa01ff5876f293ec98579cb19fae0c42
 
     def exitAssignment(self, node):
         # When there is an assignement, check if it's already stored. If not then store
         self.loadVariable(node.children[1])
         # if the identifier is not stored somewhere then store in a new address else store in previous address
+<<<<<<< HEAD
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
         self.addInstruction("sw", f"$2,{str(node.children[0].temp_address)}($fp)")
+=======
+        self.storeVariable(node.children[0])
+>>>>>>> c9d0d0c3fa01ff5876f293ec98579cb19fae0c42
 
 # TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
 #self.MIPS.append(self.spacing + "move    $2,$0")

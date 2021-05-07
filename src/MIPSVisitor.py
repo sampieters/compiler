@@ -12,6 +12,7 @@ class MIPSVisitor(ASTVisitor):
         self.after_MIPS = []
         self.counter = Counter()
         self.data_counter = Ctr()
+        self.branch_counter = Counter()
         self.symbol_table = SymbolTable()
         self.literal_table = dict()
 
@@ -31,6 +32,8 @@ class MIPSVisitor(ASTVisitor):
 
     def loadVariable(self, node):
         # Every time a  variable is used it has to be loaded in
+        instr = ""
+        params = ""
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
             if node.type in INTEGER_TYPES:
@@ -40,10 +43,12 @@ class MIPSVisitor(ASTVisitor):
             elif node.type == "double":
                 instr = "l.d"
             params = "$2," + str(node.value)
-            self.addInstruction(instr, params)
 
-        align = node.children[0].children[0].alignment()
-        node.children[0].children[0].temp_address = self.counter.incr_amount(align)
+        elif isinstance(node, IdentifierNode):
+            instr = "lw"
+            params = "$2," + str(node.temp_address) + "($fp)"
+        self.addInstruction(instr, params)
+
 
     def storeVariable(self, node):
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
@@ -96,20 +101,27 @@ class MIPSVisitor(ASTVisitor):
         child2 = self.getSymbol(node.children[1])
         # For each child that is a variable, load the variable into a new temporary address
         for child in [child1, child2]:
-            self.loadVariable(child)
+            if isinstance(child, IdentifierNode):
+                self.loadVariable(child)
         # Store the result of the binary operation in a new address
         node.temp_address = "$2"
         # Convert the children to MIPS, depending on their node types
         children_MIPS = []
         the_type = getBinaryType(child1.type, child2.type)
+        node.type = the_type
         for child in [child1, child2]:
             # Convert the child to the binary operation type, so that both children have the same type
             # TODO: We gaan waarchijnlijk ook nog een converttype moeten maken voor MIPS
             #self.convertType(child, IdentifierNode(None, None, the_type))
+            # TODO: nog een getValue maken voor MIPS
             children_MIPS.append(child.getValue())
         # Construct the LLVM instruction
-        instruction = f"{node.getValue()} = {self.binaryOpToMIPS(node)} {the_type} {', '.join(children_MIPS)}"
-        self.LLVM.append("  " + instruction)
+        # TODO: zijn register om op te slagen is hardcoded op $2
+        param = f"$2, {','.join(children_MIPS)}"
+        self.addInstruction(self.binaryOpToMIPS(node), param)
+
+    def exitUnaryOperation(self, node):
+        pass
 
     def exitFunctionDeclaration(self, node):
         function = node.children[0]
@@ -125,19 +137,14 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction("sd",       "$fp,TBA($sp)")
         self.addInstruction("move",     "$fp,$sp")
 
-    def enterScope(self, node):
-        self.symbol_table.enter_scope()
-
-    def exitScope(self, node):
-        if isinstance(node.parent, FunctionDefinitionNode):
-            # TODO: If void, then do here a 'nop'.
-            # allocate space on the stack for everything inside the function scope
-            self.addInstruction("move",     "$sp,$fp")
-            self.addInstruction("ld",       "$fp,TBA($sp)")
-            self.addInstruction("daddiu",   "$sp,$sp,TBA")
-            self.addInstruction("j",        "$31")
-            self.addInstruction("nop")
-        self.symbol_table.exit_scope()
+    def exitFunctionDefinition(self, node):
+        # TODO: If void, then do here a 'nop'.
+        # allocate space on the stack for everything inside the function scope
+        self.addInstruction("move",     "$sp,$fp")
+        self.addInstruction("ld",       "$fp,TBA($sp)")
+        self.addInstruction("daddiu",   "$sp,$sp,TBA")
+        self.addInstruction("j",        "$31")
+        self.addInstruction("nop")
 
     def exitReturn(self, node):
         # TODO: Return wordt automatisch aangemaakt wanneer er geen return is, mag opzich wel denk ik zou geen probleem moeten vormen in MIPS
@@ -148,14 +155,16 @@ class MIPSVisitor(ASTVisitor):
         identifier = node.children[0]
         if not isinstance(node.parent.parent, ArgListNode):
             self.symbol_table.add_symbol(identifier)
+        if "global" in identifier.type_semantics:
+            #TODO: NOG DOEN
+            self.addInstruction(identifier.name, ".TYPE VALUE" )
 
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         self.loadVariable(node.children[1])
         identifier = node.children[0].children[0]
         align = identifier.alignment()
-        identifier.temp_address = self.counter.incr_amount(align)
-        self.addInstruction("sw", f"$2,{identifier.temp_address}($fp)")
+        identifier.temp_address = self.counter.incr_amount(int(align))
         self.storeVariable(node.children[0].children[0])
 
     def exitAssignment(self, node):
@@ -163,8 +172,43 @@ class MIPSVisitor(ASTVisitor):
         self.loadVariable(node.children[1])
         # if the identifier is not stored somewhere then store in a new address else store in previous address
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
-        self.addInstruction("sw", f"$2,{str(node.children[0].temp_address)}($fp)")
         self.storeVariable(node.children[0])
+
+    def exitFunctionCall(self, node):
+        # Get the function with the right addresses from the table
+        function = self.getSymbol(node.children[0])
+
+        children_LLVM = []
+        # Special cases 'printf' and 'scanf'
+        if function.name == "printf":
+            self.addInstruction(f"li $v0, {PRINT_CALLCODE[function.type]}")
+            self.addInstruction("syscall")
+
+        if function.name == "printf" or function.name == "scanf":
+            pass
+
+    def enterWhile(self, node):
+        node.start_address = str(self.branch_counter)
+        self.addInstruction("b", "$L" + self.branch_counter.incr())
+        self.addInstruction("nop")
+        self.addInstruction()
+        self.addInstruction(f"$L {node.start_address}")
+
+    def enterScope(self, node):
+        self.symbol_table.enter_scope()
+        if isinstance(node.parent, WhileNode):
+            # TODO: de branch id hier staat moet brnachen naar de volgende maar in de condtion gebeurt er zwz een branch die dan niet zal moeten
+            # TODO: Hier nog een binary op (hangt af van welke condition)
+            self.addInstruction("nop")
+            self.addInstruction()
+            self.addInstruction("$L" + self.branch_counter.incr())
+
+    def exitScope(self, node):
+        self.symbol_table.exit_scope()
+        self.addInstruction()
+
+    def exitWhile(self, node):
+        self.addInstruction(f"$L {node.start_address}")
 
 # TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
 #self.MIPS.append(self.spacing + "move    $2,$0")

@@ -1,16 +1,18 @@
 # MIPS
+PRINT_CALLCODE = {"i32": 1, "float": 2, "string": 4, "char": 11}
+
 BINARY_OPS_MIPS = {
-            "+": ["add"],
-            "-": ["sub"],
-            "*": ["mul"],
-            "/": ["div"],
-            "%": ["NIET ZOMAAR"],
-            "!=": ["bne"],
-            "==": ["beq"],
-            "<=": ["ble"],
-            ">=": ["bge"],
-            ">": ["bgt"],
-            "<": ["blt"],
+            "+": "add",
+            "-": "sub",
+            "*": "mul",
+            "/": "div",
+            "%": "NIET ZOMAAR",
+            "!=": "bne",
+            "==": "beq",
+            "<=": "ble",
+            ">=": "bge",
+            ">": "bgt",
+            "<": "blt",
         }
 
 

@@ -109,6 +109,9 @@ class LiteralNode(ASTNode):
         else:   
             return str(self.value)
 
+    def alignment(self):
+        return str(int(getAlignment(self)))
+
 
 class IdentifierNode(ASTNode):
     def __init__(self, name, node_id, _type=None):
@@ -252,6 +255,9 @@ class BinaryOperationNode(ASTNode):
 
     def __str__(self):
         return f"{self.operation} ({self.type})"
+
+    def alignment(self):
+        return str(int(getAlignment(self)))
 
     def accept(self, visitor:ASTVisitor):
         visitor.enterBinaryOperation(self)

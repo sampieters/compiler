@@ -6,14 +6,31 @@ from SymbolTable import *
 
 class MIPSVisitor(ASTVisitor):
     def __init__(self):
+        self.before_MIPS = []
         self.MIPS = []
+        self.after_MIPS = []
         self.counter = Counter()
         self.spacing = '        '
 
     def loadVariable(self, node):
         # Every time a  variable is used it has to be loaded in
         if isinstance(node, LiteralNode):
-            self.MIPS.append(self.spacing + "li      $2," + str(node.value))
+            # Variables with type float or double are loaded differently than int type (loads from the .data segment)
+            if node.type == "int":
+                self.MIPS.append(self.spacing + "li      $2," + str(node.value))
+            elif node.type == "float":
+                self.MIPS.append(self.spacing + "l.s     $2," + "LITERALNAME")
+            elif node.type == "double":
+                self.MIPS.append(self.spacing + "l.d     $2," + "LITERALNAME")
+
+
+    def enterLiteral(self, node):
+        # if type is float or double, then the literals are saved in the .data segment
+        if node.type in ["float", "double"]:
+            if "data:" not in self.before_MIPS:
+                self.before_MIPS.append("data:")
+            self.before_MIPS.append(node.type + ": ." + node.type + " " + node.value)
+
 
     def enterFunctionDefinition(self, node):
         # Define a function in MIPS starting with the name of the function and allocating eenough space on the stack
@@ -55,8 +72,8 @@ class MIPSVisitor(ASTVisitor):
             node.children[0].temp_address = self.counter.incr_amount(MIPS_ALIGNMENT[node.children[0].type])
             self.MIPS.append(self.spacing + "sw      $2," + str(node.children[0].temp_address) + "($fp)")
         # TODO: nog een else??? ik denk van niet
-        # TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
-        #self.MIPS.append(self.spacing + "move    $2,$0")
+# TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
+#self.MIPS.append(self.spacing + "move    $2,$0")
 
 
 

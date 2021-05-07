@@ -1,7 +1,7 @@
-from .ASTVisitor import *
-from .ASTNode import *
-from .utils import *
-from .SymbolTable import *
+from ASTVisitor import *
+from ASTNode import *
+from utils import *
+from SymbolTable import *
 from collections import Counter as Ctr
 
 
@@ -62,46 +62,24 @@ class MIPSVisitor(ASTVisitor):
             raise Exception(f"Invalid binary operation '{node.operation}'")
 
         # STEP 1: The actual operation
-        ret_val += operation[0]
+        ret_val += operation
 
-        # STEP 2:
+        # STEP 2: check for float or double (less exceptions)
+        if the_type == "float":
+            ret_val += ".s"
 
-        extra = ""
-        # STEP 3: Check if signed or unsigned
-        if operation[0] != "div" and operation[0] != "rem":
+        elif the_type == "double":
+            ret_val += ".d"
+
+        else:
+            # STEP 3: if type is integer, check for immediate operation (this is for addi and subi)
+            if (isinstance(child1, LiteralNode) or isinstance(child2, LiteralNode)) and operation in ["add", "sub"]:
+                ret_val += "i"
+
+            # STEP 4: if type is integer, check if signed or unsigned
             if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
-                if the_type.startswith("i"):
-                    if not operation[0] == "cmp":
-                        extra += "nuw"
-                    elif operation[1] != "eq" and operation[1] != "ne":
-                        extra += "u"
-                else:
-                    if operation[0] == "cmp":
-                        if operation[1] != "ne":
-                            extra += "o"
-                        else:
-                            extra += "u"
-            else:
-                if the_type.startswith("i"):
-                    if not operation[0] == "cmp":
-                        extra += "nsw"
-                    elif operation[1] != "eq" and operation[1] != "ne":
-                        extra += "s"
-                else:
-                    if operation[0] == "cmp":
-                        if operation[1] != "ne":
-                            extra += "o"
-                        else:
-                            extra += "u"
-        # If the operation exist of multiple parts (icmp ne)
-        if len(operation) == 2:
-            extra += operation[1]
-
-        if extra:
-            ret_val += " " + extra
-
+                ret_val += "u"
         return ret_val
-
 
     def enterLiteral(self, node):
         # if type is float or double, then the literals are saved in the .data segment
@@ -111,6 +89,27 @@ class MIPSVisitor(ASTVisitor):
             value = f".{node.type} {node.value}"
             self.addInstruction(name, value, before=True)
             node.value = name
+
+    def exitBinaryOperation(self, node):
+        # Convert binary operation node to MIPS
+        child1 = self.getSymbol(node.children[0])
+        child2 = self.getSymbol(node.children[1])
+        # For each child that is a variable, load the variable into a new temporary address
+        for child in [child1, child2]:
+            self.loadVariable(child)
+        # Store the result of the binary operation in a new address
+        node.temp_address = "$2"
+        # Convert the children to MIPS, depending on their node types
+        children_MIPS = []
+        the_type = getBinaryType(child1.type, child2.type)
+        for child in [child1, child2]:
+            # Convert the child to the binary operation type, so that both children have the same type
+            # TODO: We gaan waarchijnlijk ook nog een converttype moeten maken voor MIPS
+            #self.convertType(child, IdentifierNode(None, None, the_type))
+            children_MIPS.append(child.getValue())
+        # Construct the LLVM instruction
+        instruction = f"{node.getValue()} = {self.binaryOpToMIPS(node)} {the_type} {', '.join(children_MIPS)}"
+        self.LLVM.append("  " + instruction)
 
     def exitFunctionDeclaration(self, node):
         function = node.children[0]

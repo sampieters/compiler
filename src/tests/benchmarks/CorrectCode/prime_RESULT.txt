@@ -1,5 +1,5 @@
 Enter the number of prime numbers required
-First 9 prime numbers are :
+First 8 prime numbers are :
 2
 3
 5
@@ -8,4 +8,3 @@ First 9 prime numbers are :
 13
 17
 19
-23

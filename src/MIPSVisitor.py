@@ -30,6 +30,60 @@ class MIPSVisitor(ASTVisitor):
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
         self.MIPS.append(self.spacing + "sw      $2," + str(node.temp_address) + "($fp)")
 
+    def binaryOpToLLVM(self, node):
+        child1 = self.getSymbol(node.children[0])
+        child2 = self.getSymbol(node.children[1])
+
+        the_type = getBinaryType(child1.type, child2.type)
+
+        ret_val = ""
+        try:
+            operation = BINARY_OPS_MIPS[node.operation]
+        except KeyError:
+            raise Exception(f"Invalid binary operation '{node.operation}'")
+
+        # STEP 1: The actual operation
+        ret_val += operation[0]
+
+        # STEP 2:
+
+        extra = ""
+        # STEP 3: Check if signed or unsigned
+        if operation[0] != "div" and operation[0] != "rem":
+            if "unsigned" in child1.type_semantics or "unsigned" in child2.type_semantics:
+                if the_type.startswith("i"):
+                    if not operation[0] == "cmp":
+                        extra += "nuw"
+                    elif operation[1] != "eq" and operation[1] != "ne":
+                        extra += "u"
+                else:
+                    if operation[0] == "cmp":
+                        if operation[1] != "ne":
+                            extra += "o"
+                        else:
+                            extra += "u"
+            else:
+                if the_type.startswith("i"):
+                    if not operation[0] == "cmp":
+                        extra += "nsw"
+                    elif operation[1] != "eq" and operation[1] != "ne":
+                        extra += "s"
+                else:
+                    if operation[0] == "cmp":
+                        if operation[1] != "ne":
+                            extra += "o"
+                        else:
+                            extra += "u"
+        # If the operation exist of multiple parts (icmp ne)
+        if len(operation) == 2:
+            extra += operation[1]
+
+        if extra:
+            ret_val += " " + extra
+
+        return ret_val
+
+
     def enterLiteral(self, node):
         # if type is float or double, then the literals are saved in the .data segment
         if node.type in ["float", "double"]:

@@ -36,6 +36,12 @@ class MIPSVisitor(ASTVisitor):
         params = ""
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
+            if node.type == "i8":
+                #TODO: li want literals worden geladen?
+                instr = "lb"
+            elif node.type == "i8*":
+                # TODO: li want literals worden geladen?
+                instr = "la"
             if node.type in INTEGER_TYPES:
                 instr = "li"
             elif node.type == "float":
@@ -174,18 +180,66 @@ class MIPSVisitor(ASTVisitor):
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
         self.storeVariable(node.children[0])
 
+    def type_fprint(self, function_type):
+        #TODO: waar REGISTER staat moet het register/naam komen van waar de variabele is
+        opcode = None
+        if function_type == "i8*":
+            self.addInstruction("la", "$a0, REGISTER")
+            opcode = 4
+        elif function_type == "i8":
+            self.addInstruction("lb", "$a0, REGISTER")
+            opcode = 11
+        elif function_type.startswith("i"):
+            self.addInstruction("lw", "$a0, REGISTER")
+            opcode = 1
+        elif function_type == "float":
+            self.addInstruction("l.s", "$f12, REGISTER")
+            opcode = 2
+        elif function_type == "double":
+            self.addInstruction("l.d", "$f12, REGISTER")
+            opcode = 3
+        self.addInstruction(f"li $v0, {opcode}")
+        # syscall does the actual print
+        self.addInstruction("syscall")
+
+    def type_scanf(self, function_type):
+        opcode = None
+        VorF = None
+        if function_type.startswith("i"):
+            opcode = 5
+            VorF = "v0"
+        elif function_type == "float":
+            opcode = 6
+            VorF = "f0"
+        #TODO: NOG STRING HIER HELEMAAL DOEN
+        #elif function_type == "string":
+        #    VorF = "v0"
+        #    opcode = 4
+        elif function_type == "char":
+            opcode = 12
+            VorF = "v0"
+        # syscall does the actual print
+        self.addInstruction("li", f"$v0, {opcode}")
+        self.addInstruction("syscall")
+        self.addInstruction("sw", f"${VorF}, LOCATION")
+
     def exitFunctionCall(self, node):
         # Get the function with the right addresses from the table
         function = self.getSymbol(node.children[0])
 
-        children_LLVM = []
         # Special cases 'printf' and 'scanf'
         if function.name == "printf":
-            self.addInstruction(f"li $v0, {PRINT_CALLCODE[function.type]}")
-            self.addInstruction("syscall")
-
-        if function.name == "printf" or function.name == "scanf":
-            pass
+            #TODO: (mss best in de type_fprint doen) het eerste is altijd een string, dus deze moet nog opgedeeld worden en in MIPS afgeprint worden (wordt voor nu geskipt)
+            # Do a print in MIPS for every variable mentioned in the string parameter
+            for child in function.parent.children[1].children:
+                if child == function.parent.children[1].children[0]:
+                    continue
+                else:
+                    # load the parameter according to the type
+                    self.type_fprint(child.type)
+        elif function.name == "scanf":
+            #TODO: kan deze meerdere parameters hebben?
+            self.type_scanf(function.children[1].type)
 
     def enterWhile(self, node):
         node.start_address = str(self.branch_counter)
@@ -209,17 +263,3 @@ class MIPSVisitor(ASTVisitor):
 
     def exitWhile(self, node):
         self.addInstruction(f"$L {node.start_address}")
-
-# TODO: laatste doet een move waarom? -> als 2 gebruikt wordt 0 worden voor andere functies???
-#self.MIPS.append(self.spacing + "move    $2,$0")
-
-
-
-
-
-
-
-
-
-
-

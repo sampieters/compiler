@@ -1,1 +1,1 @@
-incompatibleTypes1 succeeded
+../CorrectCode/fibonacciRecursive succeeded

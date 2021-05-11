@@ -30,6 +30,16 @@ class MIPSVisitor(ASTVisitor):
         else:
             return node
 
+    def getOpCode(self, node):
+        if "string" in node.type_semantics:
+            return 4
+        elif node.type == "i8":
+            return 11
+        elif node.type in DECIMAL_TYPES:
+            return 2
+        elif node.type in INTEGER_TYPES:
+            return 1
+
     def loadVariable(self, node):
         # Every time a  variable is used it has to be loaded in
         instr = ""

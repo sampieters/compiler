@@ -94,6 +94,7 @@ class LiteralNode(ASTNode):
         self.type_semantics = type_semantics
         self.type = _type
         self.str_length = None
+        self.temp_address = None
 
     def __str__(self):
         return f"{str(self.value)} ({self.type})"

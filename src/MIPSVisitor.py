@@ -15,6 +15,7 @@ class MIPSVisitor(ASTVisitor):
         self.branch_counter = Counter()
         self.symbol_table = SymbolTable()
         self.literal_table = dict()
+        self.zero = LiteralNode(0, "i8", -1)
 
     def addInstruction(self, instr="", params="", spacing=True, before=False, after=False):
         if before:
@@ -110,6 +111,10 @@ class MIPSVisitor(ASTVisitor):
             value = f".{node.type} {node.value}"
             self.addInstruction(name, value, before=True)
             node.value = name
+        elif "string" in node.type_semantics:
+            name = "string" + self.data_counter["string"]
+            self.addInstruction(f".asciiz {node.value}", before=True)
+            node.value = name
 
     def exitBinaryOperation(self, node):
         # Convert binary operation node to MIPS
@@ -133,11 +138,34 @@ class MIPSVisitor(ASTVisitor):
             children_MIPS.append(child.getValue())
         # Construct the LLVM instruction
         # TODO: zijn register om op te slagen is hardcoded op $2
-        param = f"$2, {','.join(children_MIPS)}"
+        param = f"$2,{','.join(children_MIPS)}"
         self.addInstruction(self.binaryOpToMIPS(node), param)
 
     def exitUnaryOperation(self, node):
-        pass
+        #  # Convert unary operation node to MIPS
+        #  child = self.getSymbol(node.children[0])
+        #  # If the child is a variable, load the variable into a new temporary address
+        #  if isinstance(child, IdentifierNode):
+        #      self.loadVariable(child)
+        #  # Store the result of the unary operation in a new address
+        #  node.temp_address = "$2"
+        #  # Convert the children to MIPS, depending on their node types
+        #  node.type = child.type
+        #  # Convert the child to the binary operation type, so that both children have the same type
+        #  # TODO: We gaan waarchijnlijk ook nog een converttype moeten maken voor MIPS
+        #  #self.convertType(child, IdentifierNode(None, None, child.type))
+        #  # Construct the LLVM instruction
+        #  # TODO: zijn register om op te slagen is hardcoded op $2
+        #  # TODO: nog een getValue maken voor MIPS
+        #  param = f"$2,{child.getValue()}"
+        if node.operation == "-":
+            self.zero.type == node.children[0].type
+            bin_op = BinaryOperationNode("-", -1)
+            bin_op.add_child(self.zero)
+            bin_op.add_child(node.children[0])
+            self.exitBinaryOperation(self, bin_op)
+        # TODO: not operatie uitzoeken, vooral verschil bij andere types
+        # TODO: pointer en array operations
 
     def exitFunctionDeclaration(self, node):
         function = node.children[0]

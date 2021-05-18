@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 # MIPS
->>>>>>> 277f56d046b369973b101282b1c40a77cd34d706
 
 BINARY_OPS_MIPS = {
             "+": "add",

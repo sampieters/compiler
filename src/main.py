@@ -42,15 +42,15 @@ if __name__ == '__main__':
 
 
     # Optimise AST
-    #visitor_opt = OptimisationVisitor()
-    #visitor_opt.visit(AST)
+    visitor_opt = OptimisationVisitor()
+    visitor_opt.visit(AST)
 
     # Create DOT file of optimised AST
-    #AST.to_dot("AST_OPT")
+    AST.to_dot("AST_OPT")
 
     # Check AST for semantical errors
-    #visitor_err = SemanticalErrorVisitor()
-    #visitor_err.visit(AST)
+    visitor_err = SemanticalErrorVisitor()
+    visitor_err.visit(AST)
 
     # Generate LLVM code from AST
     #visitor_llvm = LLVMVisitor()

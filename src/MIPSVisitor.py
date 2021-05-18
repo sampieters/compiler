@@ -245,7 +245,8 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction(name, value, before=True)
             node.value = name
         elif "string" in node.type_semantics:
-            name = "string" + self.data_counter["string"]
+            self.data_counter.update({"string": 1})
+            name = "string" + str(self.data_counter["string"])
             self.addInstruction(f".asciiz {node.value}", before=True)
             node.value = name
 

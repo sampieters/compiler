@@ -1,21 +1,22 @@
-# MIPS
+import re
 
+# MIPS
 BINARY_OPS_MIPS = {
             "+": "add",
             "-": "sub",
             "*": "mul",
             "/": "div",
             "%": "NIET ZOMAAR",
-            "!=": "bne",
-            "==": "beq",
-            "<=": "ble",
-            ">=": "bge",
-            ">": "bgt",
-            "<": "blt",
+            "!=": "ne",
+            "==": "eq",
+            "<=": "le",
+            ">=": "ge",
+            ">": "gt",
+            "<": "lt",
         }
 
-
-
+def split_string(string):
+    return re.split('%d|%i|%s', string)
 
 # LLVM
 CONVERSION_HIERARCHY = {"i1": 0, "i8": 1, "i16": 2, "i32": 3, "i64": 4, "float": 5, "double": 6, "x86_fp80": 7}

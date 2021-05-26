@@ -36,9 +36,26 @@ class Registers():
     # There are 64 registers
     # $0     : $zero      : Hard-wired to 0
     # $1     : $at        : Reserved for pseudo-instructions
-    # $2 - $3: $v0 - $v1 : Return values from functions
+    # $2 - $3: $v0 - $v1  : Return values from functions
     def __init__(self):
         self.registers = [False] * 64
+
+    def UseParam(self, double=False):
+        # if not a double than can be loaded in a0-a3
+        if not double:
+            for i in range(4, 7):
+                self.registers[i] = True
+            return str(i)
+        # Otherwise it has to be loaded in the parameter registers for floats
+        else:
+            # TODO: if it is a double or float the param needs to be passed in f12 (corresponds with $a0 for other type) or
+            # in f14 (corresponds to $a2)
+            pass
+
+
+    def FreeParam(self, register):
+        self.registers[register] = False
+
 
     def UseTemporary(self):
         # TODO: make an excpetion
@@ -147,7 +164,7 @@ class MIPSVisitor(ASTVisitor):
         params = ""
         # If it's needed to load as argument for a syscall, than load it in $a0 (or $a1) or for float and doubles in $f12
         if load_as_arg:
-            temp = "a0"
+            temp = self.registers.UseParam(node.type == "double")
         # Else load in temporary for int and f registers for float and double
         else:
             if node.type == "float" or node.type == "double":
@@ -369,6 +386,7 @@ class MIPSVisitor(ASTVisitor):
         if not isinstance(node.parent.parent, ArgListNode):
             self.symbol_table.add_symbol(identifier)
         if "global" in identifier.type_semantics:
+            print("YEET")
             # TODO: NOG DOEN
             self.addInstruction(identifier.name, ".TYPE VALUE")
 
@@ -379,6 +397,10 @@ class MIPSVisitor(ASTVisitor):
         # if "global" in identifier.type_semantics:
         #    self.addInstruction(identifier.name + ":", ".TYPE", False, True)
         #    pass
+        if "global" in identifier.type_semantics:
+            print("YEET")
+            # TODO: NOG DOEN
+            self.addInstruction(identifier.name, ".TYPE VALUE")
         if isinstance(node.children[1], BinaryOperationNode) or isinstance(node.children[1], UnaryOperationNode):
             align = identifier.alignment()
             identifier.original_address = self.counter.incr_amount(int(align))
@@ -445,6 +467,21 @@ class MIPSVisitor(ASTVisitor):
         # Get the function with the right addresses from the table
         function = self.getSymbol(node.children[0])
 
+        # load the function parameters in a0-a4 if there are any
+        for child in node.children[1].children:
+            print(child.value)
+            if isinstance(child, IdentifierNode):
+                child = self.getSymbol(child)
+                # load the to print variable in an argument register
+            self.loadVariable(child, True)
+
+        for i in range(4, 7):
+            self.registers.FreeParam(i)
+
+
+
+
+
         # Special cases 'printf' and 'scanf'
         if function.name == "printf":
             # TODO: (mss best in de type_fprint doen) het eerste is altijd een string, dus deze moet nog opgedeeld worden en in MIPS afgeprint worden (wordt voor nu geskipt)
@@ -481,6 +518,7 @@ class MIPSVisitor(ASTVisitor):
         self.symbol_table.enter_scope()
         if isinstance(node.parent, WhileNode):
             # TODO: Ik denk/hoop dat deze condiition alle gevallen oplost
+            # TODO: what if idetifier only like while(i) {}
             self.addInstruction("beq", "$" + node.parent.children[0].temp_address + ", $0, {LABEL}")
             self.loop_stack.append(len(self.MIPS) - 1)
             self.addInstruction("nop")

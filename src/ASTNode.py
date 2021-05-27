@@ -106,7 +106,7 @@ class LiteralNode(ASTNode):
 
     def getValue(self):
         if self.type == "i8*" and "string" in self.type_semantics:
-            return f"getelementptr inbounds ([{str(self.str_length)} x i8], [{str(self.str_length)} x i8]* {str(self.value)}, i64 0, i64 0)"
+            return f"getelementptr inbounds ([{str(self.str_length)} x i8], [{str(self.str_length)} x i8]* {str(self.temp_address)}, i64 0, i64 0)"
         else:   
             return str(self.value)
 

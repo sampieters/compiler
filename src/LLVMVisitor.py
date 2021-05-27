@@ -108,10 +108,9 @@ class LLVMVisitor(ASTVisitor):
     def enterLiteral(self, node):
         # string linteral is the only literal with @ and no address (special type in LLVM)
         if "string" in node.type_semantics:
-            string = node.value
-            node.value = "@.str." + self.str_counter.incr()
-            self.before_LLVM.append(node.value + " = private unnamed_addr constant [" +
-                                    str(node.str_length) + " x i8] c\"" + string + "\", align 1")
+            node.temp_address = "@.str." + self.str_counter.incr()
+            self.before_LLVM.append(node.temp_address + " = private unnamed_addr constant [" +
+                                    str(node.str_length) + " x i8] c\"" + node.value + "\", align 1")
         else:
             self.convertType(node, node)
 

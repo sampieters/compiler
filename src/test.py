@@ -3,6 +3,7 @@ import os
 import filecmp
 from antlr4 import *
 from antlr4.InputStream import InputStream
+from MIPSVisitor import MIPSVisitor
 from grammars.C.CLexer import CLexer
 from grammars.C.CParser import CParser
 from ASTListener import ASTListener
@@ -12,7 +13,7 @@ from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
 # Path to benchmarks
-PATH = "src/tests/benchmarks/SemanticErrors/"
+PATH = "src/tests/benchmarks/CorrectCode/"
 # Write results of test to file
 OUTPUT = open("results.txt", "w+")
 variables = ""
@@ -79,6 +80,14 @@ for filename in filenames:
         # Write generated LLVM to <file_path>_RESULT.ll
         with open(f"{file_path}_RESULT.ll", 'w+') as f2:
             f2.write("\n".join(visitor_llvm.LLVM))
+        f2.close()
+
+        visitor_mips = MIPSVisitor()
+        visitor_mips.visit(AST)
+
+        # Write generated MIPS to <file_path>_RESULT.asm
+        with open(f"{file_path}_RESULT.asm", 'w+') as f2:
+            f2.write("\n".join(visitor_mips.MIPS))
         f2.close()
 
         # Clear the terminal

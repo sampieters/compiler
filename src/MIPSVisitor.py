@@ -7,29 +7,26 @@ from collections import Counter as Ctr
 
 class Function_Stack():
     def __init__(self):
-        self.data_in_stack = Counter()
+        self.data_count = 0
         self.return_aanwezig = None
         self.parameter_count = None
         self.MIPS_index = None
 
-    def get_stack_size(self):
+    def stack_next(self, variable=4):
         # An extra 4 bytes to hold the frame pointer
-        return self.data_in_stack.counter * 4 + 4
+        if isinstance(variable, int):
+            self.data_count += variable
+        else:
+            self.data_count += variable.alignment()
+        return self.data_count
 
-    def get_framepointer_loc(self):
-        return self.data_in_stack.counter * 4
-
-    def stack_next(self):
-        return int(self.data_in_stack.incr()) * 4
-
-    def stack_size(self, size=4):
-        # TODO: nog rekening houden met parameters enz
-        return self.data_in_stack.counter * size
+    def stack_curr(self):
+        return self.data_count
 
     def reset(self):
         self.data_in_stack.counter = 0
         self.return_aanwezig = None
-        self.paramter_count = None
+        self.parameter_count = None
 
 
 class Registers():
@@ -88,7 +85,7 @@ class Registers():
                     else:
                         self.registers[i] = True
                         self.registers[i + 1] = True
-                # If it is a double but the register checked is uneven, then chck the following register
+                # If it is a double but the register checked is odd, then chck the following register
                 elif double:
                     continue
                 # Else if it is a float, it can be loaded in an even or uneven register
@@ -132,6 +129,11 @@ class MIPSVisitor(ASTVisitor):
         self.zero = LiteralNode(0, "i8", -1)
         self.registers = Registers()
 
+    def exitProg(self, node):
+        self.before_MIPS.extend(self.MIPS)
+        self.before_MIPS.extend(self.after_MIPS)
+        self.MIPS = self.before_MIPS
+
     def addInstruction(self, instr="", params="", spacing=True, before=False, after=False):
         if before:
             self.before_MIPS.append(instr + ": " + params)
@@ -165,12 +167,14 @@ class MIPSVisitor(ASTVisitor):
         # If it's needed to load as argument for a syscall, than load it in $a0 (or $a1) or for float and doubles in $f12
         if load_as_arg:
             temp = self.registers.UseParam(node.type == "double")
+            print("LOAD_AS_ARG temp", temp)
         # Else load in temporary for int and f registers for float and double
+        elif node.type == "float" or node.type == "double":
+            temp = self.registers.UseFloatTemporary(node.type == "double")
+            print("FLOAT temp", temp)
         else:
-            if node.type == "float" or node.type == "double":
-                temp = self.registers.UseFloatTemporary(node.type == "double")
-            else:
-                temp = self.registers.UseTemporary()
+            temp = self.registers.UseTemporary()
+            print("NORMAL temp", temp)
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
             # TODO: bij stirngs lijkt het dat in .data moet geladen worden, dan het adres geladen wordt. ALs een char wil van deze string dan lb van STIRNG ADRES)
@@ -205,7 +209,7 @@ class MIPSVisitor(ASTVisitor):
         else:
             op = "sw"
 
-        self.addInstruction(op, "$" + str(node.temp_address) + "," + str(self.funct_stack.stack_next()) + "($fp)")
+        self.addInstruction(op, "$" + str(node.temp_address) + "," + str(self.funct_stack.stack_next(node)) + "($fp)")
         self.registers.FreeTemporary(node.temp_address)
 
     def unaryOpToMIPS(self, node):
@@ -324,19 +328,19 @@ class MIPSVisitor(ASTVisitor):
             op = "subu"
             children_MIPS.append("$zero")
             children_MIPS.append(node.temp_address)
-        elif node.operation == "x++":
+        elif node.operation == "&":
+            op = "addiu"
+            children_MIPS.append("$fp")
+            children_MIPS.append(node.original_address)
+        elif node.operation == "[]":
+            identifier = self.getSymbol(node.children[0])
+            node.original_address = identifier.original_address + node.children[1].value * identifier.alignment()
+            return
+        elif node.operation == "x++" or node.operation == "++x":
             op = "addiu"
             children_MIPS.append(node.temp_address)
             children_MIPS.append("1")
-        elif node.operation == "++x":
-            op = "addiu"
-            children_MIPS.append(node.temp_address)
-            children_MIPS.append("1")
-        elif node.operation == "x--":
-            op = "addiu"
-            children_MIPS.append(node.temp_address)
-            children_MIPS.append("-1")
-        elif node.operation == "--x":
+        elif node.operation == "x--" or node.operation == "--x":
             op = "addiu"
             children_MIPS.append(node.temp_address)
             children_MIPS.append("-1")
@@ -360,14 +364,14 @@ class MIPSVisitor(ASTVisitor):
 
     def exitFunctionDefinition(self, node):
         self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", str(
-            self.funct_stack.get_stack_size()))
+            self.funct_stack.stack_next()))
         self.MIPS[self.funct_stack.MIPS_index + 1] = self.MIPS[self.funct_stack.MIPS_index + 1].replace("{LABEL}", str(
-            self.funct_stack.get_framepointer_loc()))
+            self.funct_stack.stack_curr()))
 
         # allocate space on the stack for everything inside the function scope
         self.addInstruction("move", "$sp,$fp")
-        self.addInstruction("lw", "$fp," + str(self.funct_stack.get_framepointer_loc()) + "($sp)")
-        self.addInstruction("addiu", "$sp,$sp," + str(self.funct_stack.get_stack_size()))
+        self.addInstruction("lw", "$fp," + str(self.funct_stack.stack_curr()) + "($sp)")
+        self.addInstruction("addiu", "$sp,$sp," + str(self.funct_stack.stack_next()))
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":
@@ -469,7 +473,6 @@ class MIPSVisitor(ASTVisitor):
 
         # load the function parameters in a0-a4 if there are any
         for child in node.children[1].children:
-            print(child.value)
             if isinstance(child, IdentifierNode):
                 child = self.getSymbol(child)
                 # load the to print variable in an argument register

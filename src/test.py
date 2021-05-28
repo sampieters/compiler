@@ -13,7 +13,7 @@ from OptimisationVisitor import OptimisationVisitor
 from LLVMVisitor import LLVMVisitor
 
 # Path to benchmarks
-PATH = "src/tests/benchmarks/CorrectCode/"
+PATH = "tests/benchmarks/CorrectCode/"
 # Write results of test to file
 OUTPUT = open("results.txt", "w+")
 variables = ""

@@ -1,15 +1,15 @@
 .data
-.asciiz %d; \00: 
-.asciiz %f; \00: 
+string1: .asciiz "%d; \00"
+string2: .asciiz "%f; \00"
 double1: .double 1.000000e+01
-.asciiz %d; \00: 
-.asciiz %f; \00: 
+string3: .asciiz "%d; \00"
+string4: .asciiz "%f; \00"
 double2: .double 1.000000e+01
-.asciiz %d; \00: 
-.asciiz %f; \00: 
+string5: .asciiz "%d; \00"
+string6: .asciiz "%f; \00"
 double3: .double 1.000000e+01
-.asciiz %d; \00: 
-.asciiz %f; \00: 
+string7: .asciiz "%d; \00"
+string8: .asciiz "%f; \00"
 double4: .double 1.000000e+01
 .globl main
 .text

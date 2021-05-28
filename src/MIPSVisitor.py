@@ -268,7 +268,7 @@ class MIPSVisitor(ASTVisitor):
         elif "string" in node.type_semantics:
             self.data_counter.update({"string": 1})
             name = "string" + str(self.data_counter["string"])
-            self.addInstruction(f".asciiz {node.value}", before=True)
+            self.addInstruction(name, f".asciiz \"{node.value}\"", before=True)
             node.value = name
 
     def exitBinaryOperation(self, node):

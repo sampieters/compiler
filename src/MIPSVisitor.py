@@ -17,7 +17,7 @@ class Function_Stack():
         if isinstance(variable, int):
             self.data_count += variable
         else:
-            self.data_count += variable.alignment()
+            self.data_count += int(variable.alignment())
         return self.data_count
 
     def stack_curr(self):
@@ -39,19 +39,36 @@ class Registers():
 
     def UseParam(self, double=False):
         # if not a double than can be loaded in a0-a3
-        if not double:
+        if double is False:
             for i in range(4, 7):
-                self.registers[i] = True
-            return str(i)
+                if self.registers[i] is False:
+                    self.registers[i] = True
+                    return str(i)
         # Otherwise it has to be loaded in the parameter registers for floats
         else:
-            # TODO: if it is a double or float the param needs to be passed in f12 (corresponds with $a0 for other type) or
-            # in f14 (corresponds to $a2)
-            pass
-
+            for i in range(44, 46):
+                if self.registers[i] is False:
+                    # If double, the first register needs to be an even register such that an uneven is the second register
+                    if i % 2 == 0 and double:
+                        # This is to check if there is one register in between that is used as a float
+                        if self.registers[i + 1]:
+                            continue
+                        # Else load the double in two registers
+                        else:
+                            self.registers[i] = True
+                            self.registers[i + 1] = True
+                    # If it is a double but the register checked is odd, then chck the following register
+                    elif double:
+                        continue
+                    # Else if it is a float, it can be loaded in an even or uneven register
+                    else:
+                        self.registers[i] = True
+                    return "f" + str(i - 32)
 
     def FreeParam(self, register):
-        self.registers[register] = False
+        if register.startswith("f"):
+            register = register[1:]
+        self.registers[int(register)] = False
 
 
     def UseTemporary(self):
@@ -160,7 +177,7 @@ class MIPSVisitor(ASTVisitor):
             return 1
 
     def loadVariable(self, node, load_as_arg=False):
-        # TODO: FLOATS en DOUBLE en CHAR werken echt nog niet
+        # TODO: CHAR testen
         # Every time a  variable is used it has to be loaded in
         instr = ""
         params = ""
@@ -425,22 +442,17 @@ class MIPSVisitor(ASTVisitor):
         self.storeVariable(node.children[0])
 
     def type_fprint(self, function_type):
-        # TODO: waar REGISTER staat moet het register/naam komen van waar de variabele is
         opcode = None
+        # Different opcodes for different types
         if function_type == "i8*":
-            # self.addInstruction("la", "$a0, REGISTER")
             opcode = 4
         elif function_type == "i8":
-            # self.addInstruction("lb", "$a0, REGISTER")
             opcode = 11
         elif function_type.startswith("i"):
-            # self.addInstruction("lw", "$a0, REGISTER")
             opcode = 1
         elif function_type == "float":
-            # self.addInstruction("l.s", "$f12, REGISTER")
             opcode = 2
         elif function_type == "double":
-            # self.addInstruction("l.d", "$f12, REGISTER")
             opcode = 3
         self.addInstruction("li", f"$v0,{opcode}")
         # syscall does the actual print
@@ -476,31 +488,23 @@ class MIPSVisitor(ASTVisitor):
             if isinstance(child, IdentifierNode):
                 child = self.getSymbol(child)
                 # load the to print variable in an argument register
-            self.loadVariable(child, True)
+            index = self.loadVariable(child, True)
+            # if printf or scanf than opcode loaden and syscall
+            if function.name == "printf":
+                self.type_fprint(child.type)
+                # Clear the register from the print
+                self.registers.FreeParam(index)
 
+        # Clear all registers for parameters
         for i in range(4, 7):
-            self.registers.FreeParam(i)
+            self.registers.FreeParam(str(i))
+        for i in range(44, 46):
+            self.registers.FreeParam(str(i))
 
 
 
-
-
-        # Special cases 'printf' and 'scanf'
         if function.name == "printf":
-            # TODO: (mss best in de type_fprint doen) het eerste is altijd een string, dus deze moet nog opgedeeld worden en in MIPS afgeprint worden (wordt voor nu geskipt)
-            # Do a print in MIPS for every variable mentioned in the string parameter
-            for child in function.parent.children[1].children:
-                if isinstance(child, IdentifierNode):
-                    child = self.getSymbol(child)
-                # If the chid is the first parameter (the string) then split it
-                if child == function.parent.children[1].children[0]:
-                    continue
-                else:
-                    # load the to print variable in an argument register
-                    self.loadVariable(child, True)
-
-                    # load the parameter according to the type
-                    self.type_fprint(child.type)
+            pass
         elif function.name == "scanf":
             # TODO: kan deze meerdere parameters hebben?
             self.type_scanf(function.children[1].type)
@@ -543,6 +547,9 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction("# END WHILE BODY")
         self.addInstruction()
         index = self.loop_stack.pop()
+        while "{BREAK}" in self.MIPS[index]:
+            self.MIPS[index] = self.MIPS[index].replace("{BREAK}", "L" + str(self.branch_counter.counter))
+            index = self.loop_stack.pop()
         self.MIPS[index] = self.MIPS[index].replace("{LABEL}", "$L" + str(self.branch_counter.counter))
         self.addInstruction("$L" + self.branch_counter.incr() + ":", "", False)
 
@@ -573,3 +580,12 @@ class MIPSVisitor(ASTVisitor):
         index = self.loop_stack.pop()
         self.MIPS[index] = self.MIPS[index].replace("{LABEL}", "$L" + str(self.branch_counter.counter))
         self.addInstruction("$L" + str(self.branch_counter.incr()) + ":", "", False)
+
+    def enterContinue(self, node):
+        self.addInstruction("j", "$L" + node.parent.parent.start_address)
+
+    def enterBreak(self, node):
+        self.addInstruction("j", "${BREAK}")
+        self.loop_stack.append(len(self.MIPS) - 1)
+
+# TODO: break nog doen voor if en else

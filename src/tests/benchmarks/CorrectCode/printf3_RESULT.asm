@@ -1,5 +1,5 @@
 .data
-.asciiz %d%f%c\00: 
+string1: .asciiz "%d%f%c\00"
 double1: .double 5.000000e-01
 .globl main
 .text

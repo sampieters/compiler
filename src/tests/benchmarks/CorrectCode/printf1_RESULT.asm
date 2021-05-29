@@ -1,5 +1,5 @@
 .data
-.asciiz Hello World!\0A\00: 
+string1: .asciiz "Hello World!\0A\00"
 .globl main
 .text
                 

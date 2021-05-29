@@ -1,8 +1,8 @@
 .data
-.asciiz %d; \00: 
-.asciiz %d; \00: 
-.asciiz %d; \00: 
-.asciiz %d; \00: 
+string1: .asciiz "%d; \00"
+string2: .asciiz "%d; \00"
+string3: .asciiz "%d; \00"
+string4: .asciiz "%d; \00"
 .globl main
 .text
                 

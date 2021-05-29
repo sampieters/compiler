@@ -37,6 +37,12 @@ class Registers():
     def __init__(self):
         self.registers = [False] * 64
 
+    def FreeRegister(self, register):
+        if register.startswith("f"):
+            register = register[1:]
+        self.registers[int(register)] = False
+
+
     def UseParam(self, double=False):
         # if not a double than can be loaded in a0-a3
         if double is False:
@@ -139,6 +145,7 @@ class MIPSVisitor(ASTVisitor):
         self.data_counter = Ctr()
         self.branch_counter = Counter()
         self.loop_stack = []
+        self.stat_stack = []
         self.funct_stack = Function_Stack()
         self.temp_counter = Counter()
         self.symbol_table = SymbolTable()
@@ -325,6 +332,8 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction(self.binaryOpToMIPS(node), param)
 
         # TODO: If this is the last binary op from the sequence of operations, then free
+        if not isinstance(node.parent, BinaryOperationNode) or not isinstance(node.parent, UnaryOperationNode):
+            self.registers.FreeTemporary(node.temp_address)
 
     def exitUnaryOperation(self, node):
         # TODO: not operatie uitzoeken, vooral verschil bij andere types
@@ -364,6 +373,10 @@ class MIPSVisitor(ASTVisitor):
 
         param = f"{node.temp_address},{','.join(children_MIPS)}"
         self.addInstruction(op, param)
+
+        # TODO: If this is the last binary op from the sequence of operations, then free
+        if not isinstance(node.parent, BinaryOperationNode) or not isinstance(node.parent, UnaryOperationNode):
+            self.registers.FreeTemporary(node.temp_address)
 
     def exitFunctionDeclaration(self, node):
         function = node.children[0]
@@ -431,6 +444,9 @@ class MIPSVisitor(ASTVisitor):
             align = identifier.alignment()
             identifier.original_address = self.counter.incr_amount(int(align))
             self.storeVariable(node.children[0].children[0])
+
+            self.registers.FreeRegister(identifier.temp_address)
+
         else:
             self.addInstruction("DIKKE PIEM")
 
@@ -532,10 +548,10 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction("# END WHILE CONDITION")
             self.addInstruction()
             self.addInstruction("# BEGIN WHILE BODY")
-            # self.addInstruction("$L" + self.branch_counter.incr() + ":", "", False)
         if isinstance(node.parent, IfNode):
-            self.addInstruction("beq", "REGISTER,$0, {LABEL}")
-            self.loop_stack.append(len(self.MIPS) - 1)
+            # TODO: de eerste onderste instructie gaat niet erken voor literals
+            self.addInstruction("beq", "$" + node.parent.children[0].temp_address + ",$0, {LABEL}")
+            self.stat_stack.append(len(self.MIPS) - 1)
             self.addInstruction("nop")
             self.addInstruction("# END IF CONDITION")
             self.addInstruction()
@@ -562,12 +578,12 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction("nop")
 
         # First pop from the stack for the branch instruction in the If statement
-        index = self.loop_stack.pop()
+        index = self.stat_stack.pop()
         self.MIPS[index] = self.MIPS[index].replace("{LABEL}", "$L" + str(self.branch_counter.counter))
         self.addInstruction("$L" + str(self.branch_counter.incr()) + ":", "", False)
 
         # Then append the new branch instruction such that there are no faulty branches
-        self.loop_stack.append(to_be_added)
+        self.stat_stack.append(to_be_added)
 
         self.addInstruction("# BEGIN ELSE BODY")
 
@@ -577,12 +593,14 @@ class MIPSVisitor(ASTVisitor):
     def exitBranch(self, node):
         # If only if then this is already good, when there is also an else the first branch is solved to go to else and then
         # the second is solved here
-        index = self.loop_stack.pop()
+        index = self.stat_stack.pop()
         self.MIPS[index] = self.MIPS[index].replace("{LABEL}", "$L" + str(self.branch_counter.counter))
         self.addInstruction("$L" + str(self.branch_counter.incr()) + ":", "", False)
 
     def enterContinue(self, node):
-        self.addInstruction("j", "$L" + node.parent.parent.start_address)
+        # Continue works only on while or for loop so when continue, go to the statement of the while or for loop
+        first_while = getParent(node, WhileNode)
+        self.addInstruction("j", "$L" + first_while.start_address)
 
     def enterBreak(self, node):
         self.addInstruction("j", "${BREAK}")

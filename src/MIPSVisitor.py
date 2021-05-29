@@ -259,7 +259,9 @@ class MIPSVisitor(ASTVisitor):
         else:
             op = "sw"
 
-        self.addInstruction(op, "$" + str(node.temp_address) + ", " + str(self.funct_stack.stack_next(node)) + "($fp)")
+        address = self.funct_stack.stack_next(node)
+        node.original_address = address
+        self.addInstruction(op, "$" + str(node.temp_address) + ", " + str(address) + "($fp)")
         self.registers.FreeTemporary(node.temp_address)
 
     def unaryOpToMIPS(self, node):
@@ -297,9 +299,9 @@ class MIPSVisitor(ASTVisitor):
         elif the_type == "double":
             ret_val += ".d"
 
-        if not (ret_val.endswith(".s") or ret_val.endswith(".d")):
+        else:
             # STEP 3: if type is integer, check for immediate operation (this is for addi and subi)
-            if (isinstance(child1, LiteralNode) or isinstance(child2, LiteralNode)):
+            if (isinstance(child1, LiteralNode) or isinstance(child2, LiteralNode)) and operation in ["add", "sub", "lt"]:
                 ret_val += "i"
 
             # STEP 4: if type is integer, check if signed or unsigned
@@ -318,7 +320,7 @@ class MIPSVisitor(ASTVisitor):
         elif "string" in node.type_semantics:
             self.data_counter.update({"string": 1})
             for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f', node.value)):
-                print(elem)
+                elem = elem.replace("\\0A", "\\n")
                 name = "string" + str(self.data_counter["string"]) + "_" + str(idx + 1)
                 self.addInstruction(name, f".asciiz \"{elem}\"", before=True)
             node.value = "string" + str(self.data_counter["string"])
@@ -469,14 +471,11 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction(identifier.name, ".TYPE VALUE")
         if isinstance(node.children[1], BinaryOperationNode) or isinstance(node.children[1], UnaryOperationNode):
             align = identifier.alignment()
-            identifier.original_address = self.counter.incr_amount(int(align))
             self.storeVariable(node.children[1])
         elif isinstance(node.children[1], LiteralNode):
             identifier.temp_address = self.loadVariable(node.children[1])
             align = identifier.alignment()
-            identifier.original_address = self.counter.incr_amount(int(align))
             self.storeVariable(node.children[0].children[0])
-
             self.registers.FreeRegister(identifier.temp_address)
 
         else:

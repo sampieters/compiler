@@ -5,8 +5,8 @@ string1_2: .asciiz "\0A\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -12
-        sw      $fp, 12($sp)
+        addiu   $sp, $sp, -16
+        sw      $fp, 16($sp)
         move    $fp, $sp
         li      $8, 0
         sw      $8, 4($fp)
@@ -15,7 +15,7 @@ $L0:
         # BEGIN WHILE CONDITION
         lw      $8, 4($fp)
         slti    $9, $8, 10
-        beq     $9, $0, $L1
+        beq     $9, $0, $L3
         nop     
         # END WHILE CONDITION
                 
@@ -29,17 +29,36 @@ $L0:
         la      $4, string1_2
         li      $v0, 4
         syscall 
+        # BEGIN IF CONDITION
         lw      $10, 4($fp)
-        addi    $11, $10, 1
+        seq     $11, $10, 5
+        beq     $11,$0, $L1
+        nop     
+        # END IF CONDITION
                 
-        sw      $12, 8($fp)
+        # BEGIN IF BODY
+        j       $L3
+        # END IF BODY
+        b       $L2
+        nop     
+$L1:    
+        # BEGIN ELSE BODY
+        lw      $12, 4($fp)
+        addi    $13, $12, 1
+                
+        sw      $14, 8($fp)
+        j       $L0
+        # END ELSE BODY
+$L2:    
+        li      $24, 10
+        sw      $24, 12($fp)
         j       $L0
         # END WHILE BODY
                 
-$L1:    
+$L3:    
         nop     
         move    $sp, $fp
-        lw      $fp, 12($sp)
-        addiu   $sp, $sp, 16
+        lw      $fp, 16($sp)
+        addiu   $sp, $sp, 20
         li      $v0, 10
         syscall 

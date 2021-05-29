@@ -10,11 +10,11 @@ main:
         move    $fp, $sp
         li      $8, 10
         sw      $8, 4($fp)
-        lw      $9, 0($fp)
-        addiu   $10, $fp, 0
-        sw      $$10, 12($fp)
-        lw      $11, 4($fp)
-        lw      $12, 0($$12)
+        lw      $8, 4($fp)
+        addiu   $9, $fp, 4
+        sw      $$9, 12($fp)
+        lw      $10, 3($fp)
+        lw      $11, 0($$11)
         la      $4, string1_1
         li      $v0, 4
         syscall 

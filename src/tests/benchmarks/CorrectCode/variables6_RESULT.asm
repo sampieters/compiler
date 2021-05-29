@@ -12,21 +12,21 @@ main:
         move    $fp, $sp
         li      $8, 10
         sw      $8, 4($fp)
-        lw      $9, 0($fp)
-        addiu   $10, $fp, 0
-        sw      $$10, 12($fp)
-        lw      $11, 4($fp)
-        addiu   $12, $fp, 4
-        sw      $$12, 20($fp)
-        lw      $13, 4($fp)
-        lw      $14, 0($$14)
-        lw      $24, 12($fp)
-        lw      $Error, 0($$Error)
+        lw      $8, 4($fp)
+        addiu   $9, $fp, 4
+        sw      $$9, 12($fp)
+        lw      $10, 3($fp)
+        addiu   $11, $fp, 3
+        sw      $$11, 20($fp)
+        lw      $12, 3($fp)
+        lw      $13, 0($$13)
+        lw      $14, 4($fp)
+        lw      $24, 0($$24)
         lw      $Error, 0($$Error)
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string1_2

@@ -13,19 +13,19 @@ main:
                 
 $L0:    
         # BEGIN WHILE CONDITION
-        lw      $9, 0($fp)
-        slti    $10, $9, 5
-        beq     $10, $0, $L1
+        lw      $8, 4($fp)
+        slti    $9, $8, 5
+        beq     $9, $0, $L1
         nop     
         # END WHILE CONDITION
                 
         # BEGIN WHILE BODY
-        lw      $11, 0($fp)
-        addiu   $12, $12, 1
+        lw      $10, 4($fp)
+        addiu   $11, $11, 1
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string1_2

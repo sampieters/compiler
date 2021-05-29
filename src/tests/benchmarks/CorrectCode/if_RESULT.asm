@@ -1,7 +1,7 @@
 .data
 string1_1: .asciiz "Something went wrong\00"
-string2_1: .asciiz "Hello world!\0A\00"
-string3_1: .asciiz "Hello world!\0A\00"
+string2_1: .asciiz "Hello world!\n\00"
+string3_1: .asciiz "Hello world!\n\00"
 .globl main
 .text
                 
@@ -12,9 +12,9 @@ main:
         li      $8, 5
         sw      $8, 4($fp)
         # BEGIN IF CONDITION
-        lw      $9, 0($fp)
-        slti    $10, $9, 5
-        beq     REGISTER, $0, $L0
+        lw      $8, 4($fp)
+        slti    $9, $8, 5
+        beq     $9,$0, $L0
         nop     
         # END IF CONDITION
                 
@@ -25,9 +25,9 @@ main:
         # END IF BODY
 $L0:    
         # BEGIN IF CONDITION
-        lw      $11, 0($fp)
-        sgei    $12, $11, 5
-        beq     REGISTER, $0, $L1
+        lw      $10, 4($fp)
+        sge     $11, $10, 5
+        beq     $11,$0, $L1
         nop     
         # END IF CONDITION
                 
@@ -38,17 +38,17 @@ $L0:
         # END IF BODY
 $L1:    
         # BEGIN IF CONDITION
-        lw      $13, 0($fp)
-        seqi    $14, $13, 5
-        beq     REGISTER, $0, $L3
+        lw      $12, 4($fp)
+        seq     $13, $12, 5
+        beq     $13,$0, $L3
         nop     
         # END IF CONDITION
                 
         # BEGIN IF BODY
         # BEGIN IF CONDITION
-        lw      $24, 0($fp)
-        snei    $Error, $24, 4
-        beq     REGISTER, $0, $L2
+        lw      $14, 4($fp)
+        sne     $24, $14, 4
+        beq     $24,$0, $L2
         nop     
         # END IF CONDITION
                 

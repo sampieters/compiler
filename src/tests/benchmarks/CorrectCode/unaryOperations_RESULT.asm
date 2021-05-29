@@ -29,23 +29,23 @@ main:
         la      $4, string1_2
         li      $v0, 4
         syscall 
-        lw      $9, 0($fp)
-        addiu   $10, $10, 1
+        lw      $8, 4($fp)
+        addiu   $9, $9, 1
         la      $4, string2_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string2_2
         li      $v0, 4
         syscall 
-        lw      $11, 3($fp)
-        li      $13, 15
-        sw      $13, 8($fp)
-        lw      $14, 3($fp)
-        li      $Error, 12
-        sw      $Error, 12($fp)
+        lw      $10, 3($fp)
+        li      $12, 15
+        sw      $12, 8($fp)
+        lw      $13, 3($fp)
+        li      $24, 12
+        sw      $24, 12($fp)
         li      $Error, 12
         sw      $Error, 16($fp)
         lw      $Error, 3($fp)
@@ -63,18 +63,18 @@ main:
         la      $4, string4_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string4_2
         li      $v0, 4
         syscall 
-        lw      $Error, 0($fp)
+        lw      $Error, 4($fp)
         addiu   $Error, $Error, 1
         la      $4, string5_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string5_2

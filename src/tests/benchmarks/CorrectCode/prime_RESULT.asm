@@ -19,8 +19,8 @@ main:
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $9, 2($fp)
-        addiu   $10, $fp, 2
+        lw      $8, 2($fp)
+        addiu   $9, $fp, 2
         la      $4, string2_1
         li      $v0, 5
         syscall 
@@ -33,9 +33,9 @@ main:
         syscall 
         sw      $v0, LOCATION
         # BEGIN IF CONDITION
-        lw      $11, 2($fp)
-        sgei    $12, $11, 1
-        beq     REGISTER, $0, $L0
+        lw      $10, 2($fp)
+        sge     $11, $10, 1
+        beq     $11,$0, $L0
         nop     
         # END IF CONDITION
                 
@@ -54,15 +54,15 @@ main:
         syscall 
         # END IF BODY
 $L0:    
-        li      $13, 2
-        sw      $13, 8($fp)
+        li      $12, 2
+        sw      $12, 8($fp)
                 
 $L1:    
         # BEGIN WHILE CONDITION
-        lw      $14, 4($fp)
-        lw      $24, 2($fp)
-        sle     $Error, $14, $24
-        beq     $Error, $0, {LABEL}
+        lw      $13, 4($fp)
+        lw      $14, 2($fp)
+        sle     $24, $13, $14
+        beq     $24, $0, $L6
         nop     
         # END WHILE CONDITION
                 
@@ -72,26 +72,26 @@ $L1:
                 
 $L2:    
         # BEGIN WHILE CONDITION
-        lw      $Error, 0($fp)
+        lw      $Error, 4($fp)
         subi    $Error, $Error, 1
         lw      $Error, 5($fp)
         sle     $Error, $Error, $Error
-        beq     $Error, $0, $L6
+        beq     $Error, $0, $L4
         nop     
         # END WHILE CONDITION
                 
         # BEGIN WHILE BODY
         # BEGIN IF CONDITION
-        lw      $Error, 0($fp)
+        lw      $Error, 4($fp)
         lw      $Error, 5($fp)
         NIET ZOMAAR$Error, $Error, $Error
-        seqi    $Error, $Error, 0
-        beq     REGISTER, $0, $L4
+        seq     $Error, $Error, 0
+        beq     $Error,$0, $L3
         nop     
         # END IF CONDITION
                 
         # BEGIN IF BODY
-        j       ${BREAK}
+        j       $L4
         # END IF BODY
 $L3:    
         lw      $Error, 5($fp)
@@ -102,9 +102,9 @@ $L3:
 $L4:    
         # BEGIN IF CONDITION
         lw      $Error, 5($fp)
-        lw      $Error, 0($fp)
+        lw      $Error, 4($fp)
         seq     $Error, $Error, $Error
-        beq     REGISTER, $0, $L5
+        beq     $Error,$0, $L5
         nop     
         # END IF CONDITION
                 
@@ -112,7 +112,7 @@ $L4:
         la      $4, string5_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string5_2
@@ -122,7 +122,7 @@ $L4:
         addiu   $Error, $Error, 1
         # END IF BODY
 $L5:    
-        lw      $Error, 0($fp)
+        lw      $Error, 4($fp)
         addiu   $Error, $Error, 1
         j       $L1
         # END WHILE BODY

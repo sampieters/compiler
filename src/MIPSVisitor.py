@@ -451,11 +451,18 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction("DIKKE PIEM")
 
     def exitAssignment(self, node):
-        # When there is an assignement, check if it's already stored. If not then store
-        node.children[0].temp_address = self.loadVariable(node.children[1])
+        # Get the node for the assignement
+        identifier = self.getSymbol(node.children[0])
+
+        # load the right side in to store it in the left side (identifier)
+        # Check if it's already stored. If not then store
+        self.loadVariable(self.getSymbol(node.children[1]))
+
+
         # if the identifier is not stored somewhere then store in a new address else store in previous address
         # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
         self.storeVariable(node.children[0])
+
 
     def type_fprint(self, function_type):
         opcode = None

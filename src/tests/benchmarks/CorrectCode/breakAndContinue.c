@@ -8,9 +8,9 @@ int main(){
 		if (i == 5) {
 			break;
 		} else {
-			i++;
+			i = i + 1;
 			continue;
-		} 
+		}
 		i = 10;
 	}
 	return 0;

@@ -1,29 +1,40 @@
 .data
-string1: .asciiz "%d%f%c\00"
+string1_1: .asciiz ""
+string1_2: .asciiz ""
+string1_3: .asciiz ""
+string1_4: .asciiz "\00"
 double1: .double 5.000000e-01
 .globl main
 .text
                 
 main:   
-        addiu   $sp,$sp, -4
-        sw      $fp,4($sp)
-        move    $fp,$sp
-        la      $6,string1
-        li      $6,10
-        l.d     $None,double1
-        li      $6,37
-        li      $6,10
-        li      $v0,1
+        addiu   $sp, $sp, -4
+        sw      $fp, 4($sp)
+        move    $fp, $sp
+        la      $4, string1_1
+        li      $v0, 4
         syscall 
-        l.d     $None,double1
-        li      $v0,3
+        li      $4, 10
+        li      $v0, 1
         syscall 
-        li      $6,37
-        li      $v0,11
+        la      $4, string1_2
+        li      $v0, 4
+        syscall 
+        l.d     $f12, double1
+        li      $v0, 3
+        syscall 
+        la      $4, string1_3
+        li      $v0, 4
+        syscall 
+        li      $4, 37
+        li      $v0, 11
+        syscall 
+        la      $4, string1_4
+        li      $v0, 4
         syscall 
         nop     
-        move    $sp,$fp
-        lw      $fp,4($sp)
-        addiu   $sp,$sp,8
-        li      $v0,10
+        move    $sp, $fp
+        lw      $fp, 4($sp)
+        addiu   $sp, $sp, 8
+        li      $v0, 10
         syscall 

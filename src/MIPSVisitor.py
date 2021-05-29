@@ -3,6 +3,8 @@ from ASTNode import *
 from utils import *
 from SymbolTable import *
 from collections import Counter as Ctr
+import re
+from copy import copy
 
 
 class Function_Stack():
@@ -71,10 +73,12 @@ class Registers():
                         self.registers[i] = True
                     return "f" + str(i - 32)
 
-    def FreeParam(self, register):
+    def FreeParam(self, register, double=False):
         if register.startswith("f"):
-            register = register[1:]
+            register = int(register[1:]) + 32
         self.registers[int(register)] = False
+        if double:
+            self.registers[register+1] = False
 
 
     def UseTemporary(self):
@@ -183,6 +187,28 @@ class MIPSVisitor(ASTVisitor):
         elif node.type in INTEGER_TYPES:
             return 1
 
+    def convertType(self, node1, node2):
+        # type1 identifier_1 = something;
+        # type2 identifier_2 = identifier_1; <-- This in this function is converted to llvm
+        # node parameter needs to have type 1 in it
+        # Convert node1 type to node2 type
+        node1 = self.getSymbol(node1)
+        node2 = self.getSymbol(node2)
+        # If the node being converted is a literal, modify the literal so no conversion is needed
+        if isinstance(node1, LiteralNode):
+            if node1.type == "i8" and isinstance(node1.value,str):
+                node1.value = ord(node1.value)
+            # If the literal is an integer that has to be converted to decimal, use scientific notation
+            if node2.type in DECIMAL_TYPES:
+                node1.value = "{:e}".format(float(node1.value))
+            # If the literal is a decimal that has to be converted to integer, floor the value
+            elif node2.type in INTEGER_TYPES:
+                node1.value = int(float(node1.value))
+            elif node1.value == 0 and node2.type.startswith("["):
+                node1.value = "zeroinitializer"
+            node1.type = node2.type
+            return
+
     def loadVariable(self, node, load_as_arg=False):
         # TODO: CHAR testen
         # Every time a  variable is used it has to be loaded in
@@ -210,14 +236,14 @@ class MIPSVisitor(ASTVisitor):
                 instr = "l.s"
             elif node.type == "double":
                 instr = "l.d"
-            params = "$" + str(temp) + "," + str(node.value)
+            params = "$" + str(temp) + ", " + str(node.value)
 
         elif isinstance(node, IdentifierNode):
             if node.type == "i8":
                 instr = "lb"
             else:
                 instr = "lw"
-            params = "$" + str(temp) + "," + str(node.original_address) + "($fp)"
+            params = "$" + str(temp) + ", " + str(node.original_address) + "($fp)"
         node.temp_address = temp
         self.addInstruction(instr, params)
         return temp
@@ -233,7 +259,9 @@ class MIPSVisitor(ASTVisitor):
         else:
             op = "sw"
 
-        self.addInstruction(op, "$" + str(node.temp_address) + "," + str(self.funct_stack.stack_next(node)) + "($fp)")
+        address = self.funct_stack.stack_next(node)
+        node.original_address = address
+        self.addInstruction(op, "$" + str(node.temp_address) + ", " + str(address) + "($fp)")
         self.registers.FreeTemporary(node.temp_address)
 
     def unaryOpToMIPS(self, node):
@@ -273,7 +301,7 @@ class MIPSVisitor(ASTVisitor):
 
         else:
             # STEP 3: if type is integer, check for immediate operation (this is for addi and subi)
-            if (isinstance(child1, LiteralNode) or isinstance(child2, LiteralNode)) and operation in ["add", "sub"]:
+            if (isinstance(child1, LiteralNode) or isinstance(child2, LiteralNode)) and operation in ["add", "sub", "lt"]:
                 ret_val += "i"
 
             # STEP 4: if type is integer, check if signed or unsigned
@@ -291,9 +319,11 @@ class MIPSVisitor(ASTVisitor):
             node.value = name
         elif "string" in node.type_semantics:
             self.data_counter.update({"string": 1})
-            name = "string" + str(self.data_counter["string"])
-            self.addInstruction(name, f".asciiz \"{node.value}\"", before=True)
-            node.value = name
+            for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f', node.value)):
+                elem = elem.replace("\\0A", "\\n")
+                name = "string" + str(self.data_counter["string"]) + "_" + str(idx + 1)
+                self.addInstruction(name, f".asciiz \"{elem}\"", before=True)
+            node.value = "string" + str(self.data_counter["string"])
 
     def exitBinaryOperation(self, node):
         # Convert binary operation node to MIPS
@@ -328,7 +358,7 @@ class MIPSVisitor(ASTVisitor):
             else:
                 children_MIPS.append("$" + str(child.temp_address))
         # Construct the LLVM instruction
-        param = f"${str(node.temp_address)},{','.join(children_MIPS)}"
+        param = f"${str(node.temp_address)}, {', '.join(children_MIPS)}"
         self.addInstruction(self.binaryOpToMIPS(node), param)
 
         # TODO: If this is the last binary op from the sequence of operations, then free
@@ -350,14 +380,18 @@ class MIPSVisitor(ASTVisitor):
 
         children_MIPS = []
         op = None
+        print(node.operation)
         if node.operation == "-":
             op = "subu"
             children_MIPS.append("$zero")
             children_MIPS.append(node.temp_address)
+        if node.operation == "*":
+            op = "lw"
+            children_MIPS.append(f"0(${str(node.temp_address)})")
         elif node.operation == "&":
             op = "addiu"
             children_MIPS.append("$fp")
-            children_MIPS.append(node.original_address)
+            children_MIPS.append(str(child.original_address))
         elif node.operation == "[]":
             identifier = self.getSymbol(node.children[0])
             node.original_address = identifier.original_address + node.children[1].value * identifier.alignment()
@@ -371,7 +405,7 @@ class MIPSVisitor(ASTVisitor):
             children_MIPS.append(node.temp_address)
             children_MIPS.append("-1")
 
-        param = f"{node.temp_address},{','.join(children_MIPS)}"
+        param = f"{node.temp_address}, {', '.join(children_MIPS)}"
         self.addInstruction(op, param)
 
         # TODO: If this is the last binary op from the sequence of operations, then free
@@ -388,9 +422,9 @@ class MIPSVisitor(ASTVisitor):
         function = node.children[0].children[0]
         self.addInstruction(function.name + ":", spacing=False)
         self.funct_stack.MIPS_index = len(self.MIPS)
-        self.addInstruction("addiu", "$sp,$sp, -{LABEL}")
-        self.addInstruction("sw", "$fp,{LABEL}($sp)")
-        self.addInstruction("move", "$fp,$sp")
+        self.addInstruction("addiu", "$sp, $sp, -{LABEL}")
+        self.addInstruction("sw", "$fp, {LABEL}($sp)")
+        self.addInstruction("move", "$fp, $sp")
 
     def exitFunctionDefinition(self, node):
         self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", str(
@@ -399,13 +433,13 @@ class MIPSVisitor(ASTVisitor):
             self.funct_stack.stack_curr()))
 
         # allocate space on the stack for everything inside the function scope
-        self.addInstruction("move", "$sp,$fp")
-        self.addInstruction("lw", "$fp," + str(self.funct_stack.stack_curr()) + "($sp)")
-        self.addInstruction("addiu", "$sp,$sp," + str(self.funct_stack.stack_next()))
+        self.addInstruction("move", "$sp, $fp")
+        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr()) + "($sp)")
+        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_next()))
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":
-            self.addInstruction("li", "$v0,10")
+            self.addInstruction("li", "$v0, 10")
             self.addInstruction("syscall")
         else:
             self.addInstruction("jr", "$ra")
@@ -437,14 +471,11 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction(identifier.name, ".TYPE VALUE")
         if isinstance(node.children[1], BinaryOperationNode) or isinstance(node.children[1], UnaryOperationNode):
             align = identifier.alignment()
-            identifier.original_address = self.counter.incr_amount(int(align))
             self.storeVariable(node.children[1])
         elif isinstance(node.children[1], LiteralNode):
             identifier.temp_address = self.loadVariable(node.children[1])
             align = identifier.alignment()
-            identifier.original_address = self.counter.incr_amount(int(align))
             self.storeVariable(node.children[0].children[0])
-
             self.registers.FreeRegister(identifier.temp_address)
 
         else:
@@ -477,7 +508,7 @@ class MIPSVisitor(ASTVisitor):
             opcode = 2
         elif function_type == "double":
             opcode = 3
-        self.addInstruction("li", f"$v0,{opcode}")
+        self.addInstruction("li", f"$v0, {opcode}")
         # syscall does the actual print
         self.addInstruction("syscall")
 
@@ -506,6 +537,26 @@ class MIPSVisitor(ASTVisitor):
         # Get the function with the right addresses from the table
         function = self.getSymbol(node.children[0])
 
+        if function.name in ["printf", "scanf"]:
+            for idx, child in enumerate(node.children[1].children):
+                if isinstance(child, IdentifierNode):
+                    child = self.getSymbol(child)
+
+                if idx > 0:
+                    index = self.loadVariable(child, True)
+                    self.type_fprint(child.type)
+                    self.registers.FreeParam(index, child.type == "double")
+
+                tmp = copy(node.children[1].children[0])
+                tmp.value += "_" + str(idx+1)
+                index = self.loadVariable(tmp, True)
+                if function.name == "printf":
+                    self.type_fprint(tmp.type)
+                else:
+                    self.type_scanf(tmp.type)
+                self.registers.FreeParam(index, tmp.type == "double")
+            return
+
         # load the function parameters in a0-a4 if there are any
         for child in node.children[1].children:
             if isinstance(child, IdentifierNode):
@@ -513,10 +564,6 @@ class MIPSVisitor(ASTVisitor):
                 # load the to print variable in an argument register
             index = self.loadVariable(child, True)
             # if printf or scanf than opcode loaden and syscall
-            if function.name == "printf":
-                self.type_fprint(child.type)
-                # Clear the register from the print
-                self.registers.FreeParam(index)
 
         # Clear all registers for parameters
         for i in range(4, 7):
@@ -524,15 +571,7 @@ class MIPSVisitor(ASTVisitor):
         for i in range(44, 46):
             self.registers.FreeParam(str(i))
 
-
-
-        if function.name == "printf":
-            pass
-        elif function.name == "scanf":
-            # TODO: kan deze meerdere parameters hebben?
-            self.type_scanf(function.children[1].type)
-        else:
-            self.addInstruction("jal", node.children[0].name)
+        self.addInstruction("jal", node.children[0].name)
 
     def enterWhile(self, node):
         # TODO:  CONDITIONS KLOPPEN NIET VOOR BRANCHES

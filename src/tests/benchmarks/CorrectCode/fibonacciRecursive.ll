@@ -1,5 +1,5 @@
-; ModuleID = 'src/tests/benchmarks/SemanticErrors/../CorrectCode/fibonacciRecursive.c'
-source_filename = "src/tests/benchmarks/SemanticErrors/../CorrectCode/fibonacciRecursive.c"
+; ModuleID = './src/tests/benchmarks/CorrectCode/fibonacciRecursive.c'
+source_filename = "./src/tests/benchmarks/CorrectCode/fibonacciRecursive.c"
 target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
 

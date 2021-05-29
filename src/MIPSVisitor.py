@@ -248,7 +248,7 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction(instr, params)
         return temp
 
-    def storeVariable(self, node):
+    def storeVariable(self, node, location=None):
         op = None
         if node.type == "float":
             op = "s.s"
@@ -259,7 +259,10 @@ class MIPSVisitor(ASTVisitor):
         else:
             op = "sw"
 
-        address = self.funct_stack.stack_next(node)
+        if location is None:
+            address = self.funct_stack.stack_next(node)
+        else:
+            address = location.original_address
         node.original_address = address
         self.addInstruction(op, "$" + str(node.temp_address) + ", " + str(address) + "($fp)")
         self.registers.FreeTemporary(node.temp_address)
@@ -484,15 +487,16 @@ class MIPSVisitor(ASTVisitor):
     def exitAssignment(self, node):
         # Get the node for the assignement
         identifier = self.getSymbol(node.children[0])
+        value = self.getSymbol(node.children[1])
 
         # load the right side in to store it in the left side (identifier)
         # Check if it's already stored. If not then store
-        self.loadVariable(self.getSymbol(node.children[1]))
-
+        identifier.temp_address = self.loadVariable(value)
+        self.addInstruction("TEST", str(identifier.temp_address))
 
         # if the identifier is not stored somewhere then store in a new address else store in previous address
-        # TODO: ALs identifier gedefinieerd is weer in table kijken want type en tempaddres is altijd none anders
-        self.storeVariable(node.children[0])
+        self.addInstruction("YEEEE")
+        self.storeVariable(value, identifier)
 
 
     def type_fprint(self, function_type):

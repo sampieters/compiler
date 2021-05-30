@@ -523,24 +523,28 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction("addiu", "$sp, $sp, -{LABEL}")
         self.addInstruction("sw", "$fp, {LABEL}($sp)")
         self.addInstruction("sw",   "$ra, {LABEL}($sp)")
+        self.addInstruction("sw", "$4, {LABEL}($sp)")
         self.addInstruction("move", "$fp, $sp")
 
     def exitFunctionDefinition(self, node):
         # stack size
         self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", str(
-            self.funct_stack.stack_next() + 8))
+            self.funct_stack.stack_next() + 12))
         # frame pointer place
         self.MIPS[self.funct_stack.MIPS_index + 1] = self.MIPS[self.funct_stack.MIPS_index + 1].replace("{LABEL}", str(
-            self.funct_stack.stack_curr()))
+            self.funct_stack.stack_curr() + 4))
         # return address
         self.MIPS[self.funct_stack.MIPS_index + 2] = self.MIPS[self.funct_stack.MIPS_index + 2].replace("{LABEL}", str(
+            self.funct_stack.stack_curr()))
+        self.MIPS[self.funct_stack.MIPS_index + 3] = self.MIPS[self.funct_stack.MIPS_index + 3].replace("{LABEL}", str(
             self.funct_stack.stack_curr() - 4))
 
         # allocate space on the stack for everything inside the function scope
         self.addInstruction("move", "$sp, $fp")
-        self.addInstruction("lw", "$ra, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
-        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr()) + "($sp)")
-        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_curr() + 4))
+        self.addInstruction("lw", "$4, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
+        self.addInstruction("lw", "$ra, " + str(self.funct_stack.stack_curr()) + "($sp)")
+        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr() + 4) + "($sp)")
+        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_curr() + 8))
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":
@@ -583,6 +587,8 @@ class MIPSVisitor(ASTVisitor):
             identifier.temp_address = value.temp_address
             self.storeVariable(identifier)
             self.registers.FreeRegister(identifier.temp_address)
+        elif isinstance(identifier, UnaryOperationNode) and identifier.operation == "*":
+            self.storeVariable(value, "0($" + identifier.temp_address + ")")
         else:
             # Get the node for the assignement
             # load the right side in to store it in the left side (identifier)
@@ -603,12 +609,20 @@ class MIPSVisitor(ASTVisitor):
         # load the right side in to store it in the left side (identifier)
         self.loadVariable(value)
 
+        if isinstance(value, BinaryOperationNode) and value.operation == "+":
+            print("IJOEGDOIZGJOIJIZRGJIOZGEIJOGZEJIOZEIJO", identifier, value)
         # if the identifier is not stored somewhere then store in a new address else store in previous address
         if isinstance(identifier, UnaryOperationNode) and identifier.operation == "*":
+            print("OOOGOOGAGA")
             self.storeVariable(value, f"0(${identifier.temp_address})")
         else:
-            print(value, identifier, value.temp_address)
-            self.storeVariable(value, identifier)
+            # Get the node for the assignement
+            # load the right side in to store it in the left side (identifier)
+            # Check if it's already stored. If not then store
+            identifier.temp_address = self.loadVariable(value)
+            # if the identifier is not stored somewhere then store in a new address else store in previous address
+            self.storeVariable(identifier)
+            self.registers.FreeRegister(identifier.temp_address)
         self.registers.FreeRegister(value.temp_address)
 
 

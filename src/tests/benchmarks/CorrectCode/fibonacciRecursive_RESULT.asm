@@ -9,8 +9,10 @@ string3_3: .asciiz ";\n\00"
 .text
                 
 f:      
-        addiu   $sp, $sp, -24
-        sw      $fp, 20($sp)
+        addiu   $sp, $sp, -32
+        sw      $fp, 28($sp)
+        sw      $ra, 24($sp)
+        sw      $4, 20($sp)
         move    $fp, $sp
         sw      $4, 4($fp)
         # BEGIN IF CONDITION
@@ -42,13 +44,17 @@ $L0:
         # END ELSE BODY
 $L1:    
         move    $sp, $fp
-        lw      $fp, 20($sp)
-        addiu   $sp, $sp, 24
+        lw      $4, 20($sp)
+        lw      $ra, 24($sp)
+        lw      $fp, 28($sp)
+        addiu   $sp, $sp, 32
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -44
-        sw      $fp, 40($sp)
+        addiu   $sp, $sp, -52
+        sw      $fp, 48($sp)
+        sw      $ra, 44($sp)
+        sw      $4, 40($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
@@ -105,7 +111,9 @@ $L2:
                 
 $L3:    
         move    $sp, $fp
-        lw      $fp, 40($sp)
-        addiu   $sp, $sp, 44
+        lw      $4, 40($sp)
+        lw      $ra, 44($sp)
+        lw      $fp, 48($sp)
+        addiu   $sp, $sp, 52
         li      $v0, 10
         syscall 

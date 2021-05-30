@@ -6,8 +6,10 @@ string3_1: .asciiz "Hello world!\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -24
-        sw      $fp, 20($sp)
+        addiu   $sp, $sp, -32
+        sw      $fp, 28($sp)
+        sw      $ra, 24($sp)
+        sw      $4, 20($sp)
         move    $fp, $sp
         li      $8, 5
         sw      $8, 0($fp)
@@ -69,7 +71,9 @@ $L2:
         # END IF BODY
 $L3:    
         move    $sp, $fp
-        lw      $fp, 20($sp)
-        addiu   $sp, $sp, 24
+        lw      $4, 20($sp)
+        lw      $ra, 24($sp)
+        lw      $fp, 28($sp)
+        addiu   $sp, $sp, 32
         li      $v0, 10
         syscall 

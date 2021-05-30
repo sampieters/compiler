@@ -4,14 +4,18 @@ string1_1: .asciiz "Hello World!\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -4
-        sw      $fp, 0($sp)
+        addiu   $sp, $sp, -12
+        sw      $fp, 8($sp)
+        sw      $ra, 4($sp)
+        sw      $4, 0($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
         syscall 
         move    $sp, $fp
-        lw      $fp, 0($sp)
-        addiu   $sp, $sp, 4
+        lw      $4, 0($sp)
+        lw      $ra, 4($sp)
+        lw      $fp, 8($sp)
+        addiu   $sp, $sp, 12
         li      $v0, 10
         syscall 

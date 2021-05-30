@@ -195,6 +195,42 @@ class MIPSVisitor(ASTVisitor):
         node1 = self.getSymbol(node1)
         node2 = self.getSymbol(node2)
 
+        #########
+        # TEST
+        #########
+        if isinstance(node1, LiteralNode):
+            if node2.type == "float":
+                # TODO: this if maybe works only for integer and double
+                if node1.type.startswith("i"):
+                    self.data_counter.update({"float": 1})
+                    self.addInstruction("float" + str(self.data_counter["float"]), ".float " + str(node1.value), True, True)
+                    node1.value = "float" + str(self.data_counter["float"])
+                    node1.type = "float"
+                elif node1.type == "double":
+                    for i in range(0, len(self.before_MIPS)):
+                        if node1.value in self.before_MIPS[i]:
+                            self.before_MIPS[i] = self.before_MIPS[i].replace(".double", ".float")
+                    node1.type = "float"
+            elif node2.type == "double":
+                if node1.type.startswith("i"):
+                    self.data_counter.update({"double": 1})
+                    self.addInstruction("double" + str(self.data_counter["double"]), ".double " + str(node1.value), True, True)
+                    node1.value = "double" + str(self.data_counter["double"])
+                    node1.type = "double"
+            elif node2.type == "i32":
+                if node1.type == "double":
+                    for i in range(0, len(self.before_MIPS)):
+                        if node1.value in self.before_MIPS[i]:
+                            start = self.before_MIPS[i].find(".double")
+                            substr = self.before_MIPS[i][start:]
+                            substr = substr.replace(".double", "")
+                            end = substr.find(".")
+                            substr = substr[:end]
+                            node1.value = int(substr)
+                    node1.type = "i32"
+            return
+        #########
+
         # if both types are the same, no problem
         if node1.type == node2.type:
             return
@@ -220,8 +256,7 @@ class MIPSVisitor(ASTVisitor):
         node2.temp_address = stored
 
         self.addInstruction(instruction, "$" + stored + "," + "$" + node1.temp_address)
-
-        #self.storeVariable(node2, )
+        #self.storeVariable(node2)
         # TODO; nog een store doen
 
     def loadVariable(self, node, load_as_arg=False):
@@ -384,7 +419,12 @@ class MIPSVisitor(ASTVisitor):
         for child in [child1, child2]:
             # Convert the child to the binary operation type, so that both children have the same type
             # TODO: We gaan waarchijnlijk ook nog een converttype moeten maken voor MIPS
-            # self.convertType(child, IdentifierNode(None, None, the_type))
+            if child == child1:
+                if child1.type == the_type:
+                    self.convertType(child2, child1)
+                else:
+                    self.convertType(child1, child2)
+
             # TODO: nog een getValue maken voor MIPS
             # hieronder stond tussen append child.getvalue()
             if isinstance(child, LiteralNode):
@@ -502,6 +542,9 @@ class MIPSVisitor(ASTVisitor):
         # When there is a definition, do a store word
         identifier = self.getSymbol(node.children[0].children[0])
         value = self.getSymbol(node.children[1])
+
+        self.convertType(value, identifier)
+
         if "global" in identifier.type_semantics:
             if identifier.type.startswith("i"):
                 if identifier.type == "i8":

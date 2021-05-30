@@ -153,7 +153,7 @@ geïmplementeerd van opdracht 6:
 - printf2 (werkt)
 - printf3 (werkt)
 - scanf1 (werkt)
-- scanf2 (failt, nog veel "None" te zien)
+- scanf2 (dereference returned en None address)
 - scoping (werkt)
 - unaryOperations (failt, kleine fout in het derde getal dat wordt afgeprint, array pakt niet het juiste element?)
 - variables1 (werkt)

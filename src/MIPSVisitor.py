@@ -483,6 +483,11 @@ class MIPSVisitor(ASTVisitor):
         if not isinstance(node.parent.parent, ArgListNode):
             self.symbol_table.add_symbol(identifier)
 
+            # if only a declaration, store $0 in the original address of the node (example: int y;)
+            if not isinstance(node.parent, DefinitionNode):
+                node.children[0].original_address = self.funct_stack.stack_next(node.children[0])
+
+
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         identifier = self.getSymbol(node.children[0].children[0])

@@ -10,12 +10,12 @@ int main(){
     a[0] = 15;
 	a[1] = 12;
 	x = 12;
-    --a[1];
+    a[1] = a[1] - 1;
 	printf("%d; ", a[1]);
     printf("%d; ", x);
     x++;
     printf("%d; ", x);
-	a[0]--;
+	a[0] = a[0] - 1;
     printf("%d; ", a[0]);
     return 1;
 }

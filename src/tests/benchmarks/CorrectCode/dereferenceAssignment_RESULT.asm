@@ -11,17 +11,14 @@ string4_2: .asciiz "\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -32
-        sw      $fp, 36($sp)
+        addiu   $sp, $sp, -20
+        sw      $fp, 16($sp)
         move    $fp, $sp
         li      $8, 0
         sw      $8, 0($fp)
-        lw      $8, 0($fp)
         addiu   $8, $fp, 0
         sw      $8, 4($fp)
         lw      $8, 4($fp)
-        sw      $8, 12($fp)
-        lw      $8, 12($fp)
         li      $9, 10
         sw      $9, 0($8)
         la      $4, string1_1
@@ -33,25 +30,25 @@ main:
         la      $4, string1_2
         li      $v0, 4
         syscall 
-        lw      $9, 12($fp)
+        lw      $9, 4($fp)
         lw      $9, 0($9)
         la      $4, string2_1
         li      $v0, 4
         syscall 
-        sw      $9, 20($fp)
-        lw      $4, 20($fp)
+        lw      $4, 4($fp)
+        lw      $4, 0($4)
         li      $v0, 1
         syscall 
         la      $4, string2_2
         li      $v0, 4
         syscall 
-        lw      $9, 12($fp)
-        lw      $10, 12($fp)
-        lw      $10, 0($10)
-        addi    $10, $10, 1
-        sw      $10, 24($fp)
-        lw      $10, 24($fp)
-        sw      $10, 0($9)
+        lw      $10, 4($fp)
+        lw      $11, 4($fp)
+        lw      $11, 0($11)
+        addi    $11, $11, 1
+        sw      $11, 12($fp)
+        lw      $11, 12($fp)
+        sw      $11, 0($10)
         la      $4, string3_1
         li      $v0, 4
         syscall 
@@ -61,21 +58,20 @@ main:
         la      $4, string3_2
         li      $v0, 4
         syscall 
-        lw      $10, 12($fp)
-        lw      $10, 0($10)
+        lw      $11, 4($fp)
+        lw      $11, 0($11)
         la      $4, string4_1
         li      $v0, 4
         syscall 
-        sw      $10, 28($fp)
-        lw      $4, 28($fp)
+        lw      $4, 4($fp)
+        lw      $4, 0($4)
         li      $v0, 1
         syscall 
         la      $4, string4_2
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
-        lw      $fp, 36($sp)
-        addiu   $sp, $sp, 36
+        lw      $fp, 16($sp)
+        addiu   $sp, $sp, 20
         li      $v0, 10
         syscall 

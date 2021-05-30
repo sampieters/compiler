@@ -45,6 +45,8 @@ class Registers():
         self.registers = [False] * 64
 
     def FreeRegister(self, register):
+        if not register:
+            return
         if register.startswith("f"):
             register = register[1:]
         self.registers[int(register)] = False
@@ -265,16 +267,22 @@ class MIPSVisitor(ASTVisitor):
             else:
                 instr = "lw"
             #################################
-            if (isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode)) and node.operation != "[]":
+            if (isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode)) and node.operation not in ["[]", "&", "*"]:
                 self.storeVariable(node)
             # TODO: global ook nog doen bij identifers enz
             if "global" in node.type_semantics:
                 name = node.name
+            elif isinstance(node, UnaryOperationNode) and node.operation == "*":
+                name = str(self.getSymbol(getChild(node, IdentifierNode)).original_address) + "($fp)"
             else:
                 name = str(node.original_address) + "($fp)"
             params = "$" + str(temp) + ", " + name
         node.temp_address = temp
         self.addInstruction(instr, params)
+        curr = node
+        while (isinstance(curr, UnaryOperationNode) and curr.operation == "*"):
+            self.addInstruction("lw", "$" + str(temp) + ", 0($" + str(temp) + ")")
+            curr = curr.children[0]
         return temp
 
     def storeVariable(self, node, location=None):
@@ -364,6 +372,9 @@ class MIPSVisitor(ASTVisitor):
         child1 = self.getSymbol(node.children[0])
         child2 = self.getSymbol(node.children[1])
         # For each child that is a variable, load the variable into a new temporary address
+        for child in child1, child2:
+            if isinstance(child, UnaryOperationNode) and child.operation == "[]":
+                self.loadVariable(child)
 
         # Both child's registers can be freed because not necessary after binary operation
         for child in [child1, child2]:
@@ -421,13 +432,15 @@ class MIPSVisitor(ASTVisitor):
         if node.operation == "*":
             op = "lw"
             children_MIPS.append(f"0(${str(node.temp_address)})")
-            if isinstance(node.parent, DefinitionNode) or isinstance(node.parent, AssignmentNode):
+            if isinstance(node.parent, AssignmentNode) and node.parent.children[0].operation == "*":
                 return
         elif node.operation == "&":
+            node.original_address = child.original_address
             op = "addiu"
             children_MIPS.append("$fp")
-            print(child)
             children_MIPS.append(str(child.original_address))
+            if getParent(node, FunctionCallNode):
+                return
         elif node.operation == "[]":
             identifier = self.getSymbol(node.children[0])
             node.original_address = identifier.original_address + node.children[1].value * int(identifier.alignment())
@@ -468,14 +481,14 @@ class MIPSVisitor(ASTVisitor):
 
     def exitFunctionDefinition(self, node):
         self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", str(
-            self.funct_stack.stack_next()))
+            self.funct_stack.stack_next() + 4))
         self.MIPS[self.funct_stack.MIPS_index + 1] = self.MIPS[self.funct_stack.MIPS_index + 1].replace("{LABEL}", str(
-            self.funct_stack.stack_curr()))
+            self.funct_stack.stack_curr() - 4))
 
         # allocate space on the stack for everything inside the function scope
         self.addInstruction("move", "$sp, $fp")
-        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr()) + "($sp)")
-        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_next()))
+        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
+        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_curr()))
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":
@@ -511,9 +524,12 @@ class MIPSVisitor(ASTVisitor):
             else:
                 the_type = "." + identifier.type
             self.addInstruction(identifier.name, the_type + "  " + str(value.value), True, True)
+        elif isinstance(value, UnaryOperationNode) and value.operation == "&":
+            identifier.temp_address = value.temp_address
+            self.storeVariable(identifier)
+            self.registers.FreeRegister(identifier.temp_address)
         else:
             # Get the node for the assignement
-
             # load the right side in to store it in the left side (identifier)
             # Check if it's already stored. If not then store
             identifier.temp_address = self.loadVariable(value)

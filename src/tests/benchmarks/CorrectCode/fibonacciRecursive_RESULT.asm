@@ -9,8 +9,8 @@ string3_3: .asciiz ";\n\00"
 .text
                 
 f:      
-        addiu   $sp, $sp, -20
-        sw      $fp, 24($sp)
+        addiu   $sp, $sp, -24
+        sw      $fp, 20($sp)
         move    $fp, $sp
         sw      $4, 4($fp)
         # BEGIN IF CONDITION
@@ -23,7 +23,6 @@ f:
         # END IF CONDITION
                 
         # BEGIN IF BODY
-        nop     
         # END IF BODY
         b       $L1
         nop     
@@ -40,59 +39,56 @@ $L0:
         lw      $4, 16($fp)
         jal     f
         add     $8, $11, $14
-        nop     
         # END ELSE BODY
 $L1:    
-        nop     
         move    $sp, $fp
-        lw      $fp, 24($sp)
+        lw      $fp, 20($sp)
         addiu   $sp, $sp, 24
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -48
-        sw      $fp, 52($sp)
+        addiu   $sp, $sp, -44
+        sw      $fp, 40($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $8, 28($fp)
-        addiu   $8, $fp, 28
         la      $4, string2_1
         li      $v0, 4
         syscall 
-        sw      $8, 32($fp)
-        lw      $4, 32($fp)
+        lw      $4, 24($fp)
         li      $v0, 5
         syscall 
-        sw      $v0, 28($fp)
+        sw      $v0, 24($fp)
         la      $4, string2_2
         li      $v0, 4
         syscall 
-        li      $8, 1
-        sw      $8, 40($fp)
+        li      $9, 1
+        sw      $9, 28($fp)
                 
 $L2:    
         # BEGIN WHILE CONDITION
-        lw      $8, 40($fp)
         lw      $9, 28($fp)
-        sle     $8, $8, $9
-        beq     $8, $0, $L3
+        lw      $10, 24($fp)
+        sle     $9, $9, $10
+        sw      $9, 32($fp)
+        lw      $9, 32($fp)
+        beq     $9, $0, $L3
         nop     
         # END WHILE CONDITION
                 
         # BEGIN WHILE BODY
-        lw      $8, 40($fp)
-        addi    $8, $8, 1
-        sw      $8, 44($fp)
-        lw      $8, 44($fp)
-        sw      $8, 40($fp)
-        lw      $4, 40($fp)
+        lw      $9, 28($fp)
+        addi    $9, $9, 1
+        sw      $9, 36($fp)
+        lw      $9, 36($fp)
+        sw      $9, 28($fp)
+        lw      $4, 28($fp)
         jal     f
         la      $4, string3_1
         li      $v0, 4
         syscall 
-        lw      $4, 40($fp)
+        lw      $4, 28($fp)
         li      $v0, 1
         syscall 
         la      $4, string3_2
@@ -108,9 +104,8 @@ $L2:
         # END WHILE BODY
                 
 $L3:    
-        nop     
         move    $sp, $fp
-        lw      $fp, 52($sp)
-        addiu   $sp, $sp, 52
+        lw      $fp, 40($sp)
+        addiu   $sp, $sp, 44
         li      $v0, 10
         syscall 

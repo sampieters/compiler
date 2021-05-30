@@ -5,7 +5,7 @@ string1_2: .asciiz ";\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -4
+        addiu   $sp, $sp, -12
         sw      $fp, 8($sp)
         move    $fp, $sp
         li      $8, 0
@@ -15,6 +15,8 @@ $L0:
         # BEGIN WHILE CONDITION
         lw      $8, 0($fp)
         slti    $8, $8, 5
+        sw      $8, 4($fp)
+        lw      $8, 4($fp)
         beq     $8, $0, $L1
         nop     
         # END WHILE CONDITION
@@ -36,9 +38,8 @@ $L0:
         # END WHILE BODY
                 
 $L1:    
-        nop     
         move    $sp, $fp
         lw      $fp, 8($sp)
-        addiu   $sp, $sp, 8
+        addiu   $sp, $sp, 12
         li      $v0, 10
         syscall 

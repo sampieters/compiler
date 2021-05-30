@@ -8,8 +8,8 @@ string1_4: .asciiz "\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -16
-        sw      $fp, 20($sp)
+        addiu   $sp, $sp, -20
+        sw      $fp, 16($sp)
         move    $fp, $sp
         li      $8, 5
         sw      $8, 0($fp)
@@ -38,9 +38,8 @@ main:
         la      $4, string1_4
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
-        lw      $fp, 20($sp)
+        lw      $fp, 16($sp)
         addiu   $sp, $sp, 20
         li      $v0, 10
         syscall 

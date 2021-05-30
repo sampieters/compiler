@@ -5,7 +5,7 @@ string1_2: .asciiz "\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -12
+        addiu   $sp, $sp, -20
         sw      $fp, 16($sp)
         move    $fp, $sp
         li      $8, 0
@@ -15,6 +15,8 @@ $L0:
         # BEGIN WHILE CONDITION
         lw      $8, 0($fp)
         slti    $8, $8, 10
+        sw      $8, 4($fp)
+        lw      $8, 4($fp)
         beq     $8, $0, $L3
         nop     
         # END WHILE CONDITION
@@ -32,8 +34,8 @@ $L0:
         # BEGIN IF CONDITION
         lw      $8, 0($fp)
         seq     $8, $8, 5
-        sw      $8, 4($fp)
-        lw      $8, 4($fp)
+        sw      $8, 8($fp)
+        lw      $8, 8($fp)
         beq     $8,$0, $L1
         nop     
         # END IF CONDITION
@@ -47,8 +49,8 @@ $L1:
         # BEGIN ELSE BODY
         lw      $8, 0($fp)
         addi    $8, $8, 1
-        sw      $8, 8($fp)
-        lw      $8, 8($fp)
+        sw      $8, 12($fp)
+        lw      $8, 12($fp)
         sw      $8, 0($fp)
         j       $L0
         # END ELSE BODY
@@ -59,9 +61,8 @@ $L2:
         # END WHILE BODY
                 
 $L3:    
-        nop     
         move    $sp, $fp
         lw      $fp, 16($sp)
-        addiu   $sp, $sp, 16
+        addiu   $sp, $sp, 20
         li      $v0, 10
         syscall 

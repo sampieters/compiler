@@ -122,6 +122,8 @@ class SemanticalErrorVisitor(ASTVisitor):
                 self.handleError(node, "Subscripted value is not an array, pointer or vector")
             if node.children[1].type not in INTEGER_TYPES:
                 self.handleError(node, "Array subscript is not an integer")
+            node.type = " ".join(node.children[0].type.split()[2:])[:-1]
+            print(node.type)
         else:
             node.type = node.children[0].type
 

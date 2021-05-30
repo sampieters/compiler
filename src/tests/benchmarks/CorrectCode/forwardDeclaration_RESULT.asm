@@ -6,21 +6,20 @@ string3_1: .asciiz "World\n\00"
 .text
                 
 f:      
-        addiu   $sp, $sp, -0
-        sw      $fp, 4($sp)
+        addiu   $sp, $sp, -4
+        sw      $fp, 0($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
-        lw      $fp, 4($sp)
+        lw      $fp, 0($sp)
         addiu   $sp, $sp, 4
         jr      $ra
                 
 g:      
         addiu   $sp, $sp, -8
-        sw      $fp, 12($sp)
+        sw      $fp, 4($sp)
         move    $fp, $sp
         la      $4, string2_1
         li      $v0, 4
@@ -29,21 +28,19 @@ g:
         la      $4, string3_1
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
-        lw      $fp, 12($sp)
-        addiu   $sp, $sp, 12
+        lw      $fp, 4($sp)
+        addiu   $sp, $sp, 8
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -16
-        sw      $fp, 20($sp)
+        addiu   $sp, $sp, -12
+        sw      $fp, 8($sp)
         move    $fp, $sp
         jal     f
         jal     g
-        nop     
         move    $sp, $fp
-        lw      $fp, 20($sp)
-        addiu   $sp, $sp, 20
+        lw      $fp, 8($sp)
+        addiu   $sp, $sp, 12
         li      $v0, 10
         syscall 

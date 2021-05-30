@@ -15,7 +15,7 @@ string6_2: .asciiz "; \00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -16
+        addiu   $sp, $sp, -24
         sw      $fp, 20($sp)
         move    $fp, $sp
         li      $8, 9
@@ -41,22 +41,20 @@ main:
         la      $4, string2_2
         li      $v0, 4
         syscall 
-        lw      $8, 4($fp)
         li      $9, 15
         sw      $9, 4($fp)
-        lw      $9, 4($fp)
         li      $10, 12
         sw      $10, 8($fp)
         li      $10, 12
         sw      $10, 0($fp)
-        lw      $10, 4($fp)
-        addiu   $11, $11, -1
-        sw      $10, 8($fp)
-        lw      $10, 4($fp)
+        lw      $12, 8($fp)
+        subi    $12, $12, 1
+        sw      $12, 12($fp)
+        lw      $12, 12($fp)
+        sw      $12, 8($fp)
         la      $4, string3_1
         li      $v0, 4
         syscall 
-        sw      $10, 8($fp)
         lw      $4, 8($fp)
         li      $v0, 1
         syscall 
@@ -72,9 +70,9 @@ main:
         la      $4, string4_2
         li      $v0, 4
         syscall 
-        lw      $10, 0($fp)
-        addiu   $10, $10, 1
-        sw      $10, 0($fp)
+        lw      $13, 0($fp)
+        addiu   $13, $13, 1
+        sw      $13, 0($fp)
         la      $4, string5_1
         li      $v0, 4
         syscall 
@@ -84,23 +82,22 @@ main:
         la      $4, string5_2
         li      $v0, 4
         syscall 
-        lw      $10, 4($fp)
-        addiu   $11, $11, -1
-        sw      $10, 4($fp)
-        lw      $10, 4($fp)
+        lw      $15, 4($fp)
+        subi    $15, $15, 1
+        sw      $15, 16($fp)
+        lw      $15, 16($fp)
+        sw      $15, 4($fp)
         la      $4, string6_1
         li      $v0, 4
         syscall 
-        sw      $10, 12($fp)
-        lw      $4, 12($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string6_2
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
         lw      $fp, 20($sp)
-        addiu   $sp, $sp, 20
+        addiu   $sp, $sp, 24
         li      $v0, 10
         syscall 

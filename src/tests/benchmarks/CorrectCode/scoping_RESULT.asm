@@ -12,8 +12,8 @@ string4_2: .asciiz ";\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -8
-        sw      $fp, 12($sp)
+        addiu   $sp, $sp, -12
+        sw      $fp, 8($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
@@ -66,9 +66,8 @@ main:
         syscall 
         # END IF BODY
 $L0:    
-        nop     
         move    $sp, $fp
-        lw      $fp, 12($sp)
+        lw      $fp, 8($sp)
         addiu   $sp, $sp, 12
         li      $v0, 10
         syscall 

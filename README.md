@@ -152,7 +152,7 @@ geïmplementeerd van opdracht 6:
 - printf1 (werkt)
 - printf2 (werkt)
 - printf3 (werkt)
-- scanf1 (failt, probeert sw te doen naar "LOCATION"??)
+- scanf1 (werkt)
 - scanf2 (failt, probeert sw te doen naar "LOCATION", load "None" in)
 - scoping (failt, print "x .TYPE VALUE" en "REGISTER")
 - unaryOperations (failt, arrays werken nog niet helemaal, vooral berekenen van $fp adressen en linkerkant in definitie)

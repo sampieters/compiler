@@ -19,7 +19,7 @@ def split_string(string):
 
 # LLVM
 CONVERSION_HIERARCHY = {"i1": 0, "i8": 1, "i16": 2, "i32": 3, "i64": 4, "float": 5, "double": 6, "x86_fp80": 7}
-ALIGNMENT = {"float": 4, "double": 8, "long double": 16}
+ALIGNMENT = {"float": 4, "double": 8, "long double": 16, "void": 4}
 
 BOOLEAN_OPS = ["!", "!=", "==", "<", "<=", ">", ">=", "&&", "||"]
 POINTER_OPS = ["*", "&"]

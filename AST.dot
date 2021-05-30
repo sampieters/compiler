@@ -24,58 +24,26 @@ digraph AST {
 	node10->node11
 	node12[label="i (None)"]
 	node11->node12
-	node13[label="10 (i32)"]
+	node13[label="5 (i32)"]
 	node11->node13
 	node14[label="scope"]
 	node10->node14
-	node15[label="func_call"]
+	node15[label="x++ (None)"]
 	node14->node15
-	node16[label="printf (i32 (i8*, ...))"]
+	node16[label="i (None)"]
 	node15->node16
-	node17[label="arguments"]
-	node15->node17
-	node18[label="%d\0A\00 (i8*)"]
+	node17[label="func_call"]
+	node14->node17
+	node18[label="printf (i32 (i8*, ...))"]
 	node17->node18
-	node19[label="i (None)"]
+	node19[label="arguments"]
 	node17->node19
-	node20[label="branch"]
-	node14->node20
-	node21[label="if"]
-	node20->node21
-	node22[label="== (None)"]
-	node21->node22
-	node23[label="i (None)"]
+	node20[label="%d;\00 (i8*)"]
+	node19->node20
+	node21[label="i (None)"]
+	node19->node21
+	node22[label="return"]
+	node5->node22
+	node23[label="1 (i32)"]
 	node22->node23
-	node24[label="5 (i32)"]
-	node22->node24
-	node25[label="scope"]
-	node21->node25
-	node26[label="break"]
-	node25->node26
-	node27[label="else"]
-	node20->node27
-	node28[label="scope"]
-	node27->node28
-	node29[label="assign"]
-	node28->node29
-	node30[label="i (None)"]
-	node29->node30
-	node31[label="+ (None)"]
-	node29->node31
-	node32[label="i (None)"]
-	node31->node32
-	node33[label="1 (i32)"]
-	node31->node33
-	node34[label="continue"]
-	node28->node34
-	node35[label="assign"]
-	node14->node35
-	node36[label="i (None)"]
-	node35->node36
-	node37[label="10 (i32)"]
-	node35->node37
-	node38[label="return"]
-	node5->node38
-	node39[label="0 (i32)"]
-	node38->node39
 }

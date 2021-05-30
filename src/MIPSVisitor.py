@@ -565,7 +565,7 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction("jr", "$ra")
 
     def exitReturn(self, node):
-        if len(node.children) != 0:
+        if node.children:
             child = self.getSymbol(node.children[0])
             self.loadVariable(child, False, True)
             self.addInstruction("j", "$FUNC_" + getParent(node, FunctionDefinitionNode).children[0].children[0].name)
@@ -624,11 +624,8 @@ class MIPSVisitor(ASTVisitor):
         # load the right side in to store it in the left side (identifier)
         self.loadVariable(value)
 
-        if isinstance(value, BinaryOperationNode) and value.operation == "+":
-            print("IJOEGDOIZGJOIJIZRGJIOZGEIJOGZEJIOZEIJO", identifier, value)
         # if the identifier is not stored somewhere then store in a new address else store in previous address
         if isinstance(identifier, UnaryOperationNode) and identifier.operation == "*":
-            print("OOOGOOGAGA")
             self.storeVariable(value, f"0(${identifier.temp_address})")
         else:
             # if the identifier is not stored somewhere then store in a new address else store in previous address

@@ -63,10 +63,10 @@ $FUNC_f:
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -76
-        sw      $fp, 72($sp)
-        sw      $ra, 68($sp)
-        sw      $4, 64($sp)
+        addiu   $sp, $sp, -68
+        sw      $fp, 64($sp)
+        sw      $ra, 60($sp)
+        sw      $4, 56($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $2, 4
@@ -100,22 +100,20 @@ $L2:
         addi    $11, $11, 1
         sw      $11, 48($fp)
         lw      $11, 48($fp)
-        sw      $11, 52($fp)
-        lw      $11, 52($fp)
-        sw      $11, 56($fp)
-        lw      $4, 56($fp)
+        sw      $11, 40($fp)
+        lw      $4, 40($fp)
         jal     f
-        sw      $2, 60($fp)
+        sw      $2, 52($fp)
         la      $4, string3_1
         li      $2, 4
         syscall 
-        lw      $4, 56($fp)
+        lw      $4, 40($fp)
         li      $2, 1
         syscall 
         la      $4, string3_2
         li      $2, 4
         syscall 
-        lw      $4, 60($fp)
+        lw      $4, 52($fp)
         li      $2, 1
         syscall 
         la      $4, string3_3
@@ -129,9 +127,9 @@ $L3:
         j       $FUNC_main
 $FUNC_main:
         move    $sp, $fp
-        lw      $4, 64($sp)
-        lw      $ra, 68($sp)
-        lw      $fp, 72($sp)
-        addiu   $sp, $sp, 76
+        lw      $4, 56($sp)
+        lw      $ra, 60($sp)
+        lw      $fp, 64($sp)
+        addiu   $sp, $sp, 68
         li      $2, 10
         syscall 

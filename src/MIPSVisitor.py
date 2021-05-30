@@ -261,7 +261,7 @@ class MIPSVisitor(ASTVisitor):
         #self.storeVariable(node2)
         # TODO; nog een store doen
 
-    def loadVariable(self, node, load_as_arg=False):
+    def loadVariable(self, node, load_as_arg=False, load_as_return=False):
         # TODO: CHAR testen
         # Every time a  variable is used it has to be loaded in
         instr = ""
@@ -270,6 +270,11 @@ class MIPSVisitor(ASTVisitor):
         if load_as_arg:
             temp = self.registers.UseParam(node.type)
         # Else load in temporary for int and f registers for float and double
+        elif load_as_return:
+            if node.type in ["float", "double"]:
+                temp = "f0"
+            else:
+                temp = "v0"
         elif node.type == "float" or node.type == "double":
             temp = self.registers.UseFloatTemporary(node.type == "double")
         else:
@@ -545,7 +550,10 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction("jr", "$ra")
 
     def exitReturn(self, node):
-        pass
+        if len(node.children) != 0:
+            child = self.getSymbol(node.children[0])
+            self.loadVariable(child, False, True)
+
 
     def exitDeclaration(self, node):
         identifier = node.children[0]

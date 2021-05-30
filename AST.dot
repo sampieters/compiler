@@ -4,150 +4,22 @@ digraph AST {
 	node0->node1
 	node2[label="declare_func"]
 	node1->node2
-	node3[label="f (i32)"]
+	node3[label="main (i32)"]
 	node2->node3
 	node4[label="arguments"]
 	node3->node4
-	node5[label="declare (None)"]
-	node4->node5
-	node6[label="a (i32)"]
+	node5[label="scope"]
+	node1->node5
+	node6[label="define (None)"]
 	node5->node6
-	node7[label="scope"]
-	node1->node7
-	node8[label="branch"]
+	node7[label="declare (None)"]
+	node6->node7
+	node8[label="i (i32)"]
 	node7->node8
-	node9[label="if"]
-	node8->node9
-	node10[label="< (None)"]
-	node9->node10
-	node11[label="a (None)"]
+	node9[label="4 (i32)"]
+	node6->node9
+	node10[label="return"]
+	node5->node10
+	node11[label="i (None)"]
 	node10->node11
-	node12[label="2 (i32)"]
-	node10->node12
-	node13[label="scope"]
-	node9->node13
-	node14[label="return"]
-	node13->node14
-	node15[label="a (None)"]
-	node14->node15
-	node16[label="else"]
-	node8->node16
-	node17[label="scope"]
-	node16->node17
-	node18[label="return"]
-	node17->node18
-	node19[label="+ (None)"]
-	node18->node19
-	node20[label="func_call"]
-	node19->node20
-	node21[label="f (None)"]
-	node20->node21
-	node22[label="arguments"]
-	node20->node22
-	node23[label="- (None)"]
-	node22->node23
-	node24[label="a (None)"]
-	node23->node24
-	node25[label="1 (i32)"]
-	node23->node25
-	node26[label="func_call"]
-	node19->node26
-	node27[label="f (None)"]
-	node26->node27
-	node28[label="arguments"]
-	node26->node28
-	node29[label="- (None)"]
-	node28->node29
-	node30[label="a (None)"]
-	node29->node30
-	node31[label="2 (i32)"]
-	node29->node31
-	node32[label="return"]
-	node7->node32
-	node33[label="0 (i32)"]
-	node32->node33
-	node34[label="define_func (None)"]
-	node0->node34
-	node35[label="declare_func"]
-	node34->node35
-	node36[label="main (i32)"]
-	node35->node36
-	node37[label="arguments"]
-	node36->node37
-	node38[label="scope"]
-	node34->node38
-	node39[label="declare (None)"]
-	node38->node39
-	node40[label="n (i32)"]
-	node39->node40
-	node41[label="func_call"]
-	node38->node41
-	node42[label="printf (i32 (i8*, ...))"]
-	node41->node42
-	node43[label="arguments"]
-	node41->node43
-	node44[label="Enter a number:\00 (i8*)"]
-	node43->node44
-	node45[label="func_call"]
-	node38->node45
-	node46[label="scanf (i32 (i8*, ...))"]
-	node45->node46
-	node47[label="arguments"]
-	node45->node47
-	node48[label="%d\00 (i8*)"]
-	node47->node48
-	node49[label="& (None)"]
-	node47->node49
-	node50[label="n (None)"]
-	node49->node50
-	node51[label="define (None)"]
-	node38->node51
-	node52[label="declare (None)"]
-	node51->node52
-	node53[label="i (i32)"]
-	node52->node53
-	node54[label="1 (i32)"]
-	node51->node54
-	node55[label="while"]
-	node38->node55
-	node56[label="<= (None)"]
-	node55->node56
-	node57[label="i (None)"]
-	node56->node57
-	node58[label="n (None)"]
-	node56->node58
-	node59[label="scope"]
-	node55->node59
-	node60[label="assign"]
-	node59->node60
-	node61[label="i (None)"]
-	node60->node61
-	node62[label="+ (None)"]
-	node60->node62
-	node63[label="i (None)"]
-	node62->node63
-	node64[label="1 (i32)"]
-	node62->node64
-	node65[label="func_call"]
-	node59->node65
-	node66[label="printf (i32 (i8*, ...))"]
-	node65->node66
-	node67[label="arguments"]
-	node65->node67
-	node68[label="fib(%d)\09= %d;\0A\00 (i8*)"]
-	node67->node68
-	node69[label="i (None)"]
-	node67->node69
-	node70[label="func_call"]
-	node67->node70
-	node71[label="f (None)"]
-	node70->node71
-	node72[label="arguments"]
-	node70->node72
-	node73[label="i (None)"]
-	node72->node73
-	node74[label="return"]
-	node38->node74
-	node75[label="0 (i32)"]
-	node74->node75
 }

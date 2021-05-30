@@ -196,7 +196,7 @@ class MIPSVisitor(ASTVisitor):
         node2 = self.getSymbol(node2)
 
         # if both types are the same, no problem
-        if node1 == node2:
+        if node1.type == node2.type:
             return
         # a convert instruction always begins with cvt
         instruction = "cvt"

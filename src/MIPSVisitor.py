@@ -545,10 +545,12 @@ class MIPSVisitor(ASTVisitor):
         elif function_type == "float":
             opcode = 6
             VorF = "f0"
-        # TODO: NOG STRING HIER HELEMAAL DOEN
-        # elif function_type == "string":
-        #    VorF = "v0"
-        #    opcode = 4
+        elif function_type == "double":
+            opcode = 7
+            VorF = "f0"
+        elif function_type == "string":
+            VorF = "v0"
+            opcode = 8
         elif function_type == "char":
             opcode = 12
             VorF = "v0"

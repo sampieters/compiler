@@ -645,8 +645,10 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction()
             self.addInstruction("# BEGIN WHILE BODY")
         elif isinstance(node.parent, IfNode):
-            # TODO: de eerste onderste instructie gaat niet erken voor literals
-            self.addInstruction("beq", "$" + node.parent.children[0].temp_address + ",$0, {LABEL}")
+            child = self.getSymbol(node.parent.children[0])
+            if not isinstance(child, UnaryOperationNode) or not isinstance(child, BinaryOperationNode):
+                self.loadVariable(child)
+            self.addInstruction("beq", "$" + child.temp_address + ",$0, {LABEL}")
             self.stat_stack.append(len(self.MIPS) - 1)
             self.addInstruction("nop")
             self.addInstruction("# END IF CONDITION")

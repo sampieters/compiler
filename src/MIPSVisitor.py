@@ -353,7 +353,7 @@ class MIPSVisitor(ASTVisitor):
             node.value = name
         elif "string" in node.type_semantics:
             self.data_counter.update({"string": 1})
-            for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f', node.value)):
+            for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f|%\ds', node.value)):
                 elem = elem.replace("\\0A", "\\n").replace("\\09", "\\t")
                 name = "string" + str(self.data_counter["string"]) + "_" + str(idx + 1)
                 self.addInstruction(name, f".asciiz \"{elem}\"", before=True)
@@ -405,7 +405,7 @@ class MIPSVisitor(ASTVisitor):
         # Get the identifier or literal
         child = self.getSymbol(node.children[0])
         # If child is an identifier, then load into a register
-        if isinstance(child, IdentifierNode) and node.operation != "[]":
+        if isinstance(child, IdentifierNode) and node.operation not in ["[]", "&"]:
             self.loadVariable(child)
             # Free register of the identifier to load the result in the same register
             self.registers.FreeRegister(child.temp_address)
@@ -426,6 +426,7 @@ class MIPSVisitor(ASTVisitor):
         elif node.operation == "&":
             op = "addiu"
             children_MIPS.append("$fp")
+            print(child)
             children_MIPS.append(str(child.original_address))
         elif node.operation == "[]":
             identifier = self.getSymbol(node.children[0])

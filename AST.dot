@@ -10,63 +10,42 @@ digraph AST {
 	node3->node4
 	node5[label="scope"]
 	node1->node5
-	node6[label="define (None)"]
+	node6[label="declare (None)"]
 	node5->node6
-	node7[label="declare (None)"]
+	node7[label="a ([5 x i8])"]
 	node6->node7
-	node8[label="i (i32)"]
-	node7->node8
-<<<<<<< HEAD
-	node9[label="0 (i32)"]
-	node6->node9
-	node10[label="while"]
-	node5->node10
-	node11[label="< (None)"]
-	node10->node11
-	node12[label="i (None)"]
+	node9[label="func_call"]
+	node5->node9
+	node10[label="printf (i32 (i8*, ...))"]
+	node9->node10
+	node11[label="arguments"]
+	node9->node11
+	node12[label="Enter a 5-character string:\00 (i8*)"]
 	node11->node12
-	node13[label="5 (i32)"]
-	node11->node13
-	node14[label="scope"]
-	node10->node14
-	node15[label="x++ (None)"]
-	node14->node15
-	node16[label="i (None)"]
-	node15->node16
-	node17[label="func_call"]
-	node14->node17
-	node18[label="printf (i32 (i8*, ...))"]
-	node17->node18
-	node19[label="arguments"]
-	node17->node19
-	node20[label="%d;\00 (i8*)"]
-	node19->node20
-	node21[label="i (None)"]
-	node19->node21
-	node22[label="return"]
-	node5->node22
-	node23[label="1 (i32)"]
-	node22->node23
-=======
-	node9[label="4 (i32)"]
-	node6->node9
-	node10[label="while"]
-	node5->node10
-	node11[label="i (None)"]
-	node10->node11
-	node12[label="scope"]
-	node10->node12
-	node13[label="define (None)"]
-	node12->node13
-	node14[label="declare (None)"]
+	node13[label="func_call"]
+	node5->node13
+	node14[label="scanf (i32 (i8*, ...))"]
 	node13->node14
-	node15[label="j (i32)"]
-	node14->node15
-	node16[label="5 (i32)"]
-	node13->node16
-	node17[label="return"]
-	node5->node17
-	node18[label="0 (i32)"]
+	node15[label="arguments"]
+	node13->node15
+	node16[label="%5s\00 (i8*)"]
+	node15->node16
+	node17[label="& (None)"]
+	node15->node17
+	node18[label="a (None)"]
 	node17->node18
->>>>>>> 0a6414b41289510340ac6f6fd3bf76e859163041
+	node19[label="func_call"]
+	node5->node19
+	node20[label="printf (i32 (i8*, ...))"]
+	node19->node20
+	node21[label="arguments"]
+	node19->node21
+	node22[label="%s\00 (i8*)"]
+	node21->node22
+	node23[label="a (None)"]
+	node21->node23
+	node24[label="return"]
+	node5->node24
+	node25[label="1 (i32)"]
+	node24->node25
 }

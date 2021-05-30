@@ -12,12 +12,10 @@ main:
         move    $fp, $sp
         li      $8, 10
         sw      $8, 0($fp)
-        lw      $8, 0($fp)
         addiu   $8, $fp, 0
         sw      $8, 4($fp)
         lw      $8, 4($fp)
         sw      $8, 12($fp)
-        lw      $8, 12($fp)
         addiu   $8, $fp, 12
         sw      $8, 20($fp)
         lw      $8, 20($fp)
@@ -50,7 +48,6 @@ main:
         la      $4, string1_4
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
         lw      $fp, 48($sp)
         addiu   $sp, $sp, 48

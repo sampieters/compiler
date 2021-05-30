@@ -1,6 +1,7 @@
 .data
 string1_1: .asciiz "Enter a 5-character string:\00"
-string2_1: .asciiz "%5s\00"
+string2_1: .asciiz ""
+string2_2: .asciiz "\00"
 string3_1: .asciiz ""
 string3_2: .asciiz "\00"
 .globl main
@@ -13,7 +14,6 @@ main:
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $8, 0($fp)
         addiu   $8, $fp, 0
         la      $4, string2_1
         li      $v0, 4
@@ -35,7 +35,6 @@ main:
         la      $4, string3_2
         li      $v0, 4
         syscall 
-        nop     
         move    $sp, $fp
         lw      $fp, 17($sp)
         addiu   $sp, $sp, 17

@@ -217,14 +217,11 @@ class MIPSVisitor(ASTVisitor):
         # If it's needed to load as argument for a syscall, than load it in $a0 (or $a1) or for float and doubles in $f12
         if load_as_arg:
             temp = self.registers.UseParam(node.type == "double")
-            print("LOAD_AS_ARG temp", temp)
         # Else load in temporary for int and f registers for float and double
         elif node.type == "float" or node.type == "double":
             temp = self.registers.UseFloatTemporary(node.type == "double")
-            print("FLOAT temp", temp)
         else:
             temp = self.registers.UseTemporary()
-            print("NORMAL temp", temp)
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
             # TODO: bij stirngs lijkt het dat in .data moet geladen worden, dan het adres geladen wordt. ALs een char wil van deze string dan lb van STIRNG ADRES)
@@ -238,11 +235,13 @@ class MIPSVisitor(ASTVisitor):
                 instr = "l.d"
             params = "$" + str(temp) + ", " + str(node.value)
 
-        elif isinstance(node, IdentifierNode):
+        elif isinstance(node, IdentifierNode) or isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
             if node.type == "i8":
                 instr = "lb"
             else:
                 instr = "lw"
+            if isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
+                self.storeVariable(node)
             params = "$" + str(temp) + ", " + str(node.original_address) + "($fp)"
         node.temp_address = temp
         self.addInstruction(instr, params)
@@ -260,11 +259,15 @@ class MIPSVisitor(ASTVisitor):
             op = "sw"
 
         if location is None:
-            address = self.funct_stack.stack_next(node)
+            node.original_address = self.funct_stack.stack_next(node)
+            address = str(node.original_address) + "($fp)"
+        elif isinstance(location, str):
+            address = location
+            node.original_address = location
         else:
-            address = location.original_address
-        node.original_address = address
-        self.addInstruction(op, "$" + str(node.temp_address) + ", " + str(address) + "($fp)")
+            node.original_address = location.original_address
+            address = str(node.original_address) + "($fp)"
+        self.addInstruction(op, "$" + str(node.temp_address) + ", " + address)
         self.registers.FreeRegister(node.temp_address)
 
     def unaryOpToMIPS(self, node):
@@ -323,7 +326,7 @@ class MIPSVisitor(ASTVisitor):
         elif "string" in node.type_semantics:
             self.data_counter.update({"string": 1})
             for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f', node.value)):
-                elem = elem.replace("\\0A", "\\n")
+                elem = elem.replace("\\0A", "\\n").replace("\\09", "\\t")
                 name = "string" + str(self.data_counter["string"]) + "_" + str(idx + 1)
                 self.addInstruction(name, f".asciiz \"{elem}\"", before=True)
             node.value = "string" + str(self.data_counter["string"])
@@ -383,7 +386,6 @@ class MIPSVisitor(ASTVisitor):
 
         children_MIPS = []
         op = None
-        print(node.operation)
         if node.operation == "-":
             op = "subu"
             children_MIPS.append("$zero")
@@ -391,6 +393,8 @@ class MIPSVisitor(ASTVisitor):
         if node.operation == "*":
             op = "lw"
             children_MIPS.append(f"0(${str(node.temp_address)})")
+            if isinstance(node.parent, DefinitionNode) or isinstance(node.parent, AssignmentNode):
+                return
         elif node.operation == "&":
             op = "addiu"
             children_MIPS.append("$fp")
@@ -401,7 +405,7 @@ class MIPSVisitor(ASTVisitor):
             return
         elif node.operation == "x++" or node.operation == "++x":
             op = "addiu"
-            children_MIPS.append("$" + str(node.temp_address))
+            children_MIPS.append("$" + str(child.temp_address))
             children_MIPS.append("1")
         elif node.operation == "x--" or node.operation == "--x":
             op = "addiu"
@@ -470,7 +474,7 @@ class MIPSVisitor(ASTVisitor):
         # print(identifier.type_semantics)
         # if "global" in identifier.type_semantics:
         #    self.addInstruction(identifier.name + ":", ".TYPE", False, True)
-        #    pass
+        #    pass            
         if "global" in identifier.type_semantics:
             print("YEET")
             # TODO: NOG DOEN
@@ -489,13 +493,14 @@ class MIPSVisitor(ASTVisitor):
         identifier = self.getSymbol(node.children[0])
         value = self.getSymbol(node.children[1])
 
-        # load the right side in to store it in the left side (identifier)
-        # Check if it's already stored. If not then store
-        identifier.temp_address = self.loadVariable(value)
+        self.loadVariable(value)
 
         # if the identifier is not stored somewhere then store in a new address else store in previous address
-        self.storeVariable(value, identifier)
-        self.registers.FreeRegister(identifier.temp_address)
+        if isinstance(identifier, UnaryOperationNode) and identifier.operation == "*":
+            self.storeVariable(value, f"0(${identifier.temp_address})")
+        else:
+            self.storeVariable(value, identifier)
+        self.registers.FreeRegister(value.temp_address)
 
 
     def type_fprint(self, function_type):
@@ -515,7 +520,7 @@ class MIPSVisitor(ASTVisitor):
         # syscall does the actual print
         self.addInstruction("syscall")
 
-    def type_scanf(self, function_type):
+    def type_scanf(self, function_type, identifier):
         opcode = None
         VorF = None
         if function_type.startswith("i"):
@@ -534,7 +539,7 @@ class MIPSVisitor(ASTVisitor):
         # syscall does the actual print
         self.addInstruction("li", f"$v0, {opcode}")
         self.addInstruction("syscall")
-        self.addInstruction("sw", f"${VorF}, LOCATION")
+        self.addInstruction("sw", f"${VorF}, {identifier.original_address}($fp)")
 
     def exitFunctionCall(self, node):
         # Get the function with the right addresses from the table
@@ -549,16 +554,16 @@ class MIPSVisitor(ASTVisitor):
                     if "string" in child.type_semantics:
                         child.value += "_1"
                     index = self.loadVariable(child, True)
-                    self.type_fprint(child.type)
+                    if function.name == "printf":
+                        self.type_fprint(child.type)
+                    else:
+                        self.type_scanf(child.type, getChild(child, IdentifierNode))
                     self.registers.FreeParam(index, child.type == "double")
 
                 tmp = copy(node.children[1].children[0])
                 tmp.value += "_" + str(idx+1)
                 index = self.loadVariable(tmp, True)
-                if function.name == "printf":
-                    self.type_fprint(tmp.type)
-                else:
-                    self.type_scanf(tmp.type)
+                self.type_fprint(tmp.type)
                 self.registers.FreeParam(index, tmp.type == "double")
             return
 
@@ -590,8 +595,17 @@ class MIPSVisitor(ASTVisitor):
 
     def enterScope(self, node):
         self.symbol_table.enter_scope()
-        if isinstance(node.parent, WhileNode):
-            # TODO: Ik denk/hoop dat deze condiition alle gevallen oplost
+        if isinstance(node.parent, FunctionDefinitionNode):
+            function = node.parent.children[0].children[0]
+            for idx, child in enumerate(function.children[0].children):
+                print(child)
+                child = self.getSymbol(child.children[0])
+                print(child)
+                # TODO: hardcoded to start params from 4, wont work on floats
+                child.temp_address = str(4 + idx)
+                self.storeVariable(child)
+        elif isinstance(node.parent, WhileNode):
+            # TODO: Ik denk/hoop dat deze condition alle gevallen oplost
             # TODO: what if idetifier only like while(i) {}
             self.addInstruction("beq", "$" + node.parent.children[0].temp_address + ", $0, {LABEL}")
             self.loop_stack.append(len(self.MIPS) - 1)
@@ -599,7 +613,7 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction("# END WHILE CONDITION")
             self.addInstruction()
             self.addInstruction("# BEGIN WHILE BODY")
-        if isinstance(node.parent, IfNode):
+        elif isinstance(node.parent, IfNode):
             # TODO: de eerste onderste instructie gaat niet erken voor literals
             self.addInstruction("beq", "$" + node.parent.children[0].temp_address + ",$0, {LABEL}")
             self.stat_stack.append(len(self.MIPS) - 1)

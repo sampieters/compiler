@@ -15,8 +15,8 @@ string6_2: .asciiz "; \00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -8
-        sw      $fp, 8($sp)
+        addiu   $sp, $sp, -16
+        sw      $fp, 16($sp)
         move    $fp, $sp
         li      $8, 9
         sw      $8, 4($fp)
@@ -56,7 +56,8 @@ main:
         la      $4, string3_1
         li      $v0, 4
         syscall 
-                
+        sw      $10, 8($fp)
+        lw      $4, 8($fp)
         li      $v0, 1
         syscall 
         la      $4, string3_2
@@ -71,9 +72,9 @@ main:
         la      $4, string4_2
         li      $v0, 4
         syscall 
-        lw      $11, 4($fp)
-        addiu   $11, $11, 1
-        sw      $11, 4($fp)
+        lw      $10, 4($fp)
+        addiu   $10, $10, 1
+        sw      $10, 4($fp)
         la      $4, string5_1
         li      $v0, 4
         syscall 
@@ -83,14 +84,15 @@ main:
         la      $4, string5_2
         li      $v0, 4
         syscall 
-        lw      $11, 3($fp)
-        addiu   $12, $12, -1
-        sw      $11, 3($fp)
-        lw      $11, 3($fp)
+        lw      $10, 3($fp)
+        addiu   $11, $11, -1
+        sw      $10, 3($fp)
+        lw      $10, 3($fp)
         la      $4, string6_1
         li      $v0, 4
         syscall 
-                
+        sw      $10, 12($fp)
+        lw      $4, 12($fp)
         li      $v0, 1
         syscall 
         la      $4, string6_2
@@ -98,7 +100,7 @@ main:
         syscall 
         nop     
         move    $sp, $fp
-        lw      $fp, 8($sp)
-        addiu   $sp, $sp, 12
+        lw      $fp, 16($sp)
+        addiu   $sp, $sp, 20
         li      $v0, 10
         syscall 

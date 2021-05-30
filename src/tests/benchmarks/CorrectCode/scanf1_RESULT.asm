@@ -10,8 +10,8 @@ string3_3: .asciiz "\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -4
-        sw      $fp, 4($sp)
+        addiu   $sp, $sp, -20
+        sw      $fp, 20($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
@@ -24,14 +24,16 @@ main:
         li      $v0, 5
         syscall 
         sw      $v0, LOCATION
-                
+        sw      $8, 8($fp)
+        lw      $4, 8($fp)
         li      $v0, 1
         syscall 
         la      $4, string2_2
         li      $v0, 5
         syscall 
         sw      $v0, LOCATION
-                
+        sw      $8, 16($fp)
+        lw      $4, 16($fp)
         li      $v0, 1
         syscall 
         la      $4, string2_3
@@ -55,7 +57,7 @@ main:
         syscall 
         nop     
         move    $sp, $fp
-        lw      $fp, 4($sp)
-        addiu   $sp, $sp, 8
+        lw      $fp, 20($sp)
+        addiu   $sp, $sp, 24
         li      $v0, 10
         syscall 

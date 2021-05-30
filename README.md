@@ -138,7 +138,7 @@ geïmplementeerd van opdracht 6:
 - breakAndContinue (werkt)
 - comparisons1 (werkt, dankzij folding)
 - comparisons2 (werkt, dankzij folding)
-- dereferenceAssignment (failt, moet * operatie nog nakijken, vooral aan linkerkant van definitie)
+- dereferenceAssignment (werkt, zonder (*xp)++ (gebruik in de plaats *xp = *xp + 1))
 - fibonacciRecursive (failt, zonder i++ in while, wss door functie parameters die niet worden gestored in begin v/d functies)
 - floatToIntConversion (failt, conversions zijn er nog niet)
 - for (werkt)

@@ -24,12 +24,13 @@ define i32 @main() #0 {
   %10 = load i32*, i32** %3, align 8
   %11 = load i32, i32* %10, align 4
   %12 = add nsw i32 %11, 1
-  store i32 %12, i32* %10, align 4
-  %13 = load i32, i32* %2, align 4
-  %14 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i32 0, i32 0), i32 %13)
-  %15 = load i32*, i32** %3, align 8
-  %16 = load i32, i32* %15, align 4
-  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i32 0, i32 0), i32 %16)
+  %13 = load i32*, i32** %3, align 8
+  store i32 %12, i32* %13, align 4
+  %14 = load i32, i32* %2, align 4
+  %15 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @.str, i32 0, i32 0), i32 %14)
+  %16 = load i32*, i32** %3, align 8
+  %17 = load i32, i32* %16, align 4
+  %18 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i32 0, i32 0), i32 %17)
   ret i32 1
 }
 

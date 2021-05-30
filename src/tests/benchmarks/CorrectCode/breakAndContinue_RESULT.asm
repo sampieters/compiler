@@ -5,8 +5,8 @@ string1_2: .asciiz "\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -8
-        sw      $fp, 8($sp)
+        addiu   $sp, $sp, -12
+        sw      $fp, 12($sp)
         move    $fp, $sp
         li      $8, 0
         sw      $8, 4($fp)
@@ -45,7 +45,8 @@ $L1:
         # BEGIN ELSE BODY
         lw      $8, 4($fp)
         addi    $8, $8, 1
-                
+        sw      $8, 8($fp)
+        lw      $8, 8($fp)
         sw      $8, 4($fp)
         j       $L0
         # END ELSE BODY
@@ -58,7 +59,7 @@ $L2:
 $L3:    
         nop     
         move    $sp, $fp
-        lw      $fp, 8($sp)
-        addiu   $sp, $sp, 12
+        lw      $fp, 12($sp)
+        addiu   $sp, $sp, 16
         li      $v0, 10
         syscall 

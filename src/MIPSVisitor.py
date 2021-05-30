@@ -194,20 +194,35 @@ class MIPSVisitor(ASTVisitor):
         # Convert node1 type to node2 type
         node1 = self.getSymbol(node1)
         node2 = self.getSymbol(node2)
-        # If the node being converted is a literal, modify the literal so no conversion is needed
-        if isinstance(node1, LiteralNode):
-            if node1.type == "i8" and isinstance(node1.value,str):
-                node1.value = ord(node1.value)
-            # If the literal is an integer that has to be converted to decimal, use scientific notation
-            if node2.type in DECIMAL_TYPES:
-                node1.value = "{:e}".format(float(node1.value))
-            # If the literal is a decimal that has to be converted to integer, floor the value
-            elif node2.type in INTEGER_TYPES:
-                node1.value = int(float(node1.value))
-            elif node1.value == 0 and node2.type.startswith("["):
-                node1.value = "zeroinitializer"
-            node1.type = node2.type
+
+        # if both types are the same, no problem
+        if node1.type == node2.type:
             return
+        # a convert instruction always begins with cvt
+        instruction = "cvt"
+        if node2.type == "float":
+            instruction += ".s"
+        elif node2.type == "double":
+            instruction += ".d"
+        # TODO: voor char, pointer enz... gaat dit zwz naar een word worden omgezet denk ik omdat er geen convert to byte bestaat
+        else:
+            instruction += ".w"
+
+        if node1.type == "float":
+            instruction += ".s"
+        elif node1.type == "double":
+            instruction += ".d"
+        else:
+            instruction += ".w"
+
+        # The result of a conversion is always stored in a float/double regiter
+        stored = self.registers.UseFloatTemporary(node2.type == "double")
+        node2.temp_address = stored
+
+        self.addInstruction(instruction, "$" + stored + "," + "$" + node1.temp_address)
+
+        #self.storeVariable(node2, )
+        # TODO; nog een store doen
 
     def loadVariable(self, node, load_as_arg=False):
         # TODO: CHAR testen
@@ -242,7 +257,12 @@ class MIPSVisitor(ASTVisitor):
                 instr = "lw"
             if isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
                 self.storeVariable(node)
-            params = "$" + str(temp) + ", " + str(node.original_address) + "($fp)"
+            # TODO: global ook nog doen bij identifers enz
+            if "global" in node.type_semantics:
+                name = node.name
+            else:
+                name = str(node.original_address) + "($fp)"
+            params = "$" + str(temp) + ", " + name
         node.temp_address = temp
         self.addInstruction(instr, params)
         return temp
@@ -462,37 +482,39 @@ class MIPSVisitor(ASTVisitor):
         identifier = node.children[0]
         if not isinstance(node.parent.parent, ArgListNode):
             self.symbol_table.add_symbol(identifier)
-        if "global" in identifier.type_semantics:
-            print("YEET")
-            # TODO: NOG DOEN
-            self.addInstruction(identifier.name, ".TYPE VALUE")
 
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         identifier = self.getSymbol(node.children[0].children[0])
         value = self.getSymbol(node.children[1])
-        # print(identifier.type_semantics)
-        # if "global" in identifier.type_semantics:
-        #    self.addInstruction(identifier.name + ":", ".TYPE", False, True)
-        #    pass            
         if "global" in identifier.type_semantics:
-            print("YEET")
-            # TODO: NOG DOEN
-            self.addInstruction(identifier.name, ".TYPE VALUE")
-        # Get the node for the assignement
+            if identifier.type.startswith("i"):
+                if identifier.type == "i8":
+                    the_type = ".byte"
+                else:
+                    the_type = ".word"
+            else:
+                the_type = "." + identifier.type
+            self.addInstruction(identifier.name, the_type + "  " + str(value.value), True, True)
+        else:
+            # Get the node for the assignement
 
-        # load the right side in to store it in the left side (identifier)
-        # Check if it's already stored. If not then store
-        identifier.temp_address = self.loadVariable(value)
-        # if the identifier is not stored somewhere then store in a new address else store in previous address
-        self.storeVariable(identifier)
-        self.registers.FreeRegister(identifier.temp_address)
+            # load the right side in to store it in the left side (identifier)
+            # Check if it's already stored. If not then store
+            identifier.temp_address = self.loadVariable(value)
+            # if the identifier is not stored somewhere then store in a new address else store in previous address
+            self.storeVariable(identifier)
+            self.registers.FreeRegister(identifier.temp_address)
 
     def exitAssignment(self, node):
         # Get the node for the assignement
         identifier = self.getSymbol(node.children[0])
         value = self.getSymbol(node.children[1])
 
+        # convert the type of the right side to the type of the left side if necessary
+        self.convertType(value, identifier)
+
+        # load the right side in to store it in the left side (identifier)
         self.loadVariable(value)
 
         # if the identifier is not stored somewhere then store in a new address else store in previous address
@@ -529,10 +551,12 @@ class MIPSVisitor(ASTVisitor):
         elif function_type == "float":
             opcode = 6
             VorF = "f0"
-        # TODO: NOG STRING HIER HELEMAAL DOEN
-        # elif function_type == "string":
-        #    VorF = "v0"
-        #    opcode = 4
+        elif function_type == "double":
+            opcode = 7
+            VorF = "f0"
+        elif function_type == "string":
+            VorF = "v0"
+            opcode = 8
         elif function_type == "char":
             opcode = 12
             VorF = "v0"

@@ -157,7 +157,7 @@ geïmplementeerd van opdracht 6:
 - scoping (failt, print "x .TYPE VALUE" en "REGISTER")
 - unaryOperations (failt, arrays werken nog niet helemaal, vooral berekenen van $fp adressen en linkerkant in definitie)
 - variables1 (failt, kleine fout bij printen van de float (print 0.0 ipv 0.5), mss omdat het in $4 gaat ipv een float register?)
-- variables2 (failt, er gebeuren rare dingen, load van 99 for some reason?, rare adressen)
+- variables2 (failt, de stores op de stack gebeuren op rar plaatsen)
 - variables3 (failt)
 - variables4 (failt, dereference lijkt niks te doen)
 - variables5 (failt)

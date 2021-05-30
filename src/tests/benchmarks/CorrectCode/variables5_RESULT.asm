@@ -40,6 +40,7 @@ main:
         la      $4, string1_4
         li      $v0, 4
         syscall 
+        li      $v0, 0
         move    $sp, $fp
         lw      $4, 16($sp)
         lw      $ra, 20($sp)

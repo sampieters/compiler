@@ -21,6 +21,7 @@ main:
         la      $4, string1_2
         li      $v0, 4
         syscall 
+        li      $v0, 1
         move    $sp, $fp
         lw      $4, 4($sp)
         lw      $ra, 8($sp)

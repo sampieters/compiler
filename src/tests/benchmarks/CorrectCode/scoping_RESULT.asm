@@ -69,6 +69,7 @@ main:
         syscall 
         # END IF BODY
 $L0:    
+        li      $v0, 1
         move    $sp, $fp
         lw      $4, 12($sp)
         lw      $ra, 16($sp)

@@ -70,6 +70,7 @@ $L1:
 $L2:    
         # END IF BODY
 $L3:    
+        li      $v0, 1
         move    $sp, $fp
         lw      $4, 20($sp)
         lw      $ra, 24($sp)

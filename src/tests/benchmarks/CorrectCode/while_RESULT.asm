@@ -40,6 +40,7 @@ $L0:
         # END WHILE BODY
                 
 $L1:    
+        li      $v0, 1
         move    $sp, $fp
         lw      $4, 8($sp)
         lw      $ra, 12($sp)

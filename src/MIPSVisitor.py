@@ -549,6 +549,7 @@ class MIPSVisitor(ASTVisitor):
         self.MIPS[self.funct_stack.MIPS_index + 3] = self.MIPS[self.funct_stack.MIPS_index + 3].replace("{LABEL}", str(
             self.funct_stack.stack_curr() - 4))
 
+        self.addInstruction("$FUNC_" + node.children[0].children[0].name + ":", spacing=False)
         # allocate space on the stack for everything inside the function scope
         self.addInstruction("move", "$sp, $fp")
         self.addInstruction("lw", "$4, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
@@ -567,6 +568,7 @@ class MIPSVisitor(ASTVisitor):
         if len(node.children) != 0:
             child = self.getSymbol(node.children[0])
             self.loadVariable(child, False, True)
+            self.addInstruction("j", "$FUNC_" + getParent(node, FunctionDefinitionNode).children[0].children[0].name)
 
 
     def exitDeclaration(self, node):

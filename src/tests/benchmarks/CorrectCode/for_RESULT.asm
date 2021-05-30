@@ -44,6 +44,7 @@ $L0:
         # END WHILE BODY
                 
 $L1:    
+        li      $v0, 0
         move    $sp, $fp
         lw      $4, 20($sp)
         lw      $ra, 24($sp)

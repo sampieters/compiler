@@ -50,6 +50,7 @@ main:
         la      $4, string3_3
         li      $v0, 4
         syscall 
+        li      $v0, 1
         move    $sp, $fp
         lw      $4, 8($sp)
         lw      $ra, 12($sp)

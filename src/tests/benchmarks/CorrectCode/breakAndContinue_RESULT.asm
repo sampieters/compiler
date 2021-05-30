@@ -66,6 +66,7 @@ $L2:
         # END WHILE BODY
                 
 $L3:    
+        li      $v0, 0
         move    $sp, $fp
         lw      $4, 28($sp)
         lw      $ra, 32($sp)

@@ -9,10 +9,10 @@ string3_3: .asciiz ";\n\00"
 .text
                 
 f:      
-        addiu   $sp, $sp, -40
-        sw      $fp, 36($sp)
-        sw      $ra, 32($sp)
-        sw      $4, 28($sp)
+        addiu   $sp, $sp, -44
+        sw      $fp, 40($sp)
+        sw      $ra, 36($sp)
+        sw      $4, 32($sp)
         move    $fp, $sp
         sw      $4, 4($fp)
         # BEGIN IF CONDITION
@@ -25,6 +25,8 @@ f:
         # END IF CONDITION
                 
         # BEGIN IF BODY
+        lw      $v0, 4($fp)
+        j       $FUNC_f
         # END IF BODY
         b       $L1
         nop     
@@ -45,20 +47,26 @@ $L0:
         lw      $8, 16($fp)
         lw      $9, 24($fp)
         add     $10, $8, $9
+        sw      $10, 28($fp)
+        lw      $v0, 28($fp)
+        j       $FUNC_f
         # END ELSE BODY
 $L1:    
+        li      $v0, 0
+        j       $FUNC_f
+$FUNC_f:
         move    $sp, $fp
-        lw      $4, 28($sp)
-        lw      $ra, 32($sp)
-        lw      $fp, 36($sp)
-        addiu   $sp, $sp, 40
+        lw      $4, 32($sp)
+        lw      $ra, 36($sp)
+        lw      $fp, 40($sp)
+        addiu   $sp, $sp, 44
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -72
-        sw      $fp, 68($sp)
-        sw      $ra, 64($sp)
-        sw      $4, 60($sp)
+        addiu   $sp, $sp, -76
+        sw      $fp, 72($sp)
+        sw      $ra, 68($sp)
+        sw      $4, 64($sp)
         move    $fp, $sp
         la      $4, string1_1
         li      $v0, 4
@@ -66,48 +74,48 @@ main:
         la      $4, string2_1
         li      $v0, 4
         syscall 
-        lw      $4, 32($fp)
+        lw      $4, 36($fp)
         li      $v0, 5
         syscall 
-        sw      $v0, 32($fp)
+        sw      $v0, 36($fp)
         la      $4, string2_2
         li      $v0, 4
         syscall 
         li      $11, 1
-        sw      $11, 36($fp)
+        sw      $11, 40($fp)
                 
 $L2:    
         # BEGIN WHILE CONDITION
-        lw      $11, 36($fp)
-        lw      $12, 32($fp)
-        sle     $11, $11, $12
-        sw      $11, 40($fp)
         lw      $11, 40($fp)
+        lw      $12, 36($fp)
+        sle     $11, $11, $12
+        sw      $11, 44($fp)
+        lw      $11, 44($fp)
         beq     $11, $0, $L3
         nop     
         # END WHILE CONDITION
                 
         # BEGIN WHILE BODY
-        lw      $11, 36($fp)
+        lw      $11, 40($fp)
         addi    $11, $11, 1
-        sw      $11, 44($fp)
-        lw      $11, 44($fp)
         sw      $11, 48($fp)
         lw      $11, 48($fp)
         sw      $11, 52($fp)
-        lw      $4, 52($fp)
+        lw      $11, 52($fp)
+        sw      $11, 56($fp)
+        lw      $4, 56($fp)
         jal     f
-        sw      $2, 56($fp)
+        sw      $2, 60($fp)
         la      $4, string3_1
         li      $v0, 4
         syscall 
-        lw      $4, 52($fp)
+        lw      $4, 56($fp)
         li      $v0, 1
         syscall 
         la      $4, string3_2
         li      $v0, 4
         syscall 
-        lw      $4, 56($fp)
+        lw      $4, 60($fp)
         li      $v0, 1
         syscall 
         la      $4, string3_3
@@ -117,10 +125,13 @@ $L2:
         # END WHILE BODY
                 
 $L3:    
+        li      $v0, 0
+        j       $FUNC_main
+$FUNC_main:
         move    $sp, $fp
-        lw      $4, 60($sp)
-        lw      $ra, 64($sp)
-        lw      $fp, 68($sp)
-        addiu   $sp, $sp, 72
+        lw      $4, 64($sp)
+        lw      $ra, 68($sp)
+        lw      $fp, 72($sp)
+        addiu   $sp, $sp, 76
         li      $v0, 10
         syscall 

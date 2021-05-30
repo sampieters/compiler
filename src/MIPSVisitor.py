@@ -484,8 +484,9 @@ class MIPSVisitor(ASTVisitor):
             self.symbol_table.add_symbol(identifier)
 
             # if only a declaration, store $0 in the original address of the node (example: int y;)
-            if not isinstance(node.parent, DefinitionNode):
-                node.children[0].original_address = self.funct_stack.stack_next(node.children[0])
+        if not isinstance(node.parent, DefinitionNode):
+            identifier.original_address = self.funct_stack.stack_next(identifier)
+            print("JOSHI KIJK HIER", node.children[0], node.children[0].original_address)
 
 
     def exitDefinition(self, node):
@@ -568,6 +569,7 @@ class MIPSVisitor(ASTVisitor):
         # syscall does the actual print
         self.addInstruction("li", f"$v0, {opcode}")
         self.addInstruction("syscall")
+        print("JOSHI KIJK HIER OOK", identifier, identifier.original_address)
         self.addInstruction("sw", f"${VorF}, {identifier.original_address}($fp)")
 
     def exitFunctionCall(self, node):
@@ -586,7 +588,7 @@ class MIPSVisitor(ASTVisitor):
                     if function.name == "printf":
                         self.type_fprint(child.type)
                     else:
-                        self.type_scanf(child.type, getChild(child, IdentifierNode))
+                        self.type_scanf(child.type, self.getSymbol(getChild(child, IdentifierNode)))
                     self.registers.FreeParam(index, child.type == "double")
 
                 tmp = copy(node.children[1].children[0])

@@ -45,9 +45,9 @@ class Registers():
         self.registers[int(register)] = False
 
 
-    def UseParam(self, double=False):
+    def UseParam(self, type):
         # if not a double than can be loaded in a0-a3
-        if double is False:
+        if type not in ["float", "double"]:
             for i in range(4, 7):
                 if self.registers[i] is False:
                     self.registers[i] = True
@@ -57,7 +57,7 @@ class Registers():
             for i in range(44, 46):
                 if self.registers[i] is False:
                     # If double, the first register needs to be an even register such that an uneven is the second register
-                    if i % 2 == 0 and double:
+                    if i % 2 == 0 and type == "double":
                         # This is to check if there is one register in between that is used as a float
                         if self.registers[i + 1]:
                             continue
@@ -66,7 +66,7 @@ class Registers():
                             self.registers[i] = True
                             self.registers[i + 1] = True
                     # If it is a double but the register checked is odd, then chck the following register
-                    elif double:
+                    elif type == "double":
                         continue
                     # Else if it is a float, it can be loaded in an even or uneven register
                     else:
@@ -231,7 +231,7 @@ class MIPSVisitor(ASTVisitor):
         params = ""
         # If it's needed to load as argument for a syscall, than load it in $a0 (or $a1) or for float and doubles in $f12
         if load_as_arg:
-            temp = self.registers.UseParam(node.type == "double")
+            temp = self.registers.UseParam(node.type)
         # Else load in temporary for int and f registers for float and double
         elif node.type == "float" or node.type == "double":
             temp = self.registers.UseFloatTemporary(node.type == "double")
@@ -251,10 +251,20 @@ class MIPSVisitor(ASTVisitor):
             params = "$" + str(temp) + ", " + str(node.value)
 
         elif isinstance(node, IdentifierNode) or isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
-            if node.type == "i8":
+            #################################
+            # TEST
+            #################################
+            if node.type == "i8*":
+                instr = "la"
+            elif node.type == "i8":
                 instr = "lb"
+            elif node.type == "float":
+                instr = "l.s"
+            elif node.type == "double":
+                instr = "l.d"
             else:
                 instr = "lw"
+            #################################
             if isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
                 self.storeVariable(node)
             # TODO: global ook nog doen bij identifers enz

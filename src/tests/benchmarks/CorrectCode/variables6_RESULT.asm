@@ -13,16 +13,18 @@ main:
         li      $8, 10
         sw      $8, 4($fp)
         lw      $8, 4($fp)
-        addiu   $9, $fp, 4
-        sw      $$9, 12($fp)
-        lw      $10, 3($fp)
-        addiu   $11, $fp, 3
-        sw      $$11, 20($fp)
-        lw      $12, 3($fp)
-        lw      $13, 0($$13)
-        lw      $14, 4($fp)
-        lw      $24, 0($$24)
-        lw      $Error, 0($$Error)
+        addiu   $8, $fp, 4
+                
+        sw      $8, 12($fp)
+        lw      $8, 12($fp)
+        addiu   $8, $fp, 12
+                
+        sw      $8, 20($fp)
+        lw      $8, 12($fp)
+        lw      $8, 0($8)
+        lw      $9, 20($fp)
+        lw      $9, 0($9)
+        lw      $10, 0($10)
         la      $4, string1_1
         li      $v0, 4
         syscall 

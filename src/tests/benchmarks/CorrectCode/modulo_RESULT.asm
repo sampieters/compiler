@@ -1,6 +1,6 @@
 .data
 string1_1: .asciiz ""
-string1_2: .asciiz "\0A\00"
+string1_2: .asciiz "\n\00"
 .globl main
 .text
                 

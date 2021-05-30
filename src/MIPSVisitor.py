@@ -265,7 +265,7 @@ class MIPSVisitor(ASTVisitor):
             address = location.original_address
         node.original_address = address
         self.addInstruction(op, "$" + str(node.temp_address) + ", " + str(address) + "($fp)")
-        self.registers.FreeTemporary(node.temp_address)
+        self.registers.FreeRegister(node.temp_address)
 
     def unaryOpToMIPS(self, node):
         child = self.getSymbol(node.children[0])
@@ -341,7 +341,7 @@ class MIPSVisitor(ASTVisitor):
         for child in [child1, child2]:
             if isinstance(child, IdentifierNode) or isinstance(child, BinaryOperationNode) or isinstance(child,
                                                                                                          UnaryOperationNode):
-                self.registers.FreeTemporary(child.temp_address)
+                self.registers.FreeRegister(child.temp_address)
 
         # Store the result of the binary operation in a new address (mostly the adres from the 1st or 2nd child)
         node.temp_address = self.registers.UseTemporary()
@@ -365,8 +365,8 @@ class MIPSVisitor(ASTVisitor):
         self.addInstruction(self.binaryOpToMIPS(node), param)
 
         # TODO: If this is the last binary op from the sequence of operations, then free
-        if not isinstance(node.parent, BinaryOperationNode) or not isinstance(node.parent, UnaryOperationNode):
-            self.registers.FreeTemporary(node.temp_address)
+        if not getParent(node, BinaryOperationNode) or not getParent(node, UnaryOperationNode):
+            self.registers.FreeRegister(node.temp_address)
 
     def exitUnaryOperation(self, node):
         # TODO: not operatie uitzoeken, vooral verschil bij andere types
@@ -377,9 +377,9 @@ class MIPSVisitor(ASTVisitor):
         if isinstance(child, IdentifierNode):
             self.loadVariable(child)
             # Free register of the identifier to load the result in the same register
-            self.registers.FreeTemporary(child.temp_address)
+            self.registers.FreeRegister(child.temp_address)
         # Store the result of the unary operation in a new address
-        node.temp_address = "$" + str(self.registers.UseTemporary())
+        node.temp_address = str(self.registers.UseTemporary())
 
         children_MIPS = []
         op = None
@@ -387,7 +387,7 @@ class MIPSVisitor(ASTVisitor):
         if node.operation == "-":
             op = "subu"
             children_MIPS.append("$zero")
-            children_MIPS.append(node.temp_address)
+            children_MIPS.append("$" + str(node.temp_address))
         if node.operation == "*":
             op = "lw"
             children_MIPS.append(f"0(${str(node.temp_address)})")
@@ -401,19 +401,21 @@ class MIPSVisitor(ASTVisitor):
             return
         elif node.operation == "x++" or node.operation == "++x":
             op = "addiu"
-            children_MIPS.append(node.temp_address)
+            children_MIPS.append("$" + str(node.temp_address))
             children_MIPS.append("1")
         elif node.operation == "x--" or node.operation == "--x":
             op = "addiu"
-            children_MIPS.append(node.temp_address)
+            children_MIPS.append("$" + str(node.temp_address))
             children_MIPS.append("-1")
 
-        param = f"{node.temp_address}, {', '.join(children_MIPS)}"
+        param = f"${node.temp_address}, {', '.join(children_MIPS)}"
         self.addInstruction(op, param)
 
         # TODO: If this is the last binary op from the sequence of operations, then free
-        if not isinstance(node.parent, BinaryOperationNode) or not isinstance(node.parent, UnaryOperationNode):
-            self.registers.FreeTemporary(node.temp_address)
+        if (not getParent(node, BinaryOperationNode) or not getParent(node, UnaryOperationNode)) and not node.operation == "*":
+            self.registers.FreeRegister(node.temp_address)
+        if node.operation in ["x++", "++x", "x--", "--x"]:
+            self.storeVariable(child, child)
 
     def exitFunctionDeclaration(self, node):
         function = node.children[0]
@@ -463,7 +465,8 @@ class MIPSVisitor(ASTVisitor):
 
     def exitDefinition(self, node):
         # When there is a definition, do a store word
-        identifier = node.children[0].children[0]
+        identifier = self.getSymbol(node.children[0].children[0])
+        value = self.getSymbol(node.children[1])
         # print(identifier.type_semantics)
         # if "global" in identifier.type_semantics:
         #    self.addInstruction(identifier.name + ":", ".TYPE", False, True)
@@ -472,17 +475,14 @@ class MIPSVisitor(ASTVisitor):
             print("YEET")
             # TODO: NOG DOEN
             self.addInstruction(identifier.name, ".TYPE VALUE")
-        if isinstance(node.children[1], BinaryOperationNode) or isinstance(node.children[1], UnaryOperationNode):
-            align = identifier.alignment()
-            self.storeVariable(node.children[1])
-        elif isinstance(node.children[1], LiteralNode):
-            identifier.temp_address = self.loadVariable(node.children[1])
-            align = identifier.alignment()
-            self.storeVariable(node.children[0].children[0])
-            self.registers.FreeRegister(identifier.temp_address)
+        # Get the node for the assignement
 
-        else:
-            self.addInstruction("DIKKE PIEM")
+        # load the right side in to store it in the left side (identifier)
+        # Check if it's already stored. If not then store
+        identifier.temp_address = self.loadVariable(value)
+        # if the identifier is not stored somewhere then store in a new address else store in previous address
+        self.storeVariable(identifier)
+        self.registers.FreeRegister(identifier.temp_address)
 
     def exitAssignment(self, node):
         # Get the node for the assignement
@@ -492,11 +492,10 @@ class MIPSVisitor(ASTVisitor):
         # load the right side in to store it in the left side (identifier)
         # Check if it's already stored. If not then store
         identifier.temp_address = self.loadVariable(value)
-        self.addInstruction("TEST", str(identifier.temp_address))
 
         # if the identifier is not stored somewhere then store in a new address else store in previous address
-        self.addInstruction("YEEEE")
         self.storeVariable(value, identifier)
+        self.registers.FreeRegister(identifier.temp_address)
 
 
     def type_fprint(self, function_type):
@@ -547,6 +546,8 @@ class MIPSVisitor(ASTVisitor):
                     child = self.getSymbol(child)
 
                 if idx > 0:
+                    if "string" in child.type_semantics:
+                        child.value += "_1"
                     index = self.loadVariable(child, True)
                     self.type_fprint(child.type)
                     self.registers.FreeParam(index, child.type == "double")

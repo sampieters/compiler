@@ -14,8 +14,8 @@ main:
         sw      $8, 4($fp)
         # BEGIN IF CONDITION
         lw      $8, 4($fp)
-        slti    $9, $8, 5
-        beq     $9,$0, $L0
+        slti    $8, $8, 5
+        beq     $8,$0, $L0
         nop     
         # END IF CONDITION
                 
@@ -34,17 +34,17 @@ $L0:
         # END ELSE BODY
 $L1:    
         # BEGIN IF CONDITION
-        lw      $10, 4($fp)
-        seq     $11, $10, 5
-        beq     $11,$0, $L4
+        lw      $8, 4($fp)
+        seq     $8, $8, 5
+        beq     $8,$0, $L4
         nop     
         # END IF CONDITION
                 
         # BEGIN IF BODY
         # BEGIN IF CONDITION
-        lw      $12, 4($fp)
-        seq     $13, $12, 5
-        beq     $13,$0, $L2
+        lw      $8, 4($fp)
+        seq     $8, $8, 5
+        beq     $8,$0, $L2
         nop     
         # END IF CONDITION
                 

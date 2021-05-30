@@ -1,7 +1,7 @@
 .data
 string1_1: .asciiz "Hello \00"
-string2_1: .asciiz "World\0A\00"
-string3_1: .asciiz "World\0A\00"
+string2_1: .asciiz "World\n\00"
+string3_1: .asciiz "World\n\00"
 .globl main
 .text
                 

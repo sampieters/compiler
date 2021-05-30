@@ -12,13 +12,14 @@ main:
         move    $fp, $sp
         li      $8, 10
         sw      $8, 4($fp)
-        lw      $8, None($fp)
+        lw      $8, 4($fp)
+        sw      $8, 3($fp)
+        lw      $8, 3($fp)
         sw      $8, 8($fp)
-        DIKKE PIEM
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $4, 4($fp)
+        lw      $4, 3($fp)
         li      $v0, 1
         syscall 
         la      $4, string1_2
@@ -30,7 +31,7 @@ main:
         la      $4, string1_3
         li      $v0, 4
         syscall 
-        lw      $4, 5($fp)
+        lw      $4, 8($fp)
         li      $v0, 1
         syscall 
         la      $4, string1_4

@@ -14,7 +14,7 @@ main:
         li      $v0, 4
         syscall 
         lw      $8, 2($fp)
-        addiu   $9, $fp, 2
+        addiu   $8, $fp, 2
         la      $4, string2_1
         li      $v0, 5
         syscall 

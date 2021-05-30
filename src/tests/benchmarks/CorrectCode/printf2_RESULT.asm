@@ -1,7 +1,7 @@
 .data
 string1_1: .asciiz ""
 string1_2: .asciiz " "
-string1_3: .asciiz "!\0A\00"
+string1_3: .asciiz "!\n\00"
 string2_1: .asciiz "Hello\00"
 string3_1: .asciiz "World\00"
 .globl main
@@ -14,13 +14,13 @@ main:
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        la      $4, string2
+        la      $4, string2_1
         li      $v0, 4
         syscall 
         la      $4, string1_2
         li      $v0, 4
         syscall 
-        la      $4, string3
+        la      $4, string3_1
         li      $v0, 4
         syscall 
         la      $4, string1_3

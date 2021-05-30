@@ -13,10 +13,11 @@ main:
         move    $fp, $sp
         li      $8, 5
         sw      $8, 0($fp)
+        cvt.s.w $f4,$8
         lw      $8, 0($fp)
         s.s     $8, 4($fp)
-        l.s     $f4, float1
-        s.s     $f4, 8($fp)
+        l.s     $f5, float1
+        s.s     $f5, 8($fp)
         la      $4, string1_1
         li      $v0, 4
         syscall 

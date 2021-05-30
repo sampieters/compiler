@@ -12,7 +12,7 @@ string4_2: .asciiz ";\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -12
+        addiu   $sp, $sp, -8
         sw      $fp, 12($sp)
         move    $fp, $sp
         la      $4, string1_1
@@ -25,18 +25,18 @@ main:
         li      $v0, 4
         syscall 
         li      $8, 20
-        sw      $8, 4($fp)
+        sw      $8, 0($fp)
         la      $4, string2_1
         li      $v0, 4
         syscall 
-        lw      $4, 4($fp)
+        lw      $4, 0($fp)
         li      $v0, 1
         syscall 
         la      $4, string2_2
         li      $v0, 4
         syscall 
         li      $8, 30
-        sw      $8, 4($fp)
+        sw      $8, 0($fp)
         # BEGIN IF CONDITION
         li      $8, 1
         beq     $8,$0, $L0
@@ -47,18 +47,18 @@ main:
         la      $4, string3_1
         li      $v0, 4
         syscall 
-        lw      $4, 4($fp)
+        lw      $4, 0($fp)
         li      $v0, 1
         syscall 
         la      $4, string3_2
         li      $v0, 4
         syscall 
         li      $9, 40
-        sw      $9, 8($fp)
+        sw      $9, 4($fp)
         la      $4, string4_1
         li      $v0, 4
         syscall 
-        lw      $4, 8($fp)
+        lw      $4, 4($fp)
         li      $v0, 1
         syscall 
         la      $4, string4_2
@@ -69,6 +69,6 @@ $L0:
         nop     
         move    $sp, $fp
         lw      $fp, 12($sp)
-        addiu   $sp, $sp, 16
+        addiu   $sp, $sp, 12
         li      $v0, 10
         syscall 

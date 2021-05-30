@@ -424,7 +424,7 @@ class MIPSVisitor(ASTVisitor):
             children_MIPS.append(str(child.original_address))
         elif node.operation == "[]":
             identifier = self.getSymbol(node.children[0])
-            node.original_address = identifier.original_address + node.children[1].value * identifier.alignment()
+            node.original_address = identifier.original_address + node.children[1].value * int(identifier.alignment())
             return
         elif node.operation == "x++" or node.operation == "++x":
             op = "addiu"

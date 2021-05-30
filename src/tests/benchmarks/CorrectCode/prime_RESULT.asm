@@ -11,8 +11,8 @@ string5_2: .asciiz "\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -28
-        sw      $fp, 28($sp)
+        addiu   $sp, $sp, -40
+        sw      $fp, 40($sp)
         move    $fp, $sp
         li      $8, 3
         sw      $8, 8($fp)
@@ -35,6 +35,8 @@ main:
         # BEGIN IF CONDITION
         lw      $8, 4($fp)
         sge     $8, $8, 1
+        sw      $8, 28($fp)
+        lw      $8, 28($fp)
         beq     $8,$0, $L0
         nop     
         # END IF CONDITION
@@ -86,6 +88,8 @@ $L2:
         lw      $9, 16($fp)
         NIET ZOMAAR$8, $8, $9
         seq     $8, $8, 0
+        sw      $8, 32($fp)
+        lw      $8, 32($fp)
         beq     $8,$0, $L3
         nop     
         # END IF CONDITION
@@ -105,6 +109,8 @@ $L4:
         lw      $8, 16($fp)
         lw      $9, 8($fp)
         seq     $8, $8, $9
+        sw      $8, 36($fp)
+        lw      $8, 36($fp)
         beq     $8,$0, $L5
         nop     
         # END IF CONDITION
@@ -133,7 +139,7 @@ $L5:
 $L6:    
         nop     
         move    $sp, $fp
-        lw      $fp, 28($sp)
-        addiu   $sp, $sp, 32
+        lw      $fp, 40($sp)
+        addiu   $sp, $sp, 44
         li      $v0, 10
         syscall 

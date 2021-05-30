@@ -559,7 +559,7 @@ class MIPSVisitor(ASTVisitor):
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":
-            self.addInstruction("li", "$v0, 10")
+            self.addInstruction("li", "$2, 10")
             self.addInstruction("syscall")
         else:
             self.addInstruction("jr", "$ra")
@@ -631,13 +631,8 @@ class MIPSVisitor(ASTVisitor):
             print("OOOGOOGAGA")
             self.storeVariable(value, f"0(${identifier.temp_address})")
         else:
-            # Get the node for the assignement
-            # load the right side in to store it in the left side (identifier)
-            # Check if it's already stored. If not then store
-            identifier.temp_address = self.loadVariable(value)
             # if the identifier is not stored somewhere then store in a new address else store in previous address
-            self.storeVariable(identifier)
-            self.registers.FreeRegister(identifier.temp_address)
+            self.storeVariable(value, identifier)
         self.registers.FreeRegister(value.temp_address)
 
 
@@ -654,7 +649,7 @@ class MIPSVisitor(ASTVisitor):
             opcode = 2
         elif function_type == "double":
             opcode = 3
-        self.addInstruction("li", f"$v0, {opcode}")
+        self.addInstruction("li", f"$2, {opcode}")
         # syscall does the actual print
         self.addInstruction("syscall")
 
@@ -677,7 +672,7 @@ class MIPSVisitor(ASTVisitor):
             opcode = 12
             VorF = "v0"
         # syscall does the actual print
-        self.addInstruction("li", f"$v0, {opcode}")
+        self.addInstruction("li", f"$2, {opcode}")
         self.addInstruction("syscall")
         print("JOSHI KIJK HIER OOK", identifier, identifier.original_address)
         self.addInstruction("sw", f"${VorF}, {identifier.original_address}($fp)")

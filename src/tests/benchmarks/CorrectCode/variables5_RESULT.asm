@@ -20,31 +20,33 @@ main:
         lw      $9, 0($fp)
         sw      $9, 12($fp)
         la      $4, string1_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 0($fp)
-        li      $v0, 1
+        li      $2, 1
         syscall 
         la      $4, string1_2
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 8($fp)
-        li      $v0, 1
+        li      $2, 1
         syscall 
         la      $4, string1_3
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 12($fp)
-        li      $v0, 1
+        li      $2, 1
         syscall 
         la      $4, string1_4
-        li      $v0, 4
+        li      $2, 4
         syscall 
         li      $v0, 0
+        j       $FUNC_main
+$FUNC_main:
         move    $sp, $fp
         lw      $4, 16($sp)
         lw      $ra, 20($sp)
         lw      $fp, 24($sp)
         addiu   $sp, $sp, 28
-        li      $v0, 10
+        li      $2, 10
         syscall 

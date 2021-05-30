@@ -5,10 +5,10 @@ string1_2: .asciiz "\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -40
-        sw      $fp, 36($sp)
-        sw      $ra, 32($sp)
-        sw      $4, 28($sp)
+        addiu   $sp, $sp, -28
+        sw      $fp, 24($sp)
+        sw      $ra, 20($sp)
+        sw      $4, 16($sp)
         move    $fp, $sp
         li      $8, 0
         sw      $8, 0($fp)
@@ -25,13 +25,13 @@ $L0:
                 
         # BEGIN WHILE BODY
         la      $4, string1_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 0($fp)
-        li      $v0, 1
+        li      $2, 1
         syscall 
         la      $4, string1_2
-        li      $v0, 4
+        li      $2, 4
         syscall 
         # BEGIN IF CONDITION
         lw      $8, 0($fp)
@@ -53,24 +53,23 @@ $L1:
         addi    $8, $8, 1
         sw      $8, 12($fp)
         lw      $8, 12($fp)
-        sw      $8, 16($fp)
-        lw      $8, 16($fp)
-        sw      $8, 20($fp)
+        sw      $8, 0($fp)
         j       $L0
         # END ELSE BODY
 $L2:    
         li      $8, 10
-        li      $9, 10
-        sw      $9, 24($fp)
+        sw      $8, 0($fp)
         j       $L0
         # END WHILE BODY
                 
 $L3:    
         li      $v0, 0
+        j       $FUNC_main
+$FUNC_main:
         move    $sp, $fp
-        lw      $4, 28($sp)
-        lw      $ra, 32($sp)
-        lw      $fp, 36($sp)
-        addiu   $sp, $sp, 40
-        li      $v0, 10
+        lw      $4, 16($sp)
+        lw      $ra, 20($sp)
+        lw      $fp, 24($sp)
+        addiu   $sp, $sp, 28
+        li      $2, 10
         syscall 

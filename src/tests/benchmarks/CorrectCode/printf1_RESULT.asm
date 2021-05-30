@@ -10,13 +10,15 @@ main:
         sw      $4, 0($sp)
         move    $fp, $sp
         la      $4, string1_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         li      $v0, 0
+        j       $FUNC_main
+$FUNC_main:
         move    $sp, $fp
         lw      $4, 0($sp)
         lw      $ra, 4($sp)
         lw      $fp, 8($sp)
         addiu   $sp, $sp, 12
-        li      $v0, 10
+        li      $2, 10
         syscall 

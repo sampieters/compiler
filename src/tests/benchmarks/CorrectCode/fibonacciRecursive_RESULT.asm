@@ -69,17 +69,17 @@ main:
         sw      $4, 64($sp)
         move    $fp, $sp
         la      $4, string1_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         la      $4, string2_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 36($fp)
-        li      $v0, 5
+        li      $2, 5
         syscall 
         sw      $v0, 36($fp)
         la      $4, string2_2
-        li      $v0, 4
+        li      $2, 4
         syscall 
         li      $11, 1
         sw      $11, 40($fp)
@@ -107,19 +107,19 @@ $L2:
         jal     f
         sw      $2, 60($fp)
         la      $4, string3_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 56($fp)
-        li      $v0, 1
+        li      $2, 1
         syscall 
         la      $4, string3_2
-        li      $v0, 4
+        li      $2, 4
         syscall 
         lw      $4, 60($fp)
-        li      $v0, 1
+        li      $2, 1
         syscall 
         la      $4, string3_3
-        li      $v0, 4
+        li      $2, 4
         syscall 
         j       $L2
         # END WHILE BODY
@@ -133,5 +133,5 @@ $FUNC_main:
         lw      $ra, 68($sp)
         lw      $fp, 72($sp)
         addiu   $sp, $sp, 76
-        li      $v0, 10
+        li      $2, 10
         syscall 

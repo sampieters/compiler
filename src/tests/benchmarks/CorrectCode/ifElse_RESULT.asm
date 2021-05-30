@@ -25,7 +25,7 @@ main:
                 
         # BEGIN IF BODY
         la      $4, string1_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         # END IF BODY
         b       $L1
@@ -33,7 +33,7 @@ main:
 $L0:    
         # BEGIN ELSE BODY
         la      $4, string2_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         # END ELSE BODY
 $L1:    
@@ -58,7 +58,7 @@ $L1:
                 
         # BEGIN IF BODY
         la      $4, string3_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         # END IF BODY
         b       $L3
@@ -66,17 +66,19 @@ $L1:
 $L2:    
         # BEGIN ELSE BODY
         la      $4, string4_1
-        li      $v0, 4
+        li      $2, 4
         syscall 
         # END ELSE BODY
 $L3:    
         # END IF BODY
 $L4:    
         li      $v0, 1
+        j       $FUNC_main
+$FUNC_main:
         move    $sp, $fp
         lw      $4, 16($sp)
         lw      $ra, 20($sp)
         lw      $fp, 24($sp)
         addiu   $sp, $sp, 28
-        li      $v0, 10
+        li      $2, 10
         syscall 

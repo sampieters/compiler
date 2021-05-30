@@ -22,17 +22,16 @@ main:
         lw      $8, 2($fp)
         addiu   $8, $fp, 2
         la      $4, string2_1
-        li      $v0, 5
+        li      $v0, 4
         syscall 
-        sw      $v0, LOCATION
         sw      $8, 12($fp)
         lw      $4, 12($fp)
-        li      $v0, 1
-        syscall 
-        la      $4, string2_2
         li      $v0, 5
         syscall 
-        sw      $v0, LOCATION
+        sw      $v0, None($fp)
+        la      $4, string2_2
+        li      $v0, 4
+        syscall 
         # BEGIN IF CONDITION
         lw      $8, 2($fp)
         sge     $8, $8, 1

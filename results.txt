@@ -1,5 +1,0 @@
-<<<<<<< HEAD
-fibonacciRecursive succeeded
-=======
-variables5 succeeded
->>>>>>> c67411fe2516600f915ba69e413d0fad76de438e

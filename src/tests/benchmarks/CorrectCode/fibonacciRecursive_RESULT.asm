@@ -63,29 +63,28 @@ main:
         lw      $4, 28($fp)
         li      $v0, 5
         syscall 
-        lw      $8, None($fp)
         sw      $v0, None($fp)
         la      $4, string2_2
         li      $v0, 4
         syscall 
-        li      $9, 1
-        sw      $9, 32($fp)
+        li      $8, 1
+        sw      $8, 32($fp)
                 
 $L2:    
         # BEGIN WHILE CONDITION
-        lw      $9, 32($fp)
-        lw      $10, 2($fp)
-        sle     $9, $9, $10
-        beq     $9, $0, $L3
+        lw      $8, 32($fp)
+        lw      $9, 2($fp)
+        sle     $8, $8, $9
+        beq     $8, $0, $L3
         nop     
         # END WHILE CONDITION
                 
         # BEGIN WHILE BODY
-        lw      $9, 32($fp)
-        addi    $9, $9, 1
-        sw      $9, 36($fp)
-        lw      $9, 36($fp)
-        sw      $9, 32($fp)
+        lw      $8, 32($fp)
+        addi    $8, $8, 1
+        sw      $8, 36($fp)
+        lw      $8, 36($fp)
+        sw      $8, 32($fp)
         lw      $4, 32($fp)
         jal     f
         la      $4, string3_1

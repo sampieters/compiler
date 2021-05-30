@@ -16,17 +16,16 @@ main:
         lw      $8, 2($fp)
         addiu   $8, $fp, 2
         la      $4, string2_1
-        li      $v0, 5
+        li      $v0, 4
         syscall 
-        sw      $v0, LOCATION
         sw      $8, 8($fp)
         lw      $4, 8($fp)
         li      $v0, None
         syscall 
+        sw      $None, None($fp)
         la      $4, string2_2
-        li      $v0, 5
+        li      $v0, 4
         syscall 
-        sw      $v0, LOCATION
         la      $4, string3_1
         li      $v0, 4
         syscall 

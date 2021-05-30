@@ -21,25 +21,24 @@ main:
         lw      $8, 3($fp)
         addiu   $8, $fp, 3
         la      $4, string2_1
-        li      $v0, 5
+        li      $v0, 4
         syscall 
-        sw      $v0, LOCATION
         sw      $8, 8($fp)
         lw      $4, 8($fp)
-        li      $v0, 1
-        syscall 
-        la      $4, string2_2
         li      $v0, 5
         syscall 
-        sw      $v0, LOCATION
+        sw      $v0, None($fp)
+        la      $4, string2_2
+        li      $v0, 4
+        syscall 
         sw      $8, 16($fp)
         lw      $4, 16($fp)
-        li      $v0, 1
-        syscall 
-        la      $4, string2_3
         li      $v0, 5
         syscall 
-        sw      $v0, LOCATION
+        sw      $v0, None($fp)
+        la      $4, string2_3
+        li      $v0, 4
+        syscall 
         la      $4, string3_1
         li      $v0, 4
         syscall 

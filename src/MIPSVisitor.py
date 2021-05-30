@@ -253,6 +253,9 @@ class MIPSVisitor(ASTVisitor):
         else:
             instruction += ".w"
 
+        if instruction == "cvt.w.w":
+            return
+
         # The result of a conversion is always stored in a float/double regiter
         stored = self.registers.UseFloatTemporary(node2.type == "double")
         node2.temp_address = stored

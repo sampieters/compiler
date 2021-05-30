@@ -15,18 +15,21 @@ class Function_Stack():
         self.MIPS_index = None
 
     def stack_next(self, variable=4):
+        ret_val = self.data_count
         # An extra 4 bytes to hold the frame pointer
+        print("BEFORE STACK NEXT", self.data_count, variable)
         if isinstance(variable, int):
             self.data_count += variable
         else:
-            self.data_count += int(variable.alignment())
-        return self.data_count
+            self.data_count += max(4, int(variable.alignment()))
+        print("AFTER STACK NEXT", self.data_count)
+        return ret_val
 
     def stack_curr(self):
         return self.data_count
 
     def reset(self):
-        self.data_in_stack.counter = 0
+        self.data_in_stack.counter = 4
         self.return_aanwezig = None
         self.parameter_count = None
 

@@ -154,7 +154,7 @@ geïmplementeerd van opdracht 6:
 - printf3 (werkt)
 - scanf1 (werkt)
 - scanf2 (failt, probeert sw te doen naar "LOCATION", load "None" in)
-- scoping (failt, print "x .TYPE VALUE" en "REGISTER")
+- scoping (werkt)
 - unaryOperations (failt, arrays werken nog niet helemaal, vooral berekenen van $fp adressen en linkerkant in definitie)
 - variables1 (failt, kleine fout bij printen van de float (print 0.0 ipv 0.5), mss omdat het in $4 gaat ipv een float register?)
 - variables2 (failt, de stores op de stack gebeuren op rar plaatsen)

@@ -517,18 +517,25 @@ class MIPSVisitor(ASTVisitor):
         self.funct_stack.MIPS_index = len(self.MIPS)
         self.addInstruction("addiu", "$sp, $sp, -{LABEL}")
         self.addInstruction("sw", "$fp, {LABEL}($sp)")
+        self.addInstruction("sw",   "$ra, {LABEL}($sp)")
         self.addInstruction("move", "$fp, $sp")
 
     def exitFunctionDefinition(self, node):
+        # stack size
         self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", str(
-            self.funct_stack.stack_next() + 4))
+            self.funct_stack.stack_next() + 8))
+        # frame pointer place
         self.MIPS[self.funct_stack.MIPS_index + 1] = self.MIPS[self.funct_stack.MIPS_index + 1].replace("{LABEL}", str(
+            self.funct_stack.stack_curr()))
+        # return address
+        self.MIPS[self.funct_stack.MIPS_index + 2] = self.MIPS[self.funct_stack.MIPS_index + 2].replace("{LABEL}", str(
             self.funct_stack.stack_curr() - 4))
 
         # allocate space on the stack for everything inside the function scope
         self.addInstruction("move", "$sp, $fp")
-        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
-        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_curr()))
+        self.addInstruction("lw", "$ra, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
+        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr()) + "($sp)")
+        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_curr() + 4))
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":

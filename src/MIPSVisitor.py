@@ -221,7 +221,7 @@ class MIPSVisitor(ASTVisitor):
 
         self.addInstruction(instruction, "$" + stored + "," + "$" + node1.temp_address)
 
-        self.storeVariable(node2, )
+        #self.storeVariable(node2, )
         # TODO; nog een store doen
 
     def loadVariable(self, node, load_as_arg=False):

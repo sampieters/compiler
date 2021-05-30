@@ -53,13 +53,13 @@ class Registers():
     def UseParam(self, type):
         # if not a double than can be loaded in a0-a3
         if type not in ["float", "double"]:
-            for i in range(4, 7):
+            for i in range(4, 8):
                 if self.registers[i] is False:
                     self.registers[i] = True
                     return str(i)
         # Otherwise it has to be loaded in the parameter registers for floats
         else:
-            for i in range(44, 46):
+            for i in range(44, 47):
                 if self.registers[i] is False:
                     # If double, the first register needs to be an even register such that an uneven is the second register
                     if i % 2 == 0 and type == "double":
@@ -87,26 +87,21 @@ class Registers():
 
 
     def UseTemporary(self):
-        # TODO: make an excpetion
-        for i in range(8, 15):
+        for i in range(8, 16):
             if self.registers[i] is False:
                 self.registers[i] = True
                 return str(i)
-        for i in range(24, 25):
+        for i in range(24, 26):
             if self.registers[i] is False:
                 self.registers[i] = True
                 return str(i)
-        return "Error"
 
     def FreeTemporary(self, register):
-        # TODO: make an excpetion
-        if register in range(8, 15) or register in range(24, 25):
+        if register in range(8, 16) or register in range(24, 26):
             self.registers[register] = False
-        else:
-            return "exception"
 
     def UseFloatTemporary(self, double=False):
-        for i in range(36, 42):
+        for i in range(36, 43):
             if self.registers[i] is False:
                 # If double, the first register needs to be an even register such that an uneven is the second register
                 if i % 2 == 0 and double:
@@ -124,7 +119,7 @@ class Registers():
                 else:
                     self.registers[i] = True
                 return "f" + str(i - 32)
-        for i in range(46, 48):
+        for i in range(46, 49):
             if self.registers[i] is False:
                 # If double, the first register needs to be an even register such that an uneven is the second register
                 if i % 2 == 0 and double:
@@ -310,7 +305,6 @@ class MIPSVisitor(ASTVisitor):
         self.binaryOpToMIPS(child, LiteralNode(0, child.type, -1))
 
     def binaryOpToMIPS(self, node):
-        # TODO: nog een extra instructie voor
         child1 = self.getSymbol(node.children[0])
         child2 = self.getSymbol(node.children[1])
 
@@ -323,7 +317,6 @@ class MIPSVisitor(ASTVisitor):
             raise Exception(f"Invalid binary operation '{node.operation}'")
 
         # STEP 0: if cmp set
-        # TODO: Echt uitgebreid checken
         if operation in ["ne", "eq", "le", "ge", "gt", "lt"]:
             if the_type in ["float", "double"]:
                 ret_val += "c."
@@ -402,7 +395,7 @@ class MIPSVisitor(ASTVisitor):
         param = f"${str(node.temp_address)}, {', '.join(children_MIPS)}"
         self.addInstruction(self.binaryOpToMIPS(node), param)
 
-        # TODO: If this is the last binary op from the sequence of operations, then free
+        # If this is the last binary or unary operation from the sequence of operations, then free
         if not getParent(node, BinaryOperationNode) or not getParent(node, UnaryOperationNode):
             self.registers.FreeRegister(node.temp_address)
 
@@ -452,7 +445,7 @@ class MIPSVisitor(ASTVisitor):
         param = f"${node.temp_address}, {', '.join(children_MIPS)}"
         self.addInstruction(op, param)
 
-        # TODO: If this is the last binary op from the sequence of operations, then free
+        # If this is the last binary or unary operation from the sequence of operations, then free
         if (not getParent(node, BinaryOperationNode) or not getParent(node, UnaryOperationNode)) and not node.operation == "*":
             self.registers.FreeRegister(node.temp_address)
         if node.operation in ["x++", "++x", "x--", "--x"]:
@@ -491,9 +484,7 @@ class MIPSVisitor(ASTVisitor):
             self.addInstruction("jr", "$ra")
 
     def exitReturn(self, node):
-        # TODO: Return wordt automatisch aangemaakt wanneer er geen return is, mag opzich wel denk ik zou geen probleem moeten vormen in MIPS
-        # TODO: niet altijd nop enkel bij void
-        self.addInstruction("nop")
+        pass
 
     def exitDeclaration(self, node):
         identifier = node.children[0]
@@ -625,15 +616,14 @@ class MIPSVisitor(ASTVisitor):
             # if printf or scanf than opcode loaden and syscall
 
         # Clear all registers for parameters
-        for i in range(4, 7):
+        for i in range(4, 8):
             self.registers.FreeParam(str(i))
-        for i in range(44, 46):
+        for i in range(44, 47):
             self.registers.FreeParam(str(i))
 
         self.addInstruction("jal", node.children[0].name)
 
     def enterWhile(self, node):
-        # TODO:  CONDITIONS KLOPPEN NIET VOOR BRANCHES
         node.start_address = str(self.branch_counter.incr())
         self.addInstruction()
         self.addInstruction(f"$L{node.start_address}:", "", False)
@@ -654,9 +644,10 @@ class MIPSVisitor(ASTVisitor):
                 child.temp_address = str(4 + idx)
                 self.storeVariable(child)
         elif isinstance(node.parent, WhileNode):
-            # TODO: Ik denk/hoop dat deze condition alle gevallen oplost
-            # TODO: what if idetifier only like while(i) {}
-            self.addInstruction("beq", "$" + node.parent.children[0].temp_address + ", $0, {LABEL}")
+            child = self.getSymbol(node.parent.children[0])
+            if not isinstance(child, UnaryOperationNode) or not isinstance(child, BinaryOperationNode):
+                self.loadVariable(child)
+            self.addInstruction("beq", "$" + child.temp_address + ", $0, {LABEL}")
             self.loop_stack.append(len(self.MIPS) - 1)
             self.addInstruction("nop")
             self.addInstruction("# END WHILE CONDITION")
@@ -721,5 +712,3 @@ class MIPSVisitor(ASTVisitor):
     def enterBreak(self, node):
         self.addInstruction("j", "${BREAK}")
         self.loop_stack.append(len(self.MIPS) - 1)
-
-# TODO: break nog doen voor if en else

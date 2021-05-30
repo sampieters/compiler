@@ -439,6 +439,10 @@ class FunctionCallNode(ASTNode):
     def getValue(self):
         return f"%{str(self.temp_address)}"
 
+    def alignment(self):
+        return str(int(getAlignment(self)))
+
+
 class ArgListNode(ASTNode):
     def __init__(self, node_id):
         super().__init__(node_id)

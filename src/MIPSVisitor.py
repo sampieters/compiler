@@ -292,7 +292,7 @@ class MIPSVisitor(ASTVisitor):
                 instr = "l.d"
             params = "$" + str(temp) + ", " + str(node.value)
 
-        elif isinstance(node, IdentifierNode) or isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
+        elif isinstance(node, IdentifierNode) or isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode) or isinstance(node, FunctionCallNode):
             #################################
             # TEST
             #################################
@@ -315,6 +315,7 @@ class MIPSVisitor(ASTVisitor):
             elif isinstance(node, UnaryOperationNode) and node.operation == "*":
                 name = str(self.getSymbol(getChild(node, IdentifierNode)).original_address) + "($fp)"
             else:
+                print("AAAAAAAAAAAAAAAAA", node.original_address, node)
                 name = str(node.original_address) + "($fp)"
             params = "$" + str(temp) + ", " + name
         node.temp_address = temp
@@ -338,6 +339,7 @@ class MIPSVisitor(ASTVisitor):
 
         if location is None:
             node.original_address = self.funct_stack.stack_next(node)
+            print("WOWOOWOWO", node, node.original_address)
             address = str(node.original_address) + "($fp)"
         elif isinstance(location, str):
             address = location
@@ -346,7 +348,7 @@ class MIPSVisitor(ASTVisitor):
             node.original_address = location.original_address
             address = str(node.original_address) + "($fp)"
         self.addInstruction(op, "$" + str(node.temp_address) + ", " + address)
-        self.registers.FreeRegister(node.temp_address)
+        self.registers.FreeRegister(str(node.temp_address))
 
     def unaryOpToMIPS(self, node):
         child = self.getSymbol(node.children[0])
@@ -412,8 +414,8 @@ class MIPSVisitor(ASTVisitor):
         child1 = self.getSymbol(node.children[0])
         child2 = self.getSymbol(node.children[1])
         # For each child that is a variable, load the variable into a new temporary address
-        for child in child1, child2:
-            if isinstance(child, UnaryOperationNode) and child.operation == "[]":
+        for child in [child1, child2]:
+            if (isinstance(child, UnaryOperationNode) and child.operation == "[]") or isinstance(child, FunctionCallNode):
                 self.loadVariable(child)
 
         # Both child's registers can be freed because not necessary after binary operation
@@ -708,6 +710,9 @@ class MIPSVisitor(ASTVisitor):
             self.registers.FreeParam(str(i))
 
         self.addInstruction("jal", node.children[0].name)
+        node.temp_address = 2
+        node.type = self.getSymbol(node.children[0]).type
+        self.storeVariable(node)
 
     def enterWhile(self, node):
         node.start_address = str(self.branch_counter.incr())

@@ -5,10 +5,10 @@ string1_2: .asciiz "\n\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -24
-        sw      $fp, 20($sp)
-        sw      $ra, 16($sp)
-        sw      $4, 12($sp)
+        addiu   $sp, $sp, -32
+        sw      $fp, 28($sp)
+        sw      $ra, 24($sp)
+        sw      $4, 20($sp)
         move    $fp, $sp
         li      $8, 0
         sw      $8, 0($fp)
@@ -37,15 +37,17 @@ $L0:
         addi    $8, $8, 1
         sw      $8, 8($fp)
         lw      $8, 8($fp)
-        sw      $8, 0($fp)
+        sw      $8, 12($fp)
+        lw      $8, 12($fp)
+        sw      $8, 16($fp)
         j       $L0
         # END WHILE BODY
                 
 $L1:    
         move    $sp, $fp
-        lw      $4, 12($sp)
-        lw      $ra, 16($sp)
-        lw      $fp, 20($sp)
-        addiu   $sp, $sp, 24
+        lw      $4, 20($sp)
+        lw      $ra, 24($sp)
+        lw      $fp, 28($sp)
+        addiu   $sp, $sp, 32
         li      $v0, 10
         syscall 

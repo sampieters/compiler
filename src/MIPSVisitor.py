@@ -258,6 +258,11 @@ class MIPSVisitor(ASTVisitor):
         node2.temp_address = stored
 
         self.addInstruction(instruction, "$" + stored + "," + "$" + node1.temp_address)
+        if node2.type.startswith("i"):
+            node1.temp_address = self.registers.UseTemporary()
+            self.addInstruction("mfc1", "$" + node1.temp_address + ", $" + stored)
+            node1.type = "i32"
+            self.storeVariable(node1)
         #self.storeVariable(node2)
         # TODO; nog een store doen
 

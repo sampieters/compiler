@@ -258,7 +258,12 @@ class MIPSVisitor(ASTVisitor):
                 instr = "lb"
             else:
                 instr = "lw"
-            params = "$" + str(temp) + ", " + str(node.original_address) + "($fp)"
+            # TODO: global ook nog doen bij identifers enz
+            if "global" in node.type_semantics:
+                name = node.name
+            else:
+                name = str(node.original_address) + "($fp)"
+            params = "$" + str(temp) + ", " + name
         node.temp_address = temp
         self.addInstruction(instr, params)
         return temp
@@ -473,31 +478,29 @@ class MIPSVisitor(ASTVisitor):
         identifier = node.children[0]
         if not isinstance(node.parent.parent, ArgListNode):
             self.symbol_table.add_symbol(identifier)
-        if "global" in identifier.type_semantics:
-            print("YEET")
-            # TODO: NOG DOEN
-            self.addInstruction(identifier.name, ".TYPE VALUE")
 
     def exitDefinition(self, node):
         # When there is a definition, do a store word
         identifier = self.getSymbol(node.children[0].children[0])
         value = self.getSymbol(node.children[1])
-        # print(identifier.type_semantics)
-        # if "global" in identifier.type_semantics:
-        #    self.addInstruction(identifier.name + ":", ".TYPE", False, True)
-        #    pass
         if "global" in identifier.type_semantics:
-            print("YEET")
-            # TODO: NOG DOEN
-            self.addInstruction(identifier.name, ".TYPE VALUE")
-        # Get the node for the assignement
+            if identifier.type.startswith("i"):
+                if identifier.type == "i8":
+                    the_type = ".byte"
+                else:
+                    the_type = ".word"
+            else:
+                the_type = "." + identifier.type
+            self.addInstruction(identifier.name, the_type + "  " + str(value.value), True, True)
+        else:
+            # Get the node for the assignement
 
-        # load the right side in to store it in the left side (identifier)
-        # Check if it's already stored. If not then store
-        identifier.temp_address = self.loadVariable(value)
-        # if the identifier is not stored somewhere then store in a new address else store in previous address
-        self.storeVariable(identifier)
-        self.registers.FreeRegister(identifier.temp_address)
+            # load the right side in to store it in the left side (identifier)
+            # Check if it's already stored. If not then store
+            identifier.temp_address = self.loadVariable(value)
+            # if the identifier is not stored somewhere then store in a new address else store in previous address
+            self.storeVariable(identifier)
+            self.registers.FreeRegister(identifier.temp_address)
 
     def exitAssignment(self, node):
         # Get the node for the assignement

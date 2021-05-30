@@ -26,7 +26,7 @@ main:
         la      $4, string1_2
         li      $v0, 4
         syscall 
-        lw      $4, 4($fp)
+        l.s     $f12, 4($fp)
         li      $v0, 2
         syscall 
         la      $4, string1_3

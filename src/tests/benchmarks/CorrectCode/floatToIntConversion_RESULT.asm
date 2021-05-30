@@ -13,14 +13,14 @@ main:
         move    $fp, $sp
         l.s     $f4, float1
         s.s     $f4, 0($fp)
-        lw      $f5, 0($fp)
+        l.s     $f5, 0($fp)
         sw      $f5, 4($fp)
         li      $8, 0
         sw      $8, 8($fp)
         la      $4, string1_1
         li      $v0, 4
         syscall 
-        lw      $4, 0($fp)
+        l.s     $f12, 0($fp)
         li      $v0, 2
         syscall 
         la      $4, string1_2

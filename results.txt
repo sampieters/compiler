@@ -23,10 +23,10 @@ scoping succeeded
 unaryOperations crashed
 variables1 succeeded
 variables2 succeeded
-variables3 crashed
+variables3 succeeded
 variables4 succeeded
 variables5 succeeded
 variables6 succeeded
-variables7 crashed
+variables7 succeeded
 variables8 crashed
 while succeeded

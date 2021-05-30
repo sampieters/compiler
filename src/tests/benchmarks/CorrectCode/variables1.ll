@@ -8,17 +8,16 @@ target triple = "x86_64-pc-linux-gnu"
 ; Function Attrs: noinline nounwind optnone uwtable
 define i32 @main() #0 {
   %1 = alloca i32, align 4
-  %2 = alloca float, align 4
+  %2 = alloca double, align 8
   %3 = alloca i8, align 1
   store i32 5, i32* %1, align 4
-  store float 5.000000e-01, float* %2, align 4
+  store double 5.000000e-01, double* %2, align 8
   store i8 99, i8* %3, align 1
   %4 = load i32, i32* %1, align 4
-  %5 = load float, float* %2, align 4
-  %6 = fpext float %5 to double
-  %7 = load i8, i8* %3, align 1
-  %8 = sext i8 %7 to i32
-  %9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0), i32 %4, double %6, i32 %8)
+  %5 = load double, double* %2, align 8
+  %6 = load i8, i8* %3, align 1
+  %7 = sext i8 %6 to i32
+  %8 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @.str, i32 0, i32 0), i32 %4, double %5, i32 %7)
   ret i32 0
 }
 

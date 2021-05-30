@@ -20,6 +20,8 @@ class Function_Stack():
         print("BEFORE STACK NEXT", self.data_count, variable)
         if isinstance(variable, int):
             self.data_count += variable
+        elif variable.type.endswith("]"):
+            self.data_count += max(4, int(variable.alignment()) * int(variable.type.split()[0].replace("[","")))
         else:
             self.data_count += max(4, int(variable.alignment()))
         print("AFTER STACK NEXT", self.data_count)
@@ -268,7 +270,7 @@ class MIPSVisitor(ASTVisitor):
             else:
                 instr = "lw"
             #################################
-            if isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode):
+            if (isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode)) and node.operation != "[]":
                 self.storeVariable(node)
             # TODO: global ook nog doen bij identifers enz
             if "global" in node.type_semantics:
@@ -410,7 +412,7 @@ class MIPSVisitor(ASTVisitor):
         # Get the identifier or literal
         child = self.getSymbol(node.children[0])
         # If child is an identifier, then load into a register
-        if isinstance(child, IdentifierNode):
+        if isinstance(child, IdentifierNode) and node.operation != "[]":
             self.loadVariable(child)
             # Free register of the identifier to load the result in the same register
             self.registers.FreeRegister(child.temp_address)
@@ -435,6 +437,8 @@ class MIPSVisitor(ASTVisitor):
         elif node.operation == "[]":
             identifier = self.getSymbol(node.children[0])
             node.original_address = identifier.original_address + node.children[1].value * int(identifier.alignment())
+            node.type = "".join(identifier.type.split()[2:])[:-1]
+            node.temp_address = None
             return
         elif node.operation == "x++" or node.operation == "++x":
             op = "addiu"
@@ -540,6 +544,7 @@ class MIPSVisitor(ASTVisitor):
         if isinstance(identifier, UnaryOperationNode) and identifier.operation == "*":
             self.storeVariable(value, f"0(${identifier.temp_address})")
         else:
+            print(value, identifier, value.temp_address)
             self.storeVariable(value, identifier)
         self.registers.FreeRegister(value.temp_address)
 

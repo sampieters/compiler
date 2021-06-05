@@ -6,6 +6,7 @@ BINARY_OPS_MIPS = {
             "-": "sub",
             "*": "mul",
             "/": "div",
+            "%": "div",
             "!=": "ne",
             "==": "eq",
             "<=": "le",

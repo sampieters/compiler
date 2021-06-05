@@ -63,7 +63,6 @@ main:
         li      $2, 4
         syscall 
         lw      $10, 28($fp)
-        lw      $10, 0($10)
         la      $4, string2_1
         li      $2, 4
         syscall 
@@ -91,7 +90,6 @@ main:
         li      $2, 4
         syscall 
         lw      $12, 28($fp)
-        lw      $12, 0($12)
         la      $4, string4_1
         li      $2, 4
         syscall 
@@ -102,7 +100,8 @@ main:
         la      $4, string4_2
         li      $2, 4
         syscall 
-        lw      $4, 24($fp)
+        addiu   $13, $fp, 24
+        move    $4, $13
         jal     f
         sw      $2, 40($fp)
         la      $4, string5_1
@@ -114,8 +113,7 @@ main:
         la      $4, string5_2
         li      $2, 4
         syscall 
-        lw      $14, 28($fp)
-        lw      $14, 0($14)
+        lw      $13, 28($fp)
         la      $4, string6_1
         li      $2, 4
         syscall 
@@ -138,8 +136,7 @@ main:
         la      $4, string7_2
         li      $2, 4
         syscall 
-        lw      $15, 28($fp)
-        lw      $15, 0($15)
+        lw      $14, 28($fp)
         la      $4, string8_1
         li      $2, 4
         syscall 

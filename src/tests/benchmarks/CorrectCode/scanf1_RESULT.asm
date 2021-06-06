@@ -18,17 +18,19 @@ main:
         la      $4, string1_1
         li      $2, 4
         syscall 
+        addiu   $8, $fp, 0
+        addiu   $8, $fp, 4
         la      $4, string2_1
         li      $2, 4
         syscall 
-        lw      $4, 0($fp)
+        move    $4, $8
         li      $2, 5
         syscall 
         sw      $v0, 0($fp)
         la      $4, string2_2
         li      $2, 4
         syscall 
-        lw      $4, 4($fp)
+        move    $4, $8
         li      $2, 5
         syscall 
         sw      $v0, 4($fp)

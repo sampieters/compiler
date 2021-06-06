@@ -323,7 +323,7 @@ class MIPSVisitor(ASTVisitor):
             elif isinstance(node, UnaryOperationNode) and node.operation == "&":
                 instr = "move"
                 name = "$" + str(node.temp_address)
-            elif isinstance(node, UnaryOperationNode) and node.operation == "[]":
+            elif isinstance(node, UnaryOperationNode) and node.operation == "[]" and node.temp_address:
                 name = "0($" + str(node.temp_address) + ")"
             else:
                 name = str(node.original_address) + "($fp)"

@@ -38,7 +38,7 @@ $L0:
         seq     $8, $8, 5
         sw      $8, 8($fp)
         lw      $8, 8($fp)
-        beq     $8,$0, $L1
+        beq     $8, $0, $L1
         nop     
         # END IF CONDITION
                 

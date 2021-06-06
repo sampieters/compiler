@@ -1,7 +1,7 @@
-from ASTVisitor import *
-from ASTNode import *
-from utils import *
-from SymbolTable import *
+from .ASTVisitor import *
+from .ASTNode import *
+from .utils import *
+from .SymbolTable import *
 from collections import Counter as Ctr
 import re
 from copy import copy
@@ -195,12 +195,8 @@ class MIPSVisitor(ASTVisitor):
         node1 = self.getSymbol(node1)
         node2 = self.getSymbol(node2)
 
-        #########
-        # TEST
-        #########
         if isinstance(node1, LiteralNode):
             if node2.type == "float":
-                # TODO: this if maybe works only for integer and double
                 if node1.type.startswith("i"):
                     self.data_counter.update({"float": 1})
                     self.addInstruction("float" + str(self.data_counter["float"]), ".float " + str(node1.value), True, True)
@@ -229,13 +225,10 @@ class MIPSVisitor(ASTVisitor):
                             node1.value = int(substr)
                     node1.type = "i32"
             return
-        #########
 
         if node1.type.startswith("i") and node2.type in DECIMAL_TYPES:
             node1.temp_address = self.registers.UseFloatTemporary()
             self.addInstruction("l.s", "$" + node1.temp_address + ", " + str(node1.original_address) + "($fp)")
-
-
 
         # if both types are the same, no problem
         if node1.type == node2.type:
@@ -246,7 +239,6 @@ class MIPSVisitor(ASTVisitor):
             instruction += ".s"
         elif node2.type == "double":
             instruction += ".d"
-        # TODO: voor char, pointer enz... gaat dit zwz naar een word worden omgezet denk ik omdat er geen convert to byte bestaat
         else:
             instruction += ".w"
 
@@ -273,7 +265,6 @@ class MIPSVisitor(ASTVisitor):
         self.storeVariable(node1)
 
     def loadVariable(self, node, load_as_arg=False, load_as_return=False):
-        # TODO: CHAR testen
         # Every time a  variable is used it has to be loaded in
         instr = ""
         params = ""
@@ -292,7 +283,6 @@ class MIPSVisitor(ASTVisitor):
             temp = self.registers.UseTemporary()
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
-            # TODO: bij stirngs lijkt het dat in .data moet geladen worden, dan het adres geladen wordt. ALs een char wil van deze string dan lb van STIRNG ADRES)
             if node.type == "i8*":
                 instr = "la"
             elif node.type in INTEGER_TYPES:
@@ -304,9 +294,6 @@ class MIPSVisitor(ASTVisitor):
             params = "$" + str(temp) + ", " + str(node.value)
 
         elif isinstance(node, IdentifierNode) or isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode) or isinstance(node, FunctionCallNode):
-            #################################
-            # TEST
-            #################################
             if node.type == "i8*":
                 instr = "la"
             elif node.type == "i8":
@@ -317,10 +304,8 @@ class MIPSVisitor(ASTVisitor):
                 instr = "l.d"
             else:
                 instr = "lw"
-            #################################
             if (isinstance(node, UnaryOperationNode) or isinstance(node, BinaryOperationNode)) and node.operation not in ["[]", "&", "*"]:
                 self.storeVariable(node)
-            # TODO: global ook nog doen bij identifers enz
             if "global" in node.type_semantics:
                 name = node.name
             elif isinstance(node, UnaryOperationNode) and node.operation == "*":
@@ -451,15 +436,11 @@ class MIPSVisitor(ASTVisitor):
         node.type = the_type
         for child in [child1, child2]:
             # Convert the child to the binary operation type, so that both children have the same type
-            # TODO: We gaan waarchijnlijk ook nog een converttype moeten maken voor MIPS
             if child == child1:
                 if child1.type == the_type:
                     self.convertType(child2, child1)
                 else:
                     self.convertType(child1, child2)
-
-            # TODO: nog een getValue maken voor MIPS
-            # hieronder stond tussen append child.getvalue()
             if isinstance(child, LiteralNode):
                 children_MIPS.append(str(child.value))
             else:
@@ -479,8 +460,6 @@ class MIPSVisitor(ASTVisitor):
             self.registers.FreeRegister(node.temp_address)
 
     def exitUnaryOperation(self, node):
-        # TODO: not operatie uitzoeken, vooral verschil bij andere types
-        # TODO: pointer en array operations
         # Get the identifier or literal
         child = self.getSymbol(node.children[0])
         # If child is an identifier, then load into a register
@@ -591,7 +570,6 @@ class MIPSVisitor(ASTVisitor):
             self.loadVariable(child, False, True)
             self.addInstruction("j", "$FUNC_" + getParent(node, FunctionDefinitionNode).children[0].children[0].name)
 
-
     def exitDeclaration(self, node):
         identifier = node.children[0]
         if not isinstance(node.parent.parent, ArgListNode):
@@ -600,7 +578,6 @@ class MIPSVisitor(ASTVisitor):
             # if only a declaration, store $0 in the original address of the node (example: int y;)
         if not isinstance(node.parent, DefinitionNode):
             identifier.original_address = self.funct_stack.stack_next(identifier)
-
 
     def exitDefinition(self, node):
         # When there is a definition, do a store word
@@ -636,13 +613,7 @@ class MIPSVisitor(ASTVisitor):
             # if the identifier is not stored somewhere then store in a new address else store in previous address
             self.storeVariable(identifier)
             self.registers.FreeRegister(identifier.temp_address)
-
-        print("HELO")
-        print(identifier.type, temp.type)
         self.convertType(identifier, temp)
-        print("-------")
-        print(identifier.type)
-
 
     def exitAssignment(self, node):
         # Get the node for the assignement
@@ -662,7 +633,6 @@ class MIPSVisitor(ASTVisitor):
             # if the identifier is not stored somewhere then store in a new address else store in previous address
             self.storeVariable(value, identifier)
         self.registers.FreeRegister(value.temp_address)
-
 
     def type_fprint(self, function_type):
         opcode = None
@@ -769,7 +739,6 @@ class MIPSVisitor(ASTVisitor):
             function = node.parent.children[0].children[0]
             for idx, child in enumerate(function.children[0].children):
                 child = self.getSymbol(child.children[0])
-                # TODO: hardcoded to start params from 4, wont work on floats
                 child.temp_address = str(4 + idx)
                 self.storeVariable(child)
         elif isinstance(node.parent, WhileNode):

@@ -41,7 +41,7 @@ $FUNC_f:
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -60
+        addiu   $sp, $sp, -64
         sw      $fp, 56($sp)
         sw      $ra, 52($sp)
         sw      $4, 48($sp)
@@ -154,6 +154,6 @@ $FUNC_main:
         lw      $4, 48($sp)
         lw      $ra, 52($sp)
         lw      $fp, 56($sp)
-        addiu   $sp, $sp, 60
+        addiu   $sp, $sp, 64
         li      $2, 10
         syscall 

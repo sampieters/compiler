@@ -6,7 +6,7 @@ string3_1: .asciiz "World\n\00"
 .text
                 
 f:      
-        addiu   $sp, $sp, -12
+        addiu   $sp, $sp, -16
         sw      $fp, 8($sp)
         sw      $ra, 4($sp)
         sw      $4, 0($sp)
@@ -19,11 +19,11 @@ $FUNC_f:
         lw      $4, 0($sp)
         lw      $ra, 4($sp)
         lw      $fp, 8($sp)
-        addiu   $sp, $sp, 12
+        addiu   $sp, $sp, 16
         jr      $ra
                 
 g:      
-        addiu   $sp, $sp, -20
+        addiu   $sp, $sp, -24
         sw      $fp, 16($sp)
         sw      $ra, 12($sp)
         sw      $4, 8($sp)
@@ -41,7 +41,7 @@ $FUNC_g:
         lw      $4, 8($sp)
         lw      $ra, 12($sp)
         lw      $fp, 16($sp)
-        addiu   $sp, $sp, 20
+        addiu   $sp, $sp, 24
         jr      $ra
                 
 main:   

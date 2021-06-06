@@ -558,24 +558,25 @@ class MIPSVisitor(ASTVisitor):
 
     def exitFunctionDefinition(self, node):
         # stack size
-        self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", str(
-            self.funct_stack.stack_next() + 12))
+        l1 = self.funct_stack.stack_next() + 12
+        l1 = str(l1 + l1 % 8)
+        self.MIPS[self.funct_stack.MIPS_index] = self.MIPS[self.funct_stack.MIPS_index].replace("{LABEL}", l1)
         # frame pointer place
-        self.MIPS[self.funct_stack.MIPS_index + 1] = self.MIPS[self.funct_stack.MIPS_index + 1].replace("{LABEL}", str(
-            self.funct_stack.stack_curr() + 4))
+        l2 = str(self.funct_stack.stack_curr() + 4)
+        self.MIPS[self.funct_stack.MIPS_index + 1] = self.MIPS[self.funct_stack.MIPS_index + 1].replace("{LABEL}", l2)
         # return address
-        self.MIPS[self.funct_stack.MIPS_index + 2] = self.MIPS[self.funct_stack.MIPS_index + 2].replace("{LABEL}", str(
-            self.funct_stack.stack_curr()))
-        self.MIPS[self.funct_stack.MIPS_index + 3] = self.MIPS[self.funct_stack.MIPS_index + 3].replace("{LABEL}", str(
-            self.funct_stack.stack_curr() - 4))
+        l3 = str(self.funct_stack.stack_curr())
+        self.MIPS[self.funct_stack.MIPS_index + 2] = self.MIPS[self.funct_stack.MIPS_index + 2].replace("{LABEL}", l3)
+        l4 = str(self.funct_stack.stack_curr() - 4)
+        self.MIPS[self.funct_stack.MIPS_index + 3] = self.MIPS[self.funct_stack.MIPS_index + 3].replace("{LABEL}", l4)
 
         self.addInstruction("$FUNC_" + node.children[0].children[0].name + ":", spacing=False)
         # allocate space on the stack for everything inside the function scope
         self.addInstruction("move", "$sp, $fp")
-        self.addInstruction("lw", "$4, " + str(self.funct_stack.stack_curr() - 4) + "($sp)")
-        self.addInstruction("lw", "$ra, " + str(self.funct_stack.stack_curr()) + "($sp)")
-        self.addInstruction("lw", "$fp, " + str(self.funct_stack.stack_curr() + 4) + "($sp)")
-        self.addInstruction("addiu", "$sp, $sp, " + str(self.funct_stack.stack_curr() + 8))
+        self.addInstruction("lw", "$4, " + l4 + "($sp)")
+        self.addInstruction("lw", "$ra, " + l3 + "($sp)")
+        self.addInstruction("lw", "$fp, " + l2 + "($sp)")
+        self.addInstruction("addiu", "$sp, $sp, " + l1)
 
         # If main function, close the program correctly
         if node.children[0].children[0].name == "main":

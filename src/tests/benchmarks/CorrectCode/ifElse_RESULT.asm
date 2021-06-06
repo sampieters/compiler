@@ -7,7 +7,7 @@ string4_1: .asciiz "Something went wrong\00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -28
+        addiu   $sp, $sp, -32
         sw      $fp, 24($sp)
         sw      $ra, 20($sp)
         sw      $4, 16($sp)
@@ -79,6 +79,6 @@ $FUNC_main:
         lw      $4, 16($sp)
         lw      $ra, 20($sp)
         lw      $fp, 24($sp)
-        addiu   $sp, $sp, 28
+        addiu   $sp, $sp, 32
         li      $2, 10
         syscall 

@@ -15,7 +15,7 @@ string6_2: .asciiz "; \00"
 .text
                 
 main:   
-        addiu   $sp, $sp, -12
+        addiu   $sp, $sp, -16
         sw      $fp, 8($sp)
         sw      $ra, 4($sp)
         sw      $4, 0($sp)
@@ -81,6 +81,6 @@ $FUNC_main:
         lw      $4, 0($sp)
         lw      $ra, 4($sp)
         lw      $fp, 8($sp)
-        addiu   $sp, $sp, 12
+        addiu   $sp, $sp, 16
         li      $2, 10
         syscall 

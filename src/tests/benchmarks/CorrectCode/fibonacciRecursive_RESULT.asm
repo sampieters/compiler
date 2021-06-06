@@ -9,7 +9,7 @@ string3_3: .asciiz ";\n\00"
 .text
                 
 f:      
-        addiu   $sp, $sp, -44
+        addiu   $sp, $sp, -48
         sw      $fp, 40($sp)
         sw      $ra, 36($sp)
         sw      $4, 32($sp)
@@ -59,11 +59,11 @@ $FUNC_f:
         lw      $4, 32($sp)
         lw      $ra, 36($sp)
         lw      $fp, 40($sp)
-        addiu   $sp, $sp, 44
+        addiu   $sp, $sp, 48
         jr      $ra
                 
 main:   
-        addiu   $sp, $sp, -68
+        addiu   $sp, $sp, -72
         sw      $fp, 64($sp)
         sw      $ra, 60($sp)
         sw      $4, 56($sp)
@@ -131,6 +131,6 @@ $FUNC_main:
         lw      $4, 56($sp)
         lw      $ra, 60($sp)
         lw      $fp, 64($sp)
-        addiu   $sp, $sp, 68
+        addiu   $sp, $sp, 72
         li      $2, 10
         syscall 

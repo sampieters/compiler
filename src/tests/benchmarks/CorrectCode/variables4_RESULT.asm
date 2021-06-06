@@ -15,7 +15,6 @@ main:
         addiu   $8, $fp, 0
         sw      $8, 4($fp)
         lw      $8, 4($fp)
-        lw      $8, 0($8)
         la      $4, string1_1
         li      $2, 4
         syscall 

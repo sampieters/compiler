@@ -33,7 +33,6 @@ main:
         li      $2, 4
         syscall 
         lw      $9, 4($fp)
-        lw      $9, 0($9)
         la      $4, string2_1
         li      $2, 4
         syscall 
@@ -61,7 +60,6 @@ main:
         li      $2, 4
         syscall 
         lw      $11, 4($fp)
-        lw      $11, 0($11)
         la      $4, string4_1
         li      $2, 4
         syscall 

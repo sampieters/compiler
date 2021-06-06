@@ -19,7 +19,7 @@ main:
         slti    $8, $8, 5
         sw      $8, 4($fp)
         lw      $8, 4($fp)
-        beq     $8,$0, $L0
+        beq     $8, $0, $L0
         nop     
         # END IF CONDITION
                 
@@ -42,7 +42,7 @@ $L1:
         seq     $8, $8, 5
         sw      $8, 8($fp)
         lw      $8, 8($fp)
-        beq     $8,$0, $L4
+        beq     $8, $0, $L4
         nop     
         # END IF CONDITION
                 
@@ -52,7 +52,7 @@ $L1:
         seq     $8, $8, 5
         sw      $8, 12($fp)
         lw      $8, 12($fp)
-        beq     $8,$0, $L2
+        beq     $8, $0, $L2
         nop     
         # END IF CONDITION
                 

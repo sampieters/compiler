@@ -49,7 +49,7 @@ main:
         sw      $10, 8($fp)
         li      $10, 12
         sw      $10, 0($fp)
-        lw      $12, 8($fp)
+        lw      $12, 0($None)
         subi    $12, $12, 1
         sw      $12, 12($fp)
         lw      $12, 12($fp)
@@ -57,7 +57,7 @@ main:
         la      $4, string3_1
         li      $2, 4
         syscall 
-        lw      $4, 8($fp)
+        lw      $4, 0($None)
         li      $2, 1
         syscall 
         la      $4, string3_2
@@ -84,7 +84,7 @@ main:
         la      $4, string5_2
         li      $2, 4
         syscall 
-        lw      $15, 4($fp)
+        lw      $15, 0($None)
         subi    $15, $15, 1
         sw      $15, 16($fp)
         lw      $15, 16($fp)
@@ -92,7 +92,7 @@ main:
         la      $4, string6_1
         li      $2, 4
         syscall 
-        lw      $4, 4($fp)
+        lw      $4, 0($None)
         li      $2, 1
         syscall 
         la      $4, string6_2

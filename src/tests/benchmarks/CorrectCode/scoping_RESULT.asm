@@ -41,7 +41,7 @@ main:
         sw      $8, 0($fp)
         # BEGIN IF CONDITION
         li      $8, 1
-        beq     $8,$0, $L0
+        beq     $8, $0, $L0
         nop     
         # END IF CONDITION
                 

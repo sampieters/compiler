@@ -20,7 +20,7 @@ f:
         slti    $8, $8, 2
         sw      $8, 8($fp)
         lw      $8, 8($fp)
-        beq     $8,$0, $L0
+        beq     $8, $0, $L0
         nop     
         # END IF CONDITION
                 
@@ -71,36 +71,37 @@ main:
         la      $4, string1_1
         li      $2, 4
         syscall 
+        addiu   $10, $fp, 36
         la      $4, string2_1
         li      $2, 4
         syscall 
-        lw      $4, 36($fp)
+        move    $4, $10
         li      $2, 5
         syscall 
         sw      $v0, 36($fp)
         la      $4, string2_2
         li      $2, 4
         syscall 
-        li      $11, 1
-        sw      $11, 40($fp)
+        li      $10, 1
+        sw      $10, 40($fp)
                 
 $L2:    
         # BEGIN WHILE CONDITION
-        lw      $11, 40($fp)
-        lw      $12, 36($fp)
-        sle     $11, $11, $12
-        sw      $11, 44($fp)
-        lw      $11, 44($fp)
-        beq     $11, $0, $L3
+        lw      $10, 40($fp)
+        lw      $11, 36($fp)
+        sle     $10, $10, $11
+        sw      $10, 44($fp)
+        lw      $10, 44($fp)
+        beq     $10, $0, $L3
         nop     
         # END WHILE CONDITION
                 
         # BEGIN WHILE BODY
-        lw      $11, 40($fp)
-        addi    $11, $11, 1
-        sw      $11, 48($fp)
-        lw      $11, 48($fp)
-        sw      $11, 40($fp)
+        lw      $10, 40($fp)
+        addi    $10, $10, 1
+        sw      $10, 48($fp)
+        lw      $10, 48($fp)
+        sw      $10, 40($fp)
         lw      $4, 40($fp)
         jal     f
         sw      $2, 52($fp)

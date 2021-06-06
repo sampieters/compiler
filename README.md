@@ -38,6 +38,13 @@ Alle tests die niet compileren vanwege een crash of een semantical error, zal in
 
 Voor meer details bij een crash, zoals de semantical error message moet je main.py op de file uitvoeren.
 
+####MIPS
+
+Voor MIPS wordt er ook hetzelfde door de main.py en test.py files gegenereerd. Deze files kunnen dan in MARS worden uitgevoerd.
+Om de files in MARS uit te voeren moet de setting "Initialize program counter to 'main' if defined" aangezet worden, 
+anders werkt de file niet. Deze setting is te vinden onder:
+
+    MARS toolbar --> Settings --> Initialize program counter to 'main' if defined
 
 ### 3) geïmplementeerd
 
@@ -47,7 +54,7 @@ geïmplementeerd van opdracht 1:
 - (Mandatory) Comparison operators >, <, and == (voltooid)
 - (Mandatory) Unary operators + and - (voltooid)
 - (Mandatory) Brackets to overwrite the order of operations (voltooid)
-- (Mandatory) Binary operator % (voltooid)
+- (Mandatory) Binary operator % (voltooid in LLVM, niet in MIPS)
 - (optional) Comparison operators >=, <=, != (voltooid)
 - (optional) Logical operators &&, ||, and ! (enkel ! voltooid)
 
@@ -59,7 +66,7 @@ geïmplementeerd van opdracht 2:
 - (Mandatory) Reserved words (voltooid)
 - (Mandatory) Variables (voltooid)
 - (Mandatory) Pointer Operations (voltooid)
-- (Optional) Identifier Operations (werkt deels)
+- (Optional) Identifier Operations (niet voltooid)
 - (Optional) Conversions (voltooid)
 
 - (Optional) Constant Propagation (niet voltooid)
@@ -140,12 +147,12 @@ geïmplementeerd van opdracht 6:
 - comparisons2 (werkt, dankzij folding)
 - dereferenceAssignment (werkt, zonder (*xp)++ (gebruik in de plaats *xp = *xp + 1))
 - fibonacciRecursive (werkt, zonder i++ in while)
-- floatToIntConversion (failt, converteert te veel)
+- floatToIntConversion (werkt)
 - for (werkt)
 - forwardDeclaration (werkt)
 - if (werkt, zonder &&)
 - ifElse (werkt, zonder &&)
-- intToFloatConversion (failt, zie floatToIntConversion)
+- intToFloatConversion (werkt)
 - modulo (werkt)
 - pointerArgument (werkt)
 - prime (werkt)

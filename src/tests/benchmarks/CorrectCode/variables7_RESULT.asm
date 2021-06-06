@@ -21,13 +21,13 @@ main:
         la      $4, string1_1
         li      $2, 4
         syscall 
-        lw      $4, 0($fp)
+        lw      $4, 0($None)
         li      $2, 1
         syscall 
         la      $4, string1_2
         li      $2, 4
         syscall 
-        lw      $4, 4($fp)
+        lw      $4, 0($None)
         li      $2, 1
         syscall 
         la      $4, string1_3

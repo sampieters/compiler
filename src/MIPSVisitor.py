@@ -231,6 +231,12 @@ class MIPSVisitor(ASTVisitor):
             return
         #########
 
+        if node1.type.startswith("i") and node2.type in DECIMAL_TYPES:
+            node1.temp_address = self.registers.UseFloatTemporary()
+            self.addInstruction("l.s", "$" + node1.temp_address + ", " + str(node1.original_address) + "($fp)")
+
+
+
         # if both types are the same, no problem
         if node1.type == node2.type:
             return
@@ -254,18 +260,17 @@ class MIPSVisitor(ASTVisitor):
         if instruction == "cvt.w.w":
             return
 
-        # The result of a conversion is always stored in a float/double regiter
+        # The result of a conversion is always stored in a float/double register
         stored = self.registers.UseFloatTemporary(node2.type == "double")
-        node2.temp_address = stored
+
 
         self.addInstruction(instruction, "$" + stored + "," + "$" + node1.temp_address)
+        node1.temp_address = stored
         if node2.type.startswith("i"):
             node1.temp_address = self.registers.UseTemporary()
             self.addInstruction("mfc1", "$" + node1.temp_address + ", $" + stored)
-            node1.type = "i32"
-            self.storeVariable(node1)
-        #self.storeVariable(node2)
-        # TODO; nog een store doen
+        node1.type = node2.type
+        self.storeVariable(node1)
 
     def loadVariable(self, node, load_as_arg=False, load_as_return=False):
         # TODO: CHAR testen
@@ -601,7 +606,11 @@ class MIPSVisitor(ASTVisitor):
         identifier = self.getSymbol(node.children[0].children[0])
         value = self.getSymbol(node.children[1])
 
-        self.convertType(value, identifier)
+        if isinstance(value, LiteralNode) and value.type == "double":
+            self.convertType(value, identifier)
+
+        temp = LiteralNode(0, identifier.type, -1)
+        identifier.type = value.type
 
         if "global" in identifier.type_semantics:
             if identifier.type.startswith("i"):
@@ -626,6 +635,13 @@ class MIPSVisitor(ASTVisitor):
             # if the identifier is not stored somewhere then store in a new address else store in previous address
             self.storeVariable(identifier)
             self.registers.FreeRegister(identifier.temp_address)
+
+        print("HELO")
+        print(identifier.type, temp.type)
+        self.convertType(identifier, temp)
+        print("-------")
+        print(identifier.type)
+
 
     def exitAssignment(self, node):
         # Get the node for the assignement

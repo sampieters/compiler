@@ -1,7 +1,0 @@
-Enter the number of prime numbers required
-First 5 prime numbers are :
-2
-3
-5
-7
-11

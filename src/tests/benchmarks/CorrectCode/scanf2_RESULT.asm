@@ -21,16 +21,16 @@ main:
         li      $2, 4
         syscall 
         move    $4, $8
+        li      $5, 6
         li      $2, 8
         syscall 
-        sw      $v0, 0($fp)
         la      $4, string2_2
         li      $2, 4
         syscall 
         la      $4, string3_1
         li      $2, 4
         syscall 
-        lw      $4, 0($fp)
+        la      $4, 0($fp)
         li      $2, 4
         syscall 
         la      $4, string3_2

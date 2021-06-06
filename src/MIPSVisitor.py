@@ -293,7 +293,7 @@ class MIPSVisitor(ASTVisitor):
         if isinstance(node, LiteralNode):
             # Variables with type float or double are loaded differently than int type (loads from the .data segment)
             # TODO: bij stirngs lijkt het dat in .data moet geladen worden, dan het adres geladen wordt. ALs een char wil van deze string dan lb van STIRNG ADRES)
-            if node.type == "i8*":
+            if node.type == "i8*" or "string" in node.type_semantics or node.type.endswith("i8]"):
                 instr = "la"
             elif node.type in INTEGER_TYPES:
                 instr = "li"
@@ -307,7 +307,7 @@ class MIPSVisitor(ASTVisitor):
             #################################
             # TEST
             #################################
-            if node.type == "i8*":
+            if node.type == "i8*" or "string" in node.type_semantics or node.type.endswith("i8]"):
                 instr = "la"
             elif node.type == "i8":
                 instr = "lb"
@@ -417,8 +417,11 @@ class MIPSVisitor(ASTVisitor):
             node.value = name
         elif "string" in node.type_semantics:
             self.data_counter.update({"string": 1})
-            re.sub(r"%\d*s", "%s", node.value)
-            for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f|%\ds', node.value)):
+            a = re.findall(r"%\d+s", node.value)
+            if a:
+                node.type_semantics.append(int(a[0][1:-1]))
+
+            for idx, elem in enumerate(re.split(r'%d|%i|%s|%c|%f|%\d*s', node.value)):
                 elem = elem.replace("\\0A", "\\n").replace("\\09", "\\t")
                 name = "string" + str(self.data_counter["string"]) + "_" + str(idx + 1)
                 self.addInstruction(name, f".asciiz \"{elem}\"", before=True)
@@ -681,7 +684,7 @@ class MIPSVisitor(ASTVisitor):
         # syscall does the actual print
         self.addInstruction("syscall")
 
-    def type_scanf(self, function_type, identifier):
+    def type_scanf(self, function_type, identifier, length=None):
         opcode = None
         VorF = None
         if function_type.startswith("i"):
@@ -696,23 +699,26 @@ class MIPSVisitor(ASTVisitor):
         elif function_type.endswith("i8]"):
             VorF = "v0"
             opcode = 8
-            #self.data_counter.update({"scanf": 1})
-            #identifier.value = "scanf" + str(self.data_counter["scanf"])
-            #self.addInstruction(identifier.value, ".space 500", before=True)
-            #self.addInstruction("la", f"$4, {identifier.value}")
+            self.addInstruction("li", f"$5, {length+1}")
         elif function_type == "i8":
             opcode = 12
             VorF = "v0"
         # syscall does the actual print
         self.addInstruction("li", f"$2, {opcode}")
         self.addInstruction("syscall")
-        self.addInstruction("sw", f"${VorF}, {identifier.original_address}($fp)")
+        if opcode != 8:
+            self.addInstruction("sw", f"${VorF}, {identifier.original_address}($fp)")
 
     def exitFunctionCall(self, node):
         # Get the function with the right addresses from the table
         function = self.getSymbol(node.children[0])
 
         if function.name in ["printf", "scanf"]:
+            str_len = None
+            for elem in self.getSymbol(node.children[1].children[0]).type_semantics:
+                print(elem)
+                if isinstance(elem, int):
+                    str_len = elem
             for idx, child in enumerate(node.children[1].children):
                 if isinstance(child, IdentifierNode):
                     child = self.getSymbol(child)
@@ -725,7 +731,8 @@ class MIPSVisitor(ASTVisitor):
                         self.type_fprint(child.type)
                     else:
                         #self.loadVariable(child, load_as_arg=True)
-                        self.type_scanf(self.getSymbol(child.children[0]).type, self.getSymbol(child))
+
+                        self.type_scanf(self.getSymbol(child.children[0]).type, self.getSymbol(child), str_len)
                     self.registers.FreeParam(index, child.type == "double")
 
                 tmp = copy(node.children[1].children[0])

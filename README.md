@@ -26,11 +26,13 @@ Bovendien kan ook test.py worden uitgevoerd als volgt:
 
 <u>Python3 test.py</u>
 
-Hierna kan men 1 invoeren, om automatisch voor alle .c files in src/tests/benchmarks/CorrectCode/ LLVM te genereren, deze uit te voeren en de output te vergelijken met de gewenste output die door de juist LLVM wordt gegenereerd.
+Hierna kan men 1 invoeren, om automatisch voor alle .c files in src/tests/benchmarks/CorrectCode/ LLVM te genereren, deze uit te voeren en de output te vergelijken met de gewenste output die door de juist LLVM wordt gegenereerd. Dit zal ook de MIPS genereren in een .asm file maar deze niet vergelijken met de verwachte output.
 
 Ook kan men dit op individuele bestanden uitvoeren door 2 in te voeren, waarna men de filenames invoert.
 
-Elke test die dezelfde uitvoer heeft door de LLVM van onze compiler en de echte LLVM te runnen en vergelijken, zal in results.txt komen te staan als filename succeeded.
+Als men 3 of 4 invoert, zal hetzelfde gebeuren als voor 1 of 2, enkel zal hier de mips output getoond worden voor vergelijking met de verwachte output. Aangezien MIPS in sommige gevallen licht andere resultaten print (bv. floats worden 5.0 ipv 5.00000, license staat bovenaan) wordt de output niet automatisch vergeleken. De gebruiker zal zelf een "s"(ucceed) of "f"(ailed) moeten ingeven als hij ziet dat de outputs correct of fout zijn
+
+Elke test die dezelfde uitvoer heeft door de LLVM van onze compiler en de echte LLVM te runnen en vergelijken, zal in results.txt komen te staan als filename succeeded. Als 3 of 4 wordt uitgevoerd zal results.txt de zelf ingevoerde resultaten bevatten.
 
 Alle tests die compileren maar een andere uitvoer geven zullen in results.txt komen te staan als filename failed.
 
@@ -41,12 +43,16 @@ Voor meer details bij een crash, zoals de semantical error message moet je main.
 ####MIPS
 
 Voor MIPS wordt er ook hetzelfde door de main.py en test.py files gegenereerd. Deze files kunnen dan in MARS worden uitgevoerd.
-Om de files in MARS uit te voeren moet de setting "Initialize program counter to 'main' if defined" aangezet worden, 
-anders werkt de file niet. Deze setting is te vinden onder:
+Om de files in MARS uit te voeren moet de setting "Initialize program counter to 'main' if defined" aangezet worden, anders werkt de file niet. Deze setting is te vinden onder:
 
     MARS toolbar --> Settings --> Initialize program counter to 'main' if defined
 
+Men kan de files ook runnen in de terminal (zoals test.py hier doet) door gebruik te maken van `java -jar Mars4_5.jar sm {file_path}_RESULT.asm` 
+Hier zal sm zorgen voor de setting dat de program counter op 'main' begint
+
 ### 3) geïmplementeerd
+
+Alles wat voltooid is, is zowel voor LLVM als MIPS voltooid
 
 geïmplementeerd van opdracht 1:
 
@@ -54,7 +60,7 @@ geïmplementeerd van opdracht 1:
 - (Mandatory) Comparison operators >, <, and == (voltooid)
 - (Mandatory) Unary operators + and - (voltooid)
 - (Mandatory) Brackets to overwrite the order of operations (voltooid)
-- (Mandatory) Binary operator % (voltooid in LLVM, niet in MIPS)
+- (Mandatory) Binary operator % (voltooid)
 - (optional) Comparison operators >=, <=, != (voltooid)
 - (optional) Logical operators &&, ||, and ! (enkel ! voltooid)
 
@@ -160,7 +166,7 @@ geïmplementeerd van opdracht 6:
 - printf2 (werkt)
 - printf3 (werkt)
 - scanf1 (werkt)
-- scanf2 (failt)
+- scanf2 (werkt)
 - scoping (werkt)
 - unaryOperations (werkt)
 - variables1 (werkt)

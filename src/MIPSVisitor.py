@@ -1,7 +1,7 @@
-from .ASTVisitor import *
-from .ASTNode import *
-from .utils import *
-from .SymbolTable import *
+from ASTVisitor import *
+from ASTNode import *
+from utils import *
+from SymbolTable import *
 from collections import Counter as Ctr
 import re
 from copy import copy
@@ -206,6 +206,7 @@ class MIPSVisitor(ASTVisitor):
                     for i in range(0, len(self.before_MIPS)):
                         if node1.value in self.before_MIPS[i]:
                             self.before_MIPS[i] = self.before_MIPS[i].replace(".double", ".float")
+                            node1.value.replace(".double", ".float")
                     node1.type = "float"
             elif node2.type == "double":
                 if node1.type.startswith("i"):
